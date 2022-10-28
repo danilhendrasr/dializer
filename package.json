@@ -14,14 +14,17 @@
     "@nestjs/platform-express": "^9.0.0",
     "@nrwl/nest": "^15.0.0",
     "core-js": "^3.6.5",
+    "konva": "^8.3.13",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-is": "18.2.0",
+    "react-konva": "18.2.3",
     "reflect-metadata": "^0.1.13",
     "regenerator-runtime": "0.13.7",
     "rxjs": "^7.0.0",
     "styled-components": "5.3.5",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "use-image": "^1.1.0"
   },
   "devDependencies": {
     "@nestjs/schematics": "^9.0.0",

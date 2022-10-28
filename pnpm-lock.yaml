@@ -38,11 +38,13 @@ specifiers:
   eslint-plugin-react-hooks: 4.6.0
   jest: 28.1.1
   jest-environment-jsdom: 28.1.1
+  konva: ^8.3.13
   nx: 15.0.0
   prettier: ^2.6.2
   react: 18.2.0
   react-dom: 18.2.0
   react-is: 18.2.0
+  react-konva: 18.2.3
   react-test-renderer: 18.2.0
   reflect-metadata: ^0.1.13
   regenerator-runtime: 0.13.7
@@ -52,6 +54,7 @@ specifiers:
   ts-node: 10.9.1
   tslib: ^2.3.0
   typescript: ~4.8.2
+  use-image: ^1.1.0
 
 dependencies:
   '@nestjs/common': 9.1.4_yzt46al3aifnexifjjdb4dxxja
@@ -59,14 +62,17 @@ dependencies:
   '@nestjs/platform-express': 9.1.4_osbqhc5bxkxr7p4xaw5wgzf7bi
   '@nrwl/nest': 15.0.0_yuxelih64jge2mvjvgvf7psagi
   core-js: 3.25.5
+  konva: 8.3.13
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   react-is: 18.2.0
+  react-konva: 18.2.3_ycsaxglfwmvsphhhrpeabwxklq
   reflect-metadata: 0.1.13
   regenerator-runtime: 0.13.7
   rxjs: 7.5.7
   styled-components: 5.3.5_7i5myeigehqah43i5u7wbekgba
   tslib: 2.4.0
+  use-image: 1.1.0_biqbaboplfbrettd7655fr4n2y
 
 devDependencies:
   '@nestjs/schematics': 9.0.3_typescript@4.8.4
@@ -3118,7 +3124,6 @@ packages:
 
   /@types/prop-types/15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
-    dev: true
 
   /@types/qs/6.9.7:
     resolution: {integrity: sha512-FGa1F62FT09qcrueBA6qYTrJPVDzah9a+493+o2PCXsesWHIn27G98TsSMs3WPNbZIEj4+VJf6saSFpvD+3Zsw==}
@@ -3138,13 +3143,18 @@ packages:
       '@types/react': 18.0.20
     dev: true
 
+  /@types/react-reconciler/0.28.0:
+    resolution: {integrity: sha512-5cjk9ottZAj7eaTsqzPUIlrVbh3hBAO2YaEL1rkjHKB3xNAId7oU8GhzvAX+gfmlfoxTwJnBjPxEHyxkEA1Ffg==}
+    dependencies:
+      '@types/react': 18.0.20
+    dev: false
+
   /@types/react/18.0.20:
     resolution: {integrity: sha512-MWul1teSPxujEHVwZl4a5HxQ9vVNsjTchVA+xRqv/VYGCuKGAU6UhfrTdF5aBefwD1BHUD8i/zq+O/vyCm/FrA==}
     dependencies:
       '@types/prop-types': 15.7.5
       '@types/scheduler': 0.16.2
       csstype: 3.1.1
-    dev: true
 
   /@types/resolve/1.17.1:
     resolution: {integrity: sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==}
@@ -3157,7 +3167,6 @@ packages:
 
   /@types/scheduler/0.16.2:
     resolution: {integrity: sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==}
-    dev: true
 
   /@types/semver/7.3.12:
     resolution: {integrity: sha512-WwA1MW0++RfXmCr12xeYOOC5baSC9mSb0ZqCquFzKhcoF4TvHu5MKOuXsncgZcpVFhB1pXd5hZmM0ryAoCp12A==}
@@ -4699,7 +4708,6 @@ packages:
 
   /csstype/3.1.1:
     resolution: {integrity: sha512-DJR/VvkAvSZW9bTouZue2sSxDwdTN92uHjqeKVm+0dAqdfNykRzQ95tay8aXMBAAPpUiq4Qcug2L7neoRh2Egw==}
-    dev: true
 
   /cypress/10.10.0:
     resolution: {integrity: sha512-bU8r44x1NIYAUNNXt3CwJpLOVth7HUv2hUhYCxZmgZ1IugowDvuHNpevnoZRQx1KKOEisLvIJW+Xen5Pjn41pg==}
@@ -6574,6 +6582,15 @@ packages:
     resolution: {integrity: sha512-RKYVTCjAnRthyJes037NX/IiqeidgN1xc3j1RjFfECFp28A1GVwK9nA+i0rJPaHqSZwygLzRnFlzUuHFoWWy+Q==}
     engines: {node: '>=6'}
 
+  /its-fine/1.0.6_react@18.2.0:
+    resolution: {integrity: sha512-VZJZPwVT2kxe5KQv+TxCjojfLiUIut8zXDNLTxcM7gJ/xQ/bSPk5M0neZ+j3myy45KKkltY1mm1jyJgx3Fxsdg==}
+    peerDependencies:
+      react: '>=18.0'
+    dependencies:
+      '@types/react-reconciler': 0.28.0
+      react: 18.2.0
+    dev: false
+
   /jake/10.8.5:
     resolution: {integrity: sha512-sVpxYeuAhWt0OTWITwT98oyV0GsXyMlXCF+3L1SuafBVUIr/uILGRB+NqwkzhgXKvoJpDIpQvqkUALgdmQsQxw==}
     engines: {node: '>=10'}
@@ -7289,6 +7306,10 @@ packages:
   /klona/2.0.5:
     resolution: {integrity: sha512-pJiBpiXMbt7dkzXe8Ghj/u4FfXOOa98fPW+bihOJ4SjnoijweJrNThJfd3ifXpXhREjpoF2mZVH1GfS9LV3kHQ==}
     engines: {node: '>= 8'}
+
+  /konva/8.3.13:
+    resolution: {integrity: sha512-O5VxHfRfTj4PscTglQH1NimS8+CC5hQYLeB8YQstu8MN/i2L8GjA1T9d7xxzITF2TD5+xcIs5ei7en3cztbNXg==}
+    dev: false
 
   /language-subtag-registry/0.3.22:
     resolution: {integrity: sha512-tN0MCzyWnoz/4nHS6uxdlFWoUZT7ABptwKPQ52Ea7URk6vll88bWBVhodtnlfEuCcKWNGoc+uGbw1cwa9IKh/w==}
@@ -8658,6 +8679,32 @@ packages:
   /react-is/18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
 
+  /react-konva/18.2.3_ycsaxglfwmvsphhhrpeabwxklq:
+    resolution: {integrity: sha512-OPxjBTgaEGU9pt/VJSVM7QNXYHEZ5CkulX+4fTTvbaH+Wh+vMLbXmH3yjWw4kT/5Qi6t0UQKHPPmirCv8/9sdg==}
+    peerDependencies:
+      konva: ^8.0.1 || ^7.2.5
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+    dependencies:
+      its-fine: 1.0.6_react@18.2.0
+      konva: 8.3.13
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-reconciler: 0.29.0_react@18.2.0
+      scheduler: 0.23.0
+    dev: false
+
+  /react-reconciler/0.29.0_react@18.2.0:
+    resolution: {integrity: sha512-wa0fGj7Zht1EYMRhKWwoo1H9GApxYLBuhoAuXN0TlltESAjDssB+Apf0T/DngVqaMyPypDmabL37vw/2aRM98Q==}
+    engines: {node: '>=0.10.0'}
+    peerDependencies:
+      react: ^18.2.0
+    dependencies:
+      loose-envify: 1.4.0
+      react: 18.2.0
+      scheduler: 0.23.0
+    dev: false
+
   /react-refresh/0.10.0:
     resolution: {integrity: sha512-PgidR3wST3dDYKr6b4pJoqQFpPGNKDSCDx4cZoshjXipw3LzO7mG1My2pwEzz2JVkF+inx3xRpDeQLFQGH/hsQ==}
     engines: {node: '>=0.10.0'}
@@ -9937,6 +9984,16 @@ packages:
       querystringify: 2.2.0
       requires-port: 1.0.0
     dev: true
+
+  /use-image/1.1.0_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-+cBHRR/44ZyMUS873O0vbVylgMM0AbdTunEplAWXvIQ2p69h2sIo2Qq74zeUsq6AMo+27e5lERQvXzd1crGiMg==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    dev: false
 
   /util-deprecate/1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
