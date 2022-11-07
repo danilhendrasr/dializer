@@ -1,26 +1,19 @@
 import React from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
+import { FlowChartNode } from './types';
 
-type Coordinate = {
-  x: number;
-  y: number;
-  active: boolean;
-  // Next node to be activated
-  next?: number;
-};
-
-const INITIAL_RECTS: Coordinate[] = [
-  { x: 100, y: 100, active: false, next: 3 },
-  { x: 200, y: 200, active: false, next: 2 },
+const INITIAL_NODES: Array<FlowChartNode> = [
+  { x: 100, y: 100, active: false, nextIdx: 3 },
+  { x: 200, y: 200, active: false, nextIdx: 2 },
   { x: 300, y: 300, active: false },
-  { x: 400, y: 400, active: false, next: 1 },
+  { x: 400, y: 400, active: false, nextIdx: 1 },
 ];
 
 const App = () => {
   const animationRef = React.useRef<unknown>(null);
-  const curNodeIdx = React.useRef<number | undefined>(0);
+  const curNodeIdx = React.useRef<number>(0);
 
-  const [rects, setRects] = React.useState<Coordinate[]>(INITIAL_RECTS);
+  const [nodes, setNodes] = React.useState(INITIAL_NODES);
   const [animating, setAnimation] = React.useState(false);
 
   React.useEffect(() => {
@@ -35,17 +28,17 @@ const App = () => {
         return;
       }
 
-      const rectsCopy = [...rects];
-      const curNode = rectsCopy[curNodeIdx.current];
+      const nodesCopy = [...nodes];
+      const curNode = nodesCopy[curNodeIdx.current];
+      const nextNodeIdx = curNode.nextIdx;
       curNode.active = true;
-      setRects(rectsCopy);
+      setNodes(nodesCopy);
 
-      if (curNode.next === undefined) {
+      if (nextNodeIdx === undefined) {
         clearInterval(animationRef.current as NodeJS.Timer);
+      } else {
+        curNodeIdx.current = nextNodeIdx;
       }
-
-      const nextNodeIdx = curNode.next;
-      curNodeIdx.current = nextNodeIdx;
     }, 500);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animating]);
@@ -55,14 +48,14 @@ const App = () => {
       <button onClick={() => setAnimation(!animating)}>Toggle animation</button>
       <Stage width={window.innerWidth} height={window.innerHeight}>
         <Layer>
-          {rects.map((rect, idx) => (
+          {nodes.map((node, idx) => (
             <Rect
               key={idx}
-              x={rect.x}
-              y={rect.y}
+              x={node.x}
+              y={node.y}
               width={100}
               height={100}
-              stroke={rect.active ? 'red' : 'grey'}
+              stroke={node.active ? 'red' : 'grey'}
               shadowBlur={5}
             />
           ))}
