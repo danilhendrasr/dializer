@@ -1,4 +1,4 @@
-import { Shape, Arrow, Group } from 'react-konva';
+import { Shape, Arrow, Group, Text } from 'react-konva';
 
 const OutputNode: React.FC<{ x: number; y: number; isActive: boolean }> = (
   props
@@ -9,20 +9,29 @@ const OutputNode: React.FC<{ x: number; y: number; isActive: boolean }> = (
 
   return (
     <Group>
-      <Shape
-        sceneFunc={(context, shape) => {
-          context.beginPath();
-          context.moveTo(x, y);
-          context.lineTo(x + width, y);
-          context.lineTo(x + width - 20, y + height);
-          context.lineTo(x - 20, y + height);
-          context.lineTo(x, y);
-          context.closePath();
+      <Group x={x} y={y}>
+        <Shape
+          sceneFunc={(context, shape) => {
+            context.beginPath();
+            context.moveTo(20, 0);
+            context.lineTo(width + 20, 0);
+            context.lineTo(width, height);
+            context.lineTo(-20, height);
+            context.lineTo(0, 0);
+            context.closePath();
 
-          context.fillStrokeShape(shape);
-        }}
-        stroke={isActive ? 'red' : 'grey'}
-      />
+            context.fillStrokeShape(shape);
+          }}
+          stroke={isActive ? 'red' : 'grey'}
+        />
+        <Text
+          align="center"
+          width={width}
+          height={height}
+          verticalAlign="middle"
+          text={'This is output node'}
+        />
+      </Group>
       <Arrow
         points={[x + width, y, x + width + 50, y]}
         strokeWidth={1}
