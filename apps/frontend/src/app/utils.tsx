@@ -1,6 +1,7 @@
 import { Rect } from 'react-konva';
 import { InputNode } from './components/input.node';
 import { OutputNode } from './components/output.node';
+import { StartEndNode } from './components/start-end.node';
 import { FlowChartNode, NodeTypes } from './types';
 
 export function nodeToKonvaNode(node: FlowChartNode, key?: number) {
@@ -8,14 +9,12 @@ export function nodeToKonvaNode(node: FlowChartNode, key?: number) {
     case NodeTypes.START:
     case NodeTypes.END:
       return (
-        <Rect
+        <StartEndNode
           key={key}
           x={node.x}
           y={node.y}
-          width={100}
-          height={50}
-          stroke={node.active ? 'red' : 'grey'}
-          cornerRadius={50}
+          isActive={node.active}
+          type={node.type}
         />
       );
 
