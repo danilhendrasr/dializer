@@ -1,4 +1,4 @@
-import { Rect } from 'react-konva';
+import { IfNode } from './components/if.node';
 import { InputNode } from './components/input.node';
 import { OutputNode } from './components/output.node';
 import { ProcessNode } from './components/process.node';
@@ -35,17 +35,7 @@ export function nodeToKonvaNode(node: FlowChartNode, key?: number) {
       );
 
     case NodeTypes.IF:
-      return (
-        <Rect
-          key={key}
-          x={node.x + 50}
-          y={node.y}
-          width={50}
-          height={50}
-          stroke={node.active ? 'red' : 'grey'}
-          rotationDeg={45}
-        />
-      );
+      return <IfNode key={key} x={node.x} y={node.y} isActive={node.active} />;
 
     default:
       return undefined;
