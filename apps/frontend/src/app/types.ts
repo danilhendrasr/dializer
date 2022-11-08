@@ -1,4 +1,14 @@
+export enum NodeTypes {
+  START,
+  END,
+  INPUT,
+  OUTPUT,
+  PROCESS,
+  IF,
+}
+
 export interface FlowChartNode {
+  type: NodeTypes;
   x: number;
   y: number;
   active: boolean;

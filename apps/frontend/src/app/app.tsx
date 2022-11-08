@@ -1,12 +1,15 @@
 import React from 'react';
-import { Stage, Layer, Rect } from 'react-konva';
-import { FlowChartNode } from './types';
+import { Stage, Layer } from 'react-konva';
+import { FlowChartNode, NodeTypes } from './types';
+import { nodeToKonvaNode as nodeObjectToKonvaNode } from './utils';
 
 const INITIAL_NODES: Array<FlowChartNode> = [
-  { x: 100, y: 100, active: false, nextIdx: 3 },
-  { x: 200, y: 200, active: false, nextIdx: 2 },
-  { x: 300, y: 300, active: false },
-  { x: 400, y: 400, active: false, nextIdx: 1 },
+  { type: NodeTypes.START, x: 100, y: 100, active: false, nextIdx: 1 },
+  { type: NodeTypes.INPUT, x: 100, y: 200, active: false, nextIdx: 2 },
+  { type: NodeTypes.OUTPUT, x: 100, y: 300, active: false, nextIdx: 3 },
+  { type: NodeTypes.PROCESS, x: 100, y: 400, active: false, nextIdx: 4 },
+  { type: NodeTypes.IF, x: 100, y: 500, active: false, nextIdx: 5 },
+  { type: NodeTypes.END, x: 100, y: 600, active: false },
 ];
 
 const App = () => {
@@ -48,17 +51,7 @@ const App = () => {
       <button onClick={() => setAnimation(!animating)}>Toggle animation</button>
       <Stage width={window.innerWidth} height={window.innerHeight}>
         <Layer>
-          {nodes.map((node, idx) => (
-            <Rect
-              key={idx}
-              x={node.x}
-              y={node.y}
-              width={100}
-              height={100}
-              stroke={node.active ? 'red' : 'grey'}
-              shadowBlur={5}
-            />
-          ))}
+          {nodes.map((node, idx) => nodeObjectToKonvaNode(node, idx))}
         </Layer>
       </Stage>
     </>
