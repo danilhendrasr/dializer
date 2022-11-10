@@ -26,7 +26,13 @@ export function nodeToKonvaNode(
 
     case NodeTypes.PROCESS:
       return (
-        <ProcessNode key={key} x={node.x} y={node.y} isActive={node.active} />
+        <ProcessNode
+          key={key}
+          x={node.x}
+          y={node.y}
+          isActive={node.active}
+          next={next as FlowChartNode}
+        />
       );
 
     case NodeTypes.INPUT:
