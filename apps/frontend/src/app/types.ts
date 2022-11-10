@@ -13,6 +13,9 @@ export interface FlowChartNode {
   y: number;
   active: boolean;
 
+  width: number;
+  height: number;
+
   content?: string;
 
   // If node is of non-branching type, it refers to the next
