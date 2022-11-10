@@ -15,7 +15,6 @@ type Props = {
 
 const IfNode: React.FC<Props> = (props) => {
   const { x, y, isActive, width = 100, height = 70, next } = props;
-  console.log('nexts', next);
 
   return (
     <>
@@ -43,7 +42,12 @@ const IfNode: React.FC<Props> = (props) => {
         />
       </Group>
       <Arrow
-        points={[x + width / 2, y + height, next.true.x + 50, next.true.y - 5]}
+        points={[
+          x + width / 2,
+          y + height,
+          next.true.x + next.true.width / 2,
+          next.true.y - 5,
+        ]}
         stroke="grey"
       />
       <Arrow
@@ -53,9 +57,9 @@ const IfNode: React.FC<Props> = (props) => {
           x + width + 50,
           y + height / 2,
           next.false.x + 150,
-          next.false.y + 25,
+          next.false.y + next.false.height / 2,
           next.false.x + 105,
-          next.false.y + 25,
+          next.false.y + next.false.height / 2,
         ]}
         stroke="grey"
       />

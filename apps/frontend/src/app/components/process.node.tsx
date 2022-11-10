@@ -33,7 +33,12 @@ const ProcessNode: React.FC<Props> = (props) => {
       </Group>
       {next ? (
         <Arrow
-          points={[x + width / 2, y + height, next.x + 50, next.y - 5]}
+          points={[
+            x + width / 2,
+            y + height,
+            next.x + next.width / 2,
+            next.y - 5,
+          ]}
           stroke="grey"
         />
       ) : null}

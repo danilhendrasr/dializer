@@ -1,12 +1,17 @@
 import { Shape, Arrow, Group, Text } from 'react-konva';
 import { FlowChartNode } from '../types';
 
-type Props = { x: number; y: number; isActive: boolean; next?: FlowChartNode };
+type Props = {
+  x: number;
+  y: number;
+  isActive: boolean;
+  width?: number;
+  height?: number;
+  next?: FlowChartNode;
+};
 
 const OutputNode: React.FC<Props> = (props) => {
-  const { x, y, isActive, next } = props;
-  const width = 100;
-  const height = 50;
+  const { x, y, isActive, width = 100, height = 50, next } = props;
 
   return (
     <>
@@ -42,7 +47,12 @@ const OutputNode: React.FC<Props> = (props) => {
       </Group>
       {next ? (
         <Arrow
-          points={[x + width / 2, y + height, next.x + 50, next.y - 5]}
+          points={[
+            x + width / 2,
+            y + height,
+            next.x + next.width / 2,
+            next.y - 5,
+          ]}
           stroke="grey"
         />
       ) : null}
