@@ -5,7 +5,11 @@ import { ProcessNode } from './components/process.node';
 import { StartEndNode } from './components/start-end.node';
 import { FlowChartNode, NodeTypes } from './types';
 
-export function nodeToKonvaNode(node: FlowChartNode, key?: number) {
+export function nodeToKonvaNode(
+  node: FlowChartNode,
+  next?: FlowChartNode | { true: FlowChartNode; false: FlowChartNode },
+  key?: number
+) {
   switch (node.type) {
     case NodeTypes.START:
     case NodeTypes.END:
@@ -16,6 +20,7 @@ export function nodeToKonvaNode(node: FlowChartNode, key?: number) {
           y={node.y}
           isActive={node.active}
           type={node.type}
+          next={next as FlowChartNode}
         />
       );
 

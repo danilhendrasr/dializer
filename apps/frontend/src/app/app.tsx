@@ -49,11 +49,24 @@ const App = () => {
   return (
     <>
       <button onClick={() => setAnimation(!animating)}>Toggle animation</button>
-      <Stage width={window.innerWidth} height={window.innerHeight}>
-        <Layer>
-          {nodes.map((node, idx) => nodeObjectToKonvaNode(node, idx))}
-        </Layer>
-      </Stage>
+        <Stage width={window.innerWidth} height={window.innerHeight} draggable>
+          <Layer>
+            {nodes.map((node, idx) => {
+              let nextNode: Parameters<typeof nodeObjectToKonvaNode>[1] =
+                undefined;
+              if (node.nextIdx) {
+                nextNode = nodes[node.nextIdx];
+              } else if (node.nextIdxIfTrue && node.nextIdxIfFalse) {
+                nextNode = {
+                  true: nodes[node.nextIdxIfTrue],
+                  false: nodes[node.nextIdxIfFalse],
+                };
+              }
+
+              return nodeObjectToKonvaNode(node, nextNode, idx);
+            })}
+          </Layer>
+        </Stage>
     </>
   );
 };
