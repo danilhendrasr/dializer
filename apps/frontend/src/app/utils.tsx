@@ -42,7 +42,13 @@ export function nodeToKonvaNode(
 
     case NodeTypes.OUTPUT:
       return (
-        <OutputNode key={key} x={node.x} y={node.y} isActive={node.active} />
+        <OutputNode
+          key={key}
+          x={node.x}
+          y={node.y}
+          isActive={node.active}
+          next={next as FlowChartNode}
+        />
       );
 
     case NodeTypes.IF:
