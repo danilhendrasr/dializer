@@ -8,7 +8,14 @@ const INITIAL_NODES: Array<FlowChartNode> = [
   { type: NodeTypes.INPUT, x: 100, y: 200, active: false, nextIdx: 2 },
   { type: NodeTypes.OUTPUT, x: 100, y: 300, active: false, nextIdx: 3 },
   { type: NodeTypes.PROCESS, x: 100, y: 400, active: false, nextIdx: 4 },
-  { type: NodeTypes.IF, x: 100, y: 500, active: false, nextIdx: 5 },
+  {
+    type: NodeTypes.IF,
+    x: 100,
+    y: 500,
+    active: false,
+    nextIdxIfTrue: 5,
+    nextIdxIfFalse: 3,
+  },
   { type: NodeTypes.END, x: 100, y: 600, active: false },
 ];
 
@@ -49,24 +56,24 @@ const App = () => {
   return (
     <>
       <button onClick={() => setAnimation(!animating)}>Toggle animation</button>
-        <Stage width={window.innerWidth} height={window.innerHeight} draggable>
-          <Layer>
-            {nodes.map((node, idx) => {
-              let nextNode: Parameters<typeof nodeObjectToKonvaNode>[1] =
-                undefined;
-              if (node.nextIdx) {
-                nextNode = nodes[node.nextIdx];
-              } else if (node.nextIdxIfTrue && node.nextIdxIfFalse) {
-                nextNode = {
-                  true: nodes[node.nextIdxIfTrue],
-                  false: nodes[node.nextIdxIfFalse],
-                };
-              }
+      <Stage width={window.innerWidth} height={window.innerHeight} draggable>
+        <Layer>
+          {nodes.map((node, idx) => {
+            let nextNode: Parameters<typeof nodeObjectToKonvaNode>[1] =
+              undefined;
+            if (node.nextIdx) {
+              nextNode = nodes[node.nextIdx];
+            } else if (node.nextIdxIfTrue && node.nextIdxIfFalse) {
+              nextNode = {
+                true: nodes[node.nextIdxIfTrue],
+                false: nodes[node.nextIdxIfFalse],
+              };
+            }
 
-              return nodeObjectToKonvaNode(node, nextNode, idx);
-            })}
-          </Layer>
-        </Stage>
+            return nodeObjectToKonvaNode(node, nextNode, idx);
+          })}
+        </Layer>
+      </Stage>
     </>
   );
 };

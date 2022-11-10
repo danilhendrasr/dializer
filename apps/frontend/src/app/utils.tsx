@@ -3,11 +3,11 @@ import { InputNode } from './components/input.node';
 import { OutputNode } from './components/output.node';
 import { ProcessNode } from './components/process.node';
 import { StartEndNode } from './components/start-end.node';
-import { FlowChartNode, NodeTypes } from './types';
+import { ConditionalNodeNextNodes, FlowChartNode, NodeTypes } from './types';
 
 export function nodeToKonvaNode(
   node: FlowChartNode,
-  next?: FlowChartNode | { true: FlowChartNode; false: FlowChartNode },
+  next?: FlowChartNode | ConditionalNodeNextNodes,
   key?: number
 ) {
   switch (node.type) {
@@ -58,7 +58,15 @@ export function nodeToKonvaNode(
       );
 
     case NodeTypes.IF:
-      return <IfNode key={key} x={node.x} y={node.y} isActive={node.active} />;
+      return (
+        <IfNode
+          key={key}
+          x={node.x}
+          y={node.y}
+          isActive={node.active}
+          next={next as ConditionalNodeNextNodes}
+        />
+      );
 
     default:
       return undefined;

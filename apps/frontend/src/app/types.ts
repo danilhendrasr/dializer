@@ -26,3 +26,8 @@ export interface FlowChartNode {
   // node through this proeprty.
   nextIdxIfFalse?: number;
 }
+
+export type ConditionalNodeNextNodes = {
+  true: FlowChartNode;
+  false: FlowChartNode;
+};
