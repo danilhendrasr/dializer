@@ -23,6 +23,7 @@
     "regenerator-runtime": "0.13.7",
     "rxjs": "^7.0.0",
     "styled-components": "5.3.5",
+    "tabler-icons-react": "^1.55.0",
     "tslib": "^2.3.0",
     "use-image": "^1.1.0"
   },

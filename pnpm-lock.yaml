@@ -50,6 +50,7 @@ specifiers:
   regenerator-runtime: 0.13.7
   rxjs: ^7.0.0
   styled-components: 5.3.5
+  tabler-icons-react: ^1.55.0
   ts-jest: 28.0.5
   ts-node: 10.9.1
   tslib: ^2.3.0
@@ -71,6 +72,7 @@ dependencies:
   regenerator-runtime: 0.13.7
   rxjs: 7.5.7
   styled-components: 5.3.5_7i5myeigehqah43i5u7wbekgba
+  tabler-icons-react: 1.55.0_react@18.2.0
   tslib: 2.4.0
   use-image: 1.1.0_biqbaboplfbrettd7655fr4n2y
 
@@ -9581,6 +9583,14 @@ packages:
   /symbol-tree/3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
     dev: true
+
+  /tabler-icons-react/1.55.0_react@18.2.0:
+    resolution: {integrity: sha512-+5zz2mQ2wl5658tMtK4mxUCFdF7TyPiPqLAvCUHHOeltZWukExE3aftY04HDMcap8skob/UFbzSzVhifCCMeUQ==}
+    peerDependencies:
+      react: '>= 16.8.0'
+    dependencies:
+      react: 18.2.0
+    dev: false
 
   /tapable/2.2.1:
     resolution: {integrity: sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==}
