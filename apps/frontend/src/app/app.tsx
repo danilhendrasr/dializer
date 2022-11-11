@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { KonvaEventObject } from 'konva/lib/Node';
+import { Stage as StageClass } from 'konva/lib/Stage';
 import { Stage, Layer } from 'react-konva';
 import { FlowChartNode, NodeTypes } from './types';
 import { nodeToKonvaNode as nodeObjectToKonvaNode } from './utils';
+import { Vector2d } from 'konva/lib/types';
 
 const DEFAULT_NODE_WIDTH = 100;
+
+const SCALE_BY = 1.2;
 
 const INITIAL_NODES: Array<FlowChartNode> = [
   {
@@ -63,13 +68,14 @@ const INITIAL_NODES: Array<FlowChartNode> = [
 ];
 
 const App = () => {
-  const animationRef = React.useRef<unknown>(null);
-  const curNodeIdx = React.useRef<number>(0);
+  const stageRef = useRef<StageClass | null>(null);
+  const animationRef = useRef<unknown>(null);
+  const curNodeIdx = useRef<number>(0);
 
-  const [nodes, setNodes] = React.useState(INITIAL_NODES);
-  const [animating, setAnimation] = React.useState(false);
+  const [nodes, setNodes] = useState(INITIAL_NODES);
+  const [animating, setAnimation] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!animating) {
       clearInterval(animationRef.current as NodeJS.Timer);
       return;
@@ -96,10 +102,40 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animating]);
 
+  function zoomStage(event: KonvaEventObject<WheelEvent>) {
+    event.evt.preventDefault();
+    if (stageRef.current !== null) {
+      const stage = stageRef.current;
+      const oldScale = stage.scaleX();
+      const { x: pointerX, y: pointerY } =
+        stage.getPointerPosition() as Vector2d;
+      const mousePointTo = {
+        x: (pointerX - stage.x()) / oldScale,
+        y: (pointerY - stage.y()) / oldScale,
+      };
+      const newScale =
+        event.evt.deltaY > 0 ? oldScale * SCALE_BY : oldScale / SCALE_BY;
+      stage.scale({ x: newScale, y: newScale });
+      const newPos = {
+        x: pointerX - mousePointTo.x * newScale,
+        y: pointerY - mousePointTo.y * newScale,
+      };
+
+      stage.position(newPos);
+      stage.batchDraw();
+    }
+  }
+
   return (
     <>
       <button onClick={() => setAnimation(!animating)}>Toggle animation</button>
-      <Stage width={window.innerWidth} height={window.innerHeight} draggable>
+      <Stage
+        ref={stageRef}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        draggable
+        onWheel={zoomStage}
+      >
         <Layer>
           {nodes.map((node, idx) => {
             let nextNode: Parameters<typeof nodeObjectToKonvaNode>[1] =
