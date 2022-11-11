@@ -5,6 +5,7 @@ import { Stage, Layer } from 'react-konva';
 import { FlowChartNode, NodeTypes } from './types';
 import { nodeToKonvaNode as nodeObjectToKonvaNode } from './utils';
 import { Vector2d } from 'konva/lib/types';
+import { ToggleAnimationBtn } from './components/play-animation.btn';
 
 const DEFAULT_NODE_WIDTH = 100;
 
@@ -128,7 +129,10 @@ const App = () => {
 
   return (
     <>
-      <button onClick={() => setAnimation(!animating)}>Toggle animation</button>
+      <ToggleAnimationBtn
+        isAnimationRunning={animating}
+        onClick={() => setAnimation(!animating)}
+      />
       <Stage
         ref={stageRef}
         width={window.innerWidth}
