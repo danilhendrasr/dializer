@@ -85,17 +85,19 @@ const App = () => {
     animationRef.current = setInterval(() => {
       if (curNodeIdx.current === undefined) {
         clearInterval(animationRef.current as NodeJS.Timer);
+        setAnimation(!animating);
         return;
       }
 
       const nodesCopy = [...nodes];
       const curNode = nodesCopy[curNodeIdx.current];
-      const nextNodeIdx = curNode.nextIdx;
+      const nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
       curNode.active = true;
       setNodes(nodesCopy);
 
       if (nextNodeIdx === undefined) {
         clearInterval(animationRef.current as NodeJS.Timer);
+        setAnimation(!animating);
       } else {
         curNodeIdx.current = nextNodeIdx;
       }
