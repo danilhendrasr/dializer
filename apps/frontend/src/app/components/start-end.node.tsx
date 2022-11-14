@@ -40,7 +40,7 @@ const StartEndNode: React.FC<Props> = (props) => {
           verticalAlign="middle"
           text={text}
         />
-        {next && displayAddNodeBtn ? (
+        {type === NodeTypes.START && displayAddNodeBtn ? (
           <AddNodeBtn
             isActive={displayAddNodeBtn}
             x={x + width / 2}
