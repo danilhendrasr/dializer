@@ -2,72 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { Stage as StageClass } from 'konva/lib/Stage';
 import { Stage, Layer } from 'react-konva';
-import { FlowChartNode, NodeTypes } from './types';
 import { nodeToKonvaNode as nodeObjectToKonvaNode } from './utils';
 import { Vector2d } from 'konva/lib/types';
 import { ToggleAnimationBtn } from './components/play-animation.btn';
 import { EnvironmentPanel } from './components/environtment-panel';
-
-const DEFAULT_NODE_WIDTH = 100;
+import { INITIAL_NODES } from './data';
 
 const SCALE_BY = 1.2;
-
-const INITIAL_NODES: Array<FlowChartNode> = [
-  {
-    type: NodeTypes.START,
-    x: 100,
-    y: 100,
-    width: DEFAULT_NODE_WIDTH,
-    height: 40,
-    active: false,
-    nextIdx: 1,
-  },
-  {
-    type: NodeTypes.INPUT,
-    x: 100,
-    y: 200,
-    width: DEFAULT_NODE_WIDTH,
-    height: 50,
-    active: false,
-    nextIdx: 2,
-  },
-  {
-    type: NodeTypes.OUTPUT,
-    x: 100,
-    y: 300,
-    width: DEFAULT_NODE_WIDTH,
-    height: 50,
-    active: false,
-    nextIdx: 3,
-  },
-  {
-    type: NodeTypes.PROCESS,
-    x: 100,
-    y: 400,
-    width: DEFAULT_NODE_WIDTH,
-    height: 50,
-    active: false,
-    nextIdx: 4,
-  },
-  {
-    type: NodeTypes.IF,
-    x: 100,
-    y: 500,
-    width: DEFAULT_NODE_WIDTH,
-    height: 70,
-    active: false,
-    nextIdxIfTrue: 5,
-    nextIdxIfFalse: 3,
-  },
-  {
-    type: NodeTypes.END,
-    x: 100,
-    y: 600,
-    width: DEFAULT_NODE_WIDTH,
-    height: 40,
-    active: false,
-  },
-];
 
 const App = () => {
   const stageRef = useRef<StageClass | null>(null);
