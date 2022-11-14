@@ -6,6 +6,7 @@ import { FlowChartNode, NodeTypes } from './types';
 import { nodeToKonvaNode as nodeObjectToKonvaNode } from './utils';
 import { Vector2d } from 'konva/lib/types';
 import { ToggleAnimationBtn } from './components/play-animation.btn';
+import { EnvironmentPanel } from './components/environtment-panel';
 
 const DEFAULT_NODE_WIDTH = 100;
 
@@ -159,6 +160,7 @@ const App = () => {
           })}
         </Layer>
       </Stage>
+      <EnvironmentPanel />
     </>
   );
 };
