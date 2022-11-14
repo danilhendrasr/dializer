@@ -159,6 +159,7 @@ const App = () => {
             return nodeObjectToKonvaNode(node, nextNode, idx);
           })}
         </Layer>
+        <Layer name="top-layer" />
       </Stage>
       <EnvironmentPanel />
     </>
