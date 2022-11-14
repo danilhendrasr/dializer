@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Shape, Arrow, Group, Text } from 'react-konva';
 import { FlowChartNode } from '../types';
+import { AddNodeBtn } from './add-node.btn';
 
 type Props = {
   x: number;
@@ -12,38 +14,44 @@ type Props = {
 
 const OutputNode: React.FC<Props> = (props) => {
   const { x, y, isActive, width = 100, height = 50, next } = props;
+  const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
   return (
-    <>
-      <Group>
-        <Group x={x} y={y}>
-          <Shape
-            sceneFunc={(context, shape) => {
-              context.beginPath();
-              context.moveTo(20, 0);
-              context.lineTo(width + 20, 0);
-              context.lineTo(width, height);
-              context.lineTo(-20, height);
-              context.lineTo(0, 0);
-              context.closePath();
+    <Group
+      onMouseEnter={() => setDisplayAddNodeBtn(true)}
+      onMouseLeave={() => setDisplayAddNodeBtn(false)}
+    >
+      <Group x={x} y={y}>
+        <Shape
+          sceneFunc={(context, shape) => {
+            context.beginPath();
+            context.moveTo(20, 0);
+            context.lineTo(width + 20, 0);
+            context.lineTo(width, height);
+            context.lineTo(-20, height);
+            context.lineTo(0, 0);
+            context.closePath();
 
-              context.fillStrokeShape(shape);
-            }}
-            stroke={isActive ? 'red' : 'grey'}
-          />
-          <Text
-            align="center"
-            width={width}
-            height={height}
-            verticalAlign="middle"
-            text={'This is output node'}
-          />
-        </Group>
-        <Arrow
-          points={[x + width, y, x + width + 50, y]}
-          strokeWidth={1}
+            context.fillStrokeShape(shape);
+          }}
           stroke={isActive ? 'red' : 'grey'}
         />
+        <Text
+          align="center"
+          width={width}
+          height={height}
+          verticalAlign="middle"
+          text={'This is output node'}
+        />
+        {next && displayAddNodeBtn ? (
+          <AddNodeBtn
+            isActive={displayAddNodeBtn}
+            x={x + width / 2}
+            y={y + height}
+            onMouseEnter={() => setDisplayAddNodeBtn(true)}
+            onMouseLeave={() => setDisplayAddNodeBtn(false)}
+          />
+        ) : null}
       </Group>
       {next ? (
         <Arrow
@@ -56,7 +64,7 @@ const OutputNode: React.FC<Props> = (props) => {
           stroke="grey"
         />
       ) : null}
-    </>
+    </Group>
   );
 };
 
