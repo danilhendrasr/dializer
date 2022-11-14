@@ -19,6 +19,7 @@
     "react-dom": "18.2.0",
     "react-is": "18.2.0",
     "react-konva": "18.2.3",
+    "react-konva-utils": "^0.3.0",
     "reflect-metadata": "^0.1.13",
     "regenerator-runtime": "0.13.7",
     "rxjs": "^7.0.0",
