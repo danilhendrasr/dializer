@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Arrow, Group, Shape, Text } from 'react-konva';
 import { FlowChartNode } from '../types';
+import { AddNodeBtn } from './add-node.btn';
 
 type Props = {
   x: number;
@@ -15,9 +17,13 @@ type Props = {
 
 const IfNode: React.FC<Props> = (props) => {
   const { x, y, isActive, width = 100, height = 70, next } = props;
+  const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
   return (
-    <>
+    <Group
+      onMouseEnter={() => setDisplayAddNodeBtn(true)}
+      onMouseLeave={() => setDisplayAddNodeBtn(false)}
+    >
       <Group x={x} y={y}>
         <Shape
           sceneFunc={(context, shape) => {
@@ -40,6 +46,15 @@ const IfNode: React.FC<Props> = (props) => {
           verticalAlign="middle"
           text={'Change me later'}
         />
+        {next && displayAddNodeBtn ? (
+          <AddNodeBtn
+            isActive={displayAddNodeBtn}
+            x={x + width / 2}
+            y={y + height}
+            onMouseEnter={() => setDisplayAddNodeBtn(true)}
+            onMouseLeave={() => setDisplayAddNodeBtn(false)}
+          />
+        ) : null}
       </Group>
       <Arrow
         points={[
@@ -63,7 +78,7 @@ const IfNode: React.FC<Props> = (props) => {
         ]}
         stroke="grey"
       />
-    </>
+    </Group>
   );
 };
 
