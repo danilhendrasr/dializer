@@ -7,6 +7,7 @@ import { Vector2d } from 'konva/lib/types';
 import { ToggleAnimationBtn } from './components/play-animation.btn';
 import { EnvironmentPanel } from './components/environtment-panel';
 import { INITIAL_NODES } from './data';
+import { NodesContext } from './contexts/nodes.context';
 
 const SCALE_BY = 1.2;
 
@@ -72,7 +73,7 @@ const App = () => {
   }
 
   return (
-    <>
+    <NodesContext.Provider value={{ nodes, setNodes }}>
       <ToggleAnimationBtn
         isAnimationRunning={animating}
         onClick={() => setAnimation(!animating)}
@@ -103,7 +104,7 @@ const App = () => {
         <Layer name="top-layer" />
       </Stage>
       <EnvironmentPanel />
-    </>
+    </NodesContext.Provider>
   );
 };
 
