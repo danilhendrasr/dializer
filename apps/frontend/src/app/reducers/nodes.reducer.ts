@@ -11,12 +11,12 @@ export function nodesReducer(
   state: FlowChartNode[],
   action: NodesReducerActionObject
 ) {
+  let nodes = [...state];
   switch (action.type) {
     case NodeActions.ACTIVATE: {
-      const nodesCopy = [...state];
-      const targetNode = nodesCopy[action.idx];
+      const targetNode = nodes[action.idx];
       targetNode.active = true;
-      return nodesCopy;
+      return nodes;
     }
 
     case NodeActions.ADD_NEW: {
@@ -24,7 +24,31 @@ export function nodesReducer(
         throw new Error('Node type is required when adding new node.');
       }
 
-      return state;
+      const prevNode = nodes[action.idx - 1];
+      const newNode: FlowChartNode = {
+        type: action.nodeType,
+        x: prevNode.x,
+        y: prevNode.y + prevNode.height + 50,
+        active: false,
+        height: 100,
+        width: 100,
+        nextIdx: action.idx + 1,
+      };
+
+      nodes = nodes.map((node, idx) => {
+        if (idx < action.idx) return node;
+        node.y += newNode.height;
+
+        if (node.nextIdx) node.nextIdx++;
+        if (node.nextIdxIfTrue) node.nextIdxIfTrue++;
+        if (node.nextIdxIfFalse) node.nextIdxIfFalse++;
+
+        return node;
+      });
+
+      nodes.splice(action.idx, 0, newNode);
+
+      return nodes;
     }
 
     case NodeActions.DELETE: {
