@@ -13,10 +13,21 @@ type Props = {
 
   width?: number;
   height?: number;
+
+  onAddNewNode: () => void;
 };
 
 const StartEndNode: React.FC<Props> = (props) => {
-  const { x, y, next, isActive, width = 100, height = 40, type } = props;
+  const {
+    x,
+    y,
+    next,
+    isActive,
+    width = 100,
+    height = 40,
+    type,
+    onAddNewNode,
+  } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
   const text = type === NodeTypes.START ? 'Start' : 'End';
@@ -47,6 +58,7 @@ const StartEndNode: React.FC<Props> = (props) => {
             y={y + height}
             onMouseEnter={() => setDisplayAddNodeBtn(true)}
             onMouseLeave={() => setDisplayAddNodeBtn(false)}
+            onClick={onAddNewNode}
           />
         ) : null}
       </Group>

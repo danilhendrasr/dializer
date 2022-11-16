@@ -11,12 +11,21 @@ type Props = {
     true: FlowChartNode;
     false: FlowChartNode;
   };
+  onAddNewNode: () => void;
   width?: number;
   height?: number;
 };
 
 const IfNode: React.FC<Props> = (props) => {
-  const { x, y, isActive, width = 100, height = 70, next } = props;
+  const {
+    x,
+    y,
+    isActive,
+    width = 100,
+    height = 70,
+    next,
+    onAddNewNode,
+  } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
   return (
@@ -53,6 +62,7 @@ const IfNode: React.FC<Props> = (props) => {
             y={y + height}
             onMouseEnter={() => setDisplayAddNodeBtn(true)}
             onMouseLeave={() => setDisplayAddNodeBtn(false)}
+            onClick={onAddNewNode}
           />
         ) : null}
       </Group>

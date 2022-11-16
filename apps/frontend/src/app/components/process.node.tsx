@@ -7,13 +7,22 @@ type Props = {
   x: number;
   y: number;
   isActive: boolean;
+  onAddNewNode: () => void;
   width?: number;
   height?: number;
   next?: FlowChartNode;
 };
 
 const ProcessNode: React.FC<Props> = (props) => {
-  const { x, y, isActive, width = 100, height = 50, next } = props;
+  const {
+    x,
+    y,
+    isActive,
+    width = 100,
+    height = 50,
+    next,
+    onAddNewNode,
+  } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
   return (
@@ -42,6 +51,7 @@ const ProcessNode: React.FC<Props> = (props) => {
             y={y + height}
             onMouseEnter={() => setDisplayAddNodeBtn(true)}
             onMouseLeave={() => setDisplayAddNodeBtn(false)}
+            onClick={onAddNewNode}
           />
         ) : null}
       </Group>
