@@ -1,3 +1,9 @@
+export enum NodeActions {
+  ADD_NEW = 'add_new',
+  DELETE = 'delete',
+  ACTIVATE = 'activate',
+}
+
 export enum NodeTypes {
   START,
   END,

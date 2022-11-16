@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { Stage as StageClass } from 'konva/lib/Stage';
 import { Stage, Layer } from 'react-konva';
@@ -8,6 +8,8 @@ import { ToggleAnimationBtn } from './components/play-animation.btn';
 import { EnvironmentPanel } from './components/environtment-panel';
 import { INITIAL_NODES } from './data';
 import { NodesContext } from './contexts/nodes.context';
+import { nodesReducer } from './reducers/nodes.reducer';
+import { NodeActions } from './types';
 
 const SCALE_BY = 1.2;
 
@@ -16,7 +18,7 @@ const App = () => {
   const animationRef = useRef<unknown>(null);
   const curNodeIdx = useRef<number>(0);
 
-  const [nodes, setNodes] = useState(INITIAL_NODES);
+  const [nodes, nodesDispatch] = useReducer(nodesReducer, INITIAL_NODES);
   const [animating, setAnimation] = useState(false);
 
   useEffect(() => {
@@ -32,11 +34,13 @@ const App = () => {
         return;
       }
 
-      const nodesCopy = [...nodes];
-      const curNode = nodesCopy[curNodeIdx.current];
+      nodesDispatch({
+        type: NodeActions.ACTIVATE,
+        idx: curNodeIdx.current,
+      });
+
+      const curNode = nodes[curNodeIdx.current];
       const nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
-      curNode.active = true;
-      setNodes(nodesCopy);
 
       if (nextNodeIdx === undefined) {
         clearInterval(animationRef.current as NodeJS.Timer);
@@ -73,7 +77,7 @@ const App = () => {
   }
 
   return (
-    <NodesContext.Provider value={{ nodes, setNodes }}>
+    <NodesContext.Provider value={{ nodes, nodesDispatch }}>
       <ToggleAnimationBtn
         isAnimationRunning={animating}
         onClick={() => setAnimation(!animating)}
