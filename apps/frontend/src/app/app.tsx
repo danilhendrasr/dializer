@@ -45,7 +45,7 @@ const App = () => {
 
       nodesDispatch({
         type: NodeActions.ACTIVATE,
-        idx: curNodeIdx.current,
+        atIdx: curNodeIdx.current,
       });
 
       const curNode = nodes[curNodeIdx.current];
@@ -114,7 +114,7 @@ const App = () => {
             const onAddNewNode = () => {
               nodesDispatch({
                 type: NodeActions.ADD_NEW,
-                idx: idx + 1,
+                atIdx: idx + 1,
                 nodeType: NodeTypes.PROCESS,
               });
             };

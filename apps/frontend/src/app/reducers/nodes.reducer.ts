@@ -2,7 +2,7 @@ import { FlowChartNode, NodeActions, NodeTypes } from '../types';
 
 export type NodesReducerActionObject = {
   type: NodeActions;
-  idx: number;
+  atIdx: number;
   // Required if action type is NodeActions.ADD_NEW
   nodeType?: NodeTypes;
 };
@@ -14,7 +14,7 @@ export function nodesReducer(
   let nodes = [...state];
   switch (action.type) {
     case NodeActions.ACTIVATE: {
-      const targetNode = nodes[action.idx];
+      const targetNode = nodes[action.atIdx];
       targetNode.active = true;
       return nodes;
     }
@@ -24,7 +24,8 @@ export function nodesReducer(
         throw new Error('Node type is required when adding new node.');
       }
 
-      const prevNode = nodes[action.idx - 1];
+      const prevNodeIdx = action.atIdx - 1;
+      const prevNode = nodes[prevNodeIdx];
       const newNode: FlowChartNode = {
         type: action.nodeType,
         x: prevNode.x,
@@ -32,21 +33,23 @@ export function nodesReducer(
         active: false,
         height: 100,
         width: 100,
-        nextIdx: action.idx + 1,
+        nextIdx: action.atIdx + 1,
       };
 
       nodes = nodes.map((node, idx) => {
-        if (idx < action.idx) return node;
-        node.y += newNode.height;
+        if (idx < action.atIdx) return node;
+        node.y += newNode.height + 50;
 
         if (node.nextIdx) node.nextIdx++;
         if (node.nextIdxIfTrue) node.nextIdxIfTrue++;
-        if (node.nextIdxIfFalse) node.nextIdxIfFalse++;
+        if (node.nextIdxIfFalse && prevNodeIdx !== node.nextIdxIfFalse) {
+          node.nextIdxIfFalse++;
+        }
 
         return node;
       });
 
-      nodes.splice(action.idx, 0, newNode);
+      nodes.splice(action.atIdx, 0, newNode);
 
       return nodes;
     }
