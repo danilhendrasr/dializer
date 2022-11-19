@@ -21,8 +21,19 @@ import { OutputNode } from './components/output.node';
 import { IfNode } from './components/if.node';
 import { AddNodeBtn } from './components/add-node.btn';
 import { SelectNodePopover } from './components/select-node.popover';
+import { ToastContainer } from 'react-toastify';
+import styled from 'styled-components';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SCALE_BY = 1.2;
+
+const Toast = styled(ToastContainer)`
+  .Toastify__toast-body {
+    color: black;
+    font-size: 0.9rem;
+    font-family: sans-serif;
+  }
+`;
 
 const App = () => {
   const stageRef = useRef<StageClass | null>(null);
@@ -223,6 +234,7 @@ const App = () => {
         </Stage>
       </NodesContext.Provider>
       <EnvironmentPanel />
+      <Toast position="bottom-center" theme="light" />
     </>
   );
 };

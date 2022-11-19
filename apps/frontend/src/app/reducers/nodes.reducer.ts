@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { FlowChartNode, NodeActions, NodeTypes } from '../types';
 
 export type NodesReducerActionObject = {
@@ -26,6 +27,16 @@ export function nodesReducer(
 
       const prevNodeIdx = action.atIdx - 1;
       const prevNode = nodes[prevNodeIdx];
+      const ifAfterTerminal =
+        action.nodeType === NodeTypes.IF && prevNode.type === NodeTypes.START;
+
+      if (ifAfterTerminal) {
+        toast('Cannot insert if node after start node.', { type: 'error' });
+        return nodes;
+      }
+
+      const isNextIfNode = action.nodeType === NodeTypes.IF;
+
       const newNode: FlowChartNode = {
         type: action.nodeType,
         x: prevNode.x,
@@ -33,7 +44,9 @@ export function nodesReducer(
         active: false,
         height: 100,
         width: 100,
-        nextIdx: action.atIdx + 1,
+        nextIdx: !isNextIfNode ? action.atIdx + 1 : undefined,
+        nextIdxIfTrue: isNextIfNode ? action.atIdx + 1 : undefined,
+        nextIdxIfFalse: isNextIfNode ? action.atIdx - 1 : undefined,
       };
 
       nodes = nodes.map((node, idx) => {
