@@ -29,6 +29,7 @@ export const SelectNodePopover: React.FC<Props> = (props) => {
         size = { width: 90, height: 40 };
       }
 
+      const nodeText = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
       const Component = nodeTypeToNode({
         node: {
           type: nodeType,
@@ -37,6 +38,7 @@ export const SelectNodePopover: React.FC<Props> = (props) => {
           width: size.width,
           height: size.height,
           active: false,
+          content: nodeText,
         },
         key: idx,
         onClick: () => onSelect(nodeType),
