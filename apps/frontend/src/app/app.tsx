@@ -19,6 +19,8 @@ import { ProcessNode } from './components/process.node';
 import { InputNode } from './components/input.node';
 import { OutputNode } from './components/output.node';
 import { IfNode } from './components/if.node';
+import { AddNodeBtn } from './components/add-node.btn';
+import { SelectNodePopover } from './components/select-node.popover';
 
 const SCALE_BY = 1.2;
 
@@ -29,6 +31,11 @@ const App = () => {
 
   const [nodes, nodesDispatch] = useReducer(nodesReducer, INITIAL_NODES);
   const [animating, setAnimation] = useState(false);
+  const [selectNodePopover, setSelectNodePopover] = useState<{
+    x: number;
+    y: number;
+    onNodeSelect: (nodeType: NodeTypes) => void;
+  }>();
 
   useEffect(() => {
     if (!animating) {
@@ -86,111 +93,137 @@ const App = () => {
   }
 
   return (
-    <NodesContext.Provider value={{ nodes, nodesDispatch }}>
+    <>
       <ToggleAnimationBtn
         isAnimationRunning={animating}
         onClick={() => setAnimation(!animating)}
       />
-      <Stage
-        ref={stageRef}
-        width={window.innerWidth}
-        height={window.innerHeight}
-        draggable
-        onWheel={zoomStage}
-      >
-        <Layer>
-          {nodes.map((node, idx) => {
-            let next: FlowChartNode | ConditionalNodeNextNodes | undefined =
-              undefined;
-            if (node.nextIdx) {
-              next = nodes[node.nextIdx];
-            } else if (node.nextIdxIfTrue && node.nextIdxIfFalse) {
-              next = {
-                true: nodes[node.nextIdxIfTrue],
-                false: nodes[node.nextIdxIfFalse],
+      <NodesContext.Provider value={{ nodes, nodesDispatch }}>
+        <Stage
+          ref={stageRef}
+          width={window.innerWidth}
+          height={window.innerHeight}
+          draggable
+          onWheel={zoomStage}
+        >
+          <Layer>
+            {nodes.map((node, idx) => {
+              let next: FlowChartNode | ConditionalNodeNextNodes | undefined =
+                undefined;
+              if (node.nextIdx) {
+                next = nodes[node.nextIdx];
+              } else if (node.nextIdxIfTrue && node.nextIdxIfFalse) {
+                next = {
+                  true: nodes[node.nextIdxIfTrue],
+                  false: nodes[node.nextIdxIfFalse],
+                };
+              }
+
+              const addNewNodeAtIdx = (nodeType: NodeTypes) => {
+                nodesDispatch({
+                  type: NodeActions.ADD_NEW,
+                  atIdx: idx + 1,
+                  nodeType: nodeType,
+                });
+                setSelectNodePopover(undefined);
               };
-            }
 
-            const onAddNewNode = () => {
-              nodesDispatch({
-                type: NodeActions.ADD_NEW,
-                atIdx: idx + 1,
-                nodeType: NodeTypes.PROCESS,
-              });
-            };
+              const AddNewNodeBtn = (
+                <AddNodeBtn
+                  x={node.x + node.width / 2}
+                  y={node.y + node.height}
+                  onClick={() => {
+                    setSelectNodePopover({
+                      x: node.x,
+                      y: node.y,
+                      onNodeSelect: addNewNodeAtIdx,
+                    });
+                  }}
+                />
+              );
 
-            switch (node.type) {
-              case NodeTypes.START:
-              case NodeTypes.END:
-                return (
-                  <StartEndNode
-                    key={idx}
-                    x={node.x}
-                    y={node.y}
-                    isActive={node.active}
-                    type={node.type}
-                    next={next as FlowChartNode}
-                    onAddNewNode={onAddNewNode}
-                  />
-                );
+              switch (node.type) {
+                case NodeTypes.START:
+                case NodeTypes.END:
+                  return (
+                    <StartEndNode
+                      key={idx}
+                      x={node.x}
+                      y={node.y}
+                      isActive={node.active}
+                      type={node.type}
+                      next={next as FlowChartNode}
+                      addNewNodeBtn={AddNewNodeBtn}
+                    />
+                  );
 
-              case NodeTypes.PROCESS:
-                return (
-                  <ProcessNode
-                    key={idx}
-                    x={node.x}
-                    y={node.y}
-                    isActive={node.active}
-                    next={next as FlowChartNode}
-                    onAddNewNode={onAddNewNode}
-                  />
-                );
+                case NodeTypes.PROCESS:
+                  return (
+                    <ProcessNode
+                      key={idx}
+                      x={node.x}
+                      y={node.y}
+                      isActive={node.active}
+                      next={next as FlowChartNode}
+                      addNewNodeBtn={AddNewNodeBtn}
+                    />
+                  );
 
-              case NodeTypes.INPUT:
-                return (
-                  <InputNode
-                    key={idx}
-                    x={node.x}
-                    y={node.y}
-                    isActive={node.active}
-                    next={next as FlowChartNode}
-                    onAddNewNode={onAddNewNode}
-                  />
-                );
+                case NodeTypes.INPUT:
+                  return (
+                    <InputNode
+                      key={idx}
+                      x={node.x}
+                      y={node.y}
+                      isActive={node.active}
+                      next={next as FlowChartNode}
+                      addNewNodeBtn={AddNewNodeBtn}
+                    />
+                  );
 
-              case NodeTypes.OUTPUT:
-                return (
-                  <OutputNode
-                    key={idx}
-                    x={node.x}
-                    y={node.y}
-                    isActive={node.active}
-                    next={next as FlowChartNode}
-                    onAddNewNode={onAddNewNode}
-                  />
-                );
+                case NodeTypes.OUTPUT:
+                  return (
+                    <OutputNode
+                      key={idx}
+                      x={node.x}
+                      y={node.y}
+                      isActive={node.active}
+                      next={next as FlowChartNode}
+                      addNewNodeBtn={AddNewNodeBtn}
+                    />
+                  );
 
-              case NodeTypes.IF:
-                return (
-                  <IfNode
-                    key={idx}
-                    x={node.x}
-                    y={node.y}
-                    isActive={node.active}
-                    next={next as ConditionalNodeNextNodes}
-                    onAddNewNode={onAddNewNode}
-                  />
-                );
+                case NodeTypes.IF:
+                  return (
+                    <IfNode
+                      key={idx}
+                      x={node.x}
+                      y={node.y}
+                      isActive={node.active}
+                      next={next as ConditionalNodeNextNodes}
+                      addNewNodeBtn={AddNewNodeBtn}
+                    />
+                  );
 
-              default:
-                return null;
-            }
-          })}
-        </Layer>
-        <Layer name="top-layer" />
-      </Stage>
+                default:
+                  return null;
+              }
+            })}
+          </Layer>
+          <Layer name="top-layer">
+            {selectNodePopover !== undefined ? (
+              <SelectNodePopover
+                x={selectNodePopover.x - 10}
+                y={selectNodePopover.y - 10}
+                onSelect={selectNodePopover.onNodeSelect}
+                onCancel={() => setSelectNodePopover(undefined)}
+              />
+            ) : null}
+          </Layer>
+        </Stage>
+      </NodesContext.Provider>
       <EnvironmentPanel />
-    </NodesContext.Provider>
+    </>
   );
 };
 
