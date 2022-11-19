@@ -1,35 +1,29 @@
 import { useState } from 'react';
-import { Circle, Group, Shape } from 'react-konva';
+import { Circle, Group } from 'react-konva';
 import { Portal } from 'react-konva-utils';
+import { PlusIcon } from './plus.btn';
 
 type Props = {
-  isActive: boolean;
   x: number;
   y: number;
 
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
-  onClick?: () => void;
+  onClick: () => void;
 };
 
 export const AddNodeBtn: React.FC<Props> = (props) => {
-  const { isActive, x, y, onMouseEnter, onMouseLeave, onClick } = props;
+  const { x, y, onClick } = props;
   const [hovered, setHovered] = useState(false);
 
-  const radius = hovered ? 10 : 5;
-  const opacity = hovered ? 1 : 0.9;
+  const radius = hovered ? 5 : 7;
+  const opacity = hovered ? 1 : 0.8;
+  const circleFill = hovered ? 'black' : 'white';
+  const plusIconFill = hovered ? 'white' : 'black';
 
   return (
-    <Portal selector={'.top-layer'} enabled={isActive}>
+    <Portal selector={'.top-layer'} enabled={true}>
       <Group
-        onMouseEnter={() => {
-          onMouseEnter();
-          setHovered(true);
-        }}
-        onMouseLeave={() => {
-          onMouseLeave();
-          setHovered(false);
-        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         onClick={onClick}
       >
         <Circle
@@ -38,21 +32,10 @@ export const AddNodeBtn: React.FC<Props> = (props) => {
           radius={radius}
           opacity={opacity}
           stroke="black"
-          fill="white"
+          fill={circleFill}
           strokeWidth={0.5}
         />
-        {hovered ? (
-          <Shape
-            sceneFunc={(context, shape) => {
-              context.moveTo(x - 5, y);
-              context.lineTo(x + 5, y);
-              context.moveTo(x, y - 5);
-              context.lineTo(x, y + 5);
-              context.fillStrokeShape(shape);
-            }}
-            stroke="black"
-          />
-        ) : null}
+        <PlusIcon x={x} y={y} size={2.5} color={plusIconFill} />
       </Group>
     </Portal>
   );
