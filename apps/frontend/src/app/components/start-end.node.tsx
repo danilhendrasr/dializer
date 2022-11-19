@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Arrow, Group, Rect, Text } from 'react-konva';
 import { FlowChartNode, NodeTypes } from '../types';
-import { AddNodeBtn } from './add-node.btn';
 
 type Props = {
   type: NodeTypes.START | NodeTypes.END;
@@ -14,7 +13,7 @@ type Props = {
   width?: number;
   height?: number;
 
-  onAddNewNode: () => void;
+  addNewNodeBtn?: JSX.Element;
 };
 
 const StartEndNode: React.FC<Props> = (props) => {
@@ -26,7 +25,7 @@ const StartEndNode: React.FC<Props> = (props) => {
     width = 100,
     height = 40,
     type,
-    onAddNewNode,
+    addNewNodeBtn,
   } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
@@ -51,16 +50,9 @@ const StartEndNode: React.FC<Props> = (props) => {
           verticalAlign="middle"
           text={text}
         />
-        {type === NodeTypes.START && displayAddNodeBtn ? (
-          <AddNodeBtn
-            isActive={displayAddNodeBtn}
-            x={x + width / 2}
-            y={y + height}
-            onMouseEnter={() => setDisplayAddNodeBtn(true)}
-            onMouseLeave={() => setDisplayAddNodeBtn(false)}
-            onClick={onAddNewNode}
-          />
-        ) : null}
+        {type === NodeTypes.START && displayAddNodeBtn && addNewNodeBtn
+          ? addNewNodeBtn
+          : null}
       </Group>
       {next && type === NodeTypes.START ? (
         <Arrow

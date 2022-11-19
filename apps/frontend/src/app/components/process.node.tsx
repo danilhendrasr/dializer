@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { Arrow, Group, Rect, Text } from 'react-konva';
 import { FlowChartNode } from '../types';
-import { AddNodeBtn } from './add-node.btn';
 
 type Props = {
   x: number;
   y: number;
   isActive: boolean;
-  onAddNewNode: () => void;
+  addNewNodeBtn?: JSX.Element;
   width?: number;
   height?: number;
   next?: FlowChartNode;
@@ -21,7 +20,7 @@ const ProcessNode: React.FC<Props> = (props) => {
     width = 100,
     height = 50,
     next,
-    onAddNewNode,
+    addNewNodeBtn,
   } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
@@ -44,16 +43,7 @@ const ProcessNode: React.FC<Props> = (props) => {
           verticalAlign="middle"
           text={'This should be dynamic'}
         />
-        {next && displayAddNodeBtn ? (
-          <AddNodeBtn
-            isActive={displayAddNodeBtn}
-            x={x + width / 2}
-            y={y + height}
-            onMouseEnter={() => setDisplayAddNodeBtn(true)}
-            onMouseLeave={() => setDisplayAddNodeBtn(false)}
-            onClick={onAddNewNode}
-          />
-        ) : null}
+        {displayAddNodeBtn && addNewNodeBtn ? addNewNodeBtn : null}
       </Group>
       {next ? (
         <Arrow
