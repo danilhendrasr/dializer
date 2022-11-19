@@ -5,12 +5,12 @@ export enum NodeActions {
 }
 
 export enum NodeTypes {
-  START,
-  END,
-  INPUT,
-  OUTPUT,
-  PROCESS,
-  IF,
+  START = 'start',
+  END = 'start',
+  INPUT = 'input',
+  OUTPUT = 'output',
+  PROCESS = 'process',
+  IF = 'if',
 }
 
 export interface FlowChartNode {
