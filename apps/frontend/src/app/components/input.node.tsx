@@ -6,6 +6,7 @@ type Props = {
   x: number;
   y: number;
   isActive: boolean;
+  text?: string;
   addNewNodeBtn?: JSX.Element;
   width?: number;
   height?: number;
@@ -17,6 +18,7 @@ const InputNode: React.FC<Props> = (props) => {
   const {
     x,
     y,
+    text,
     isActive,
     width = 100,
     height = 50,
@@ -58,7 +60,7 @@ const InputNode: React.FC<Props> = (props) => {
             width={width}
             height={height}
             verticalAlign="middle"
-            text={'This is input node'}
+            text={text}
           />
         </Group>
         {displayAddNodeBtn ? addNewNodeBtn : null}

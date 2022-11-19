@@ -10,6 +10,7 @@ type Params = {
   nextNode?: FlowChartNode | ConditionalNodeNextNodes;
   addNewNodeBtn?: JSX.Element;
   key?: number;
+  text?: string;
   onClick?: () => void;
 };
 
@@ -42,6 +43,7 @@ export const nodeTypeToNode = (params: Params) => {
           y={node.y}
           width={node.width}
           height={node.height}
+          text={node.content}
           isActive={node.active}
           next={nextNode as FlowChartNode}
           addNewNodeBtn={addNewNodeBtn}
@@ -57,6 +59,7 @@ export const nodeTypeToNode = (params: Params) => {
           y={node.y}
           width={node.width}
           height={node.height}
+          text={node.content}
           isActive={node.active}
           next={nextNode as FlowChartNode}
           addNewNodeBtn={addNewNodeBtn}
@@ -72,6 +75,7 @@ export const nodeTypeToNode = (params: Params) => {
           y={node.y}
           width={node.width}
           height={node.height}
+          text={node.content}
           isActive={node.active}
           next={nextNode as FlowChartNode}
           addNewNodeBtn={addNewNodeBtn}
@@ -87,6 +91,7 @@ export const nodeTypeToNode = (params: Params) => {
           y={node.y}
           width={node.width}
           height={node.height}
+          text={node.content}
           isActive={node.active}
           next={nextNode as ConditionalNodeNextNodes}
           addNewNodeBtn={addNewNodeBtn}

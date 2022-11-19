@@ -6,6 +6,7 @@ type Props = {
   x: number;
   y: number;
   isActive: boolean;
+  text?: string;
   next?: {
     true: FlowChartNode;
     false: FlowChartNode;
@@ -20,6 +21,7 @@ const IfNode: React.FC<Props> = (props) => {
   const {
     x,
     y,
+    text,
     isActive,
     width = 100,
     height = 70,
@@ -55,7 +57,7 @@ const IfNode: React.FC<Props> = (props) => {
           width={width}
           height={height}
           verticalAlign="middle"
-          text={'Change me later'}
+          text={text}
         />
         {displayAddNodeBtn && addNewNodeBtn ? addNewNodeBtn : null}
       </Group>

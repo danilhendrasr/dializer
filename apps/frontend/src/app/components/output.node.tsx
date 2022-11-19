@@ -6,6 +6,7 @@ type Props = {
   x: number;
   y: number;
   isActive: boolean;
+  text?: string;
   addNewNodeBtn?: JSX.Element;
   width?: number;
   height?: number;
@@ -17,6 +18,7 @@ const OutputNode: React.FC<Props> = (props) => {
   const {
     x,
     y,
+    text,
     isActive,
     width = 100,
     height = 50,
@@ -53,7 +55,7 @@ const OutputNode: React.FC<Props> = (props) => {
             width={width}
             height={height}
             verticalAlign="middle"
-            text={'This is output node'}
+            text={text}
           />
           <Arrow
             points={[width, 0, width + 50, 0]}
