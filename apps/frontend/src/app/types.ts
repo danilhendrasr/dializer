@@ -6,7 +6,7 @@ export enum NodeActions {
 
 export enum NodeTypes {
   START = 'start',
-  END = 'start',
+  END = 'end',
   INPUT = 'input',
   OUTPUT = 'output',
   PROCESS = 'process',
