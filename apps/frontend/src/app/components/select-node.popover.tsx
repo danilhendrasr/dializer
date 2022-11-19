@@ -1,5 +1,6 @@
-import { Group, Rect, Text } from 'react-konva';
+import { Group, Rect } from 'react-konva';
 import { NodeTypes } from '../types';
+import { nodeTypeToNode } from '../utils';
 import { CloseIcon } from './close.icon';
 
 type Props = {
@@ -12,31 +13,47 @@ type Props = {
 export const SelectNodePopover: React.FC<Props> = (props) => {
   const { x, y, onSelect, onCancel } = props;
 
-  let curNodeY = 0;
+  const padding = { x: 60, y: 15 };
+  let curNodeX = padding.x;
+  let curNodeY = padding.y;
   const nodeChoices = Object.values(NodeTypes)
     .filter(
-      (nodeType) => nodeType !== NodeTypes.START || nodeType !== NodeTypes.END
+      (nodeType) => nodeType !== NodeTypes.START && nodeType !== NodeTypes.END
     )
     .map((nodeType, idx) => {
-      const Component = (
-        <Text
-          key={idx}
-          y={curNodeY}
-          width={50}
-          height={50}
-          fill="black"
-          text={nodeType}
-          onClick={() => onSelect(nodeType)}
-        />
-      );
+      let size = { width: 60, height: 40 };
 
-      curNodeY += 15;
+      if (nodeType === NodeTypes.PROCESS) {
+        size = { width: 80, height: 40 };
+      } else if (nodeType === NodeTypes.IF) {
+        size = { width: 90, height: 40 };
+      }
+
+      const Component = nodeTypeToNode({
+        node: {
+          type: nodeType,
+          x: curNodeX,
+          y: curNodeY + 5,
+          width: size.width,
+          height: size.height,
+          active: false,
+        },
+        key: idx,
+        onClick: () => onSelect(nodeType),
+      });
+
+      if ((idx + 1) % 2 === 0) {
+        curNodeY = padding.y;
+        curNodeX += size.width + 50;
+      } else {
+        curNodeY += size.height + 10;
+      }
 
       return Component;
     });
 
-  const boundingBoxHeight = 100;
-  const boundingBoxWidth = 250;
+  const boundingBoxHeight = 125;
+  const boundingBoxWidth = 280;
 
   return (
     <Group draggable x={x - 10} y={y - 10}>
