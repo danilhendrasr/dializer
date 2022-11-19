@@ -10,6 +10,7 @@ type Props = {
   width?: number;
   height?: number;
   next?: FlowChartNode;
+  onClick?: () => void;
 };
 
 const OutputNode: React.FC<Props> = (props) => {
@@ -21,6 +22,7 @@ const OutputNode: React.FC<Props> = (props) => {
     height = 50,
     next,
     addNewNodeBtn,
+    onClick,
   } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
@@ -28,6 +30,7 @@ const OutputNode: React.FC<Props> = (props) => {
     <Group
       onMouseEnter={() => setDisplayAddNodeBtn(true)}
       onMouseLeave={() => setDisplayAddNodeBtn(false)}
+      onClick={onClick}
     >
       <Group>
         <Group x={x} y={y}>

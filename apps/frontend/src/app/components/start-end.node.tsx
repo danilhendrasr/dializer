@@ -14,6 +14,8 @@ type Props = {
   height?: number;
 
   addNewNodeBtn?: JSX.Element;
+
+  onClick?: () => void;
 };
 
 const StartEndNode: React.FC<Props> = (props) => {
@@ -26,6 +28,7 @@ const StartEndNode: React.FC<Props> = (props) => {
     height = 40,
     type,
     addNewNodeBtn,
+    onClick,
   } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
@@ -35,6 +38,7 @@ const StartEndNode: React.FC<Props> = (props) => {
     <Group
       onMouseEnter={() => setDisplayAddNodeBtn(true)}
       onMouseLeave={() => setDisplayAddNodeBtn(false)}
+      onClick={onClick}
     >
       <Group x={x} y={y}>
         <Rect

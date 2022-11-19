@@ -6,13 +6,14 @@ type Props = {
   x: number;
   y: number;
   isActive: boolean;
-  next: {
+  next?: {
     true: FlowChartNode;
     false: FlowChartNode;
   };
   addNewNodeBtn?: JSX.Element;
   width?: number;
   height?: number;
+  onClick?: () => void;
 };
 
 const IfNode: React.FC<Props> = (props) => {
@@ -24,6 +25,7 @@ const IfNode: React.FC<Props> = (props) => {
     height = 70,
     next,
     addNewNodeBtn,
+    onClick,
   } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
@@ -31,6 +33,7 @@ const IfNode: React.FC<Props> = (props) => {
     <Group
       onMouseEnter={() => setDisplayAddNodeBtn(true)}
       onMouseLeave={() => setDisplayAddNodeBtn(false)}
+      onClick={onClick}
     >
       <Group x={x} y={y}>
         <Shape
@@ -56,28 +59,32 @@ const IfNode: React.FC<Props> = (props) => {
         />
         {displayAddNodeBtn && addNewNodeBtn ? addNewNodeBtn : null}
       </Group>
-      <Arrow
-        points={[
-          x + width / 2,
-          y + height,
-          next.true.x + next.true.width / 2,
-          next.true.y - 5,
-        ]}
-        stroke="grey"
-      />
-      <Arrow
-        points={[
-          x + width,
-          y + height / 2,
-          x + width + 50,
-          y + height / 2,
-          next.false.x + 150,
-          next.false.y + next.false.height / 2,
-          next.false.x + 105,
-          next.false.y + next.false.height / 2,
-        ]}
-        stroke="grey"
-      />
+      {next ? (
+        <>
+          <Arrow
+            points={[
+              x + width / 2,
+              y + height,
+              next.true.x + next.true.width / 2,
+              next.true.y - 5,
+            ]}
+            stroke="grey"
+          />
+          <Arrow
+            points={[
+              x + width,
+              y + height / 2,
+              x + width + 50,
+              y + height / 2,
+              next.false.x + 150,
+              next.false.y + next.false.height / 2,
+              next.false.x + 105,
+              next.false.y + next.false.height / 2,
+            ]}
+            stroke="grey"
+          />
+        </>
+      ) : null}
     </Group>
   );
 };
