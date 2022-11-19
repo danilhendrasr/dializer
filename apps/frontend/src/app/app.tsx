@@ -14,16 +14,12 @@ import {
   NodeActions,
   NodeTypes,
 } from './types';
-import { StartEndNode } from './components/start-end.node';
-import { ProcessNode } from './components/process.node';
-import { InputNode } from './components/input.node';
-import { OutputNode } from './components/output.node';
-import { IfNode } from './components/if.node';
 import { AddNodeBtn } from './components/add-node.btn';
 import { SelectNodePopover } from './components/select-node.popover';
 import { ToastContainer } from 'react-toastify';
 import styled from 'styled-components';
 import 'react-toastify/dist/ReactToastify.css';
+import { nodeTypeToNode } from './utils';
 
 const SCALE_BY = 1.2;
 
@@ -153,72 +149,12 @@ const App = () => {
                 />
               );
 
-              switch (node.type) {
-                case NodeTypes.START:
-                case NodeTypes.END:
-                  return (
-                    <StartEndNode
-                      key={idx}
-                      x={node.x}
-                      y={node.y}
-                      isActive={node.active}
-                      type={node.type}
-                      next={next as FlowChartNode}
-                      addNewNodeBtn={AddNewNodeBtn}
-                    />
-                  );
-
-                case NodeTypes.PROCESS:
-                  return (
-                    <ProcessNode
-                      key={idx}
-                      x={node.x}
-                      y={node.y}
-                      isActive={node.active}
-                      next={next as FlowChartNode}
-                      addNewNodeBtn={AddNewNodeBtn}
-                    />
-                  );
-
-                case NodeTypes.INPUT:
-                  return (
-                    <InputNode
-                      key={idx}
-                      x={node.x}
-                      y={node.y}
-                      isActive={node.active}
-                      next={next as FlowChartNode}
-                      addNewNodeBtn={AddNewNodeBtn}
-                    />
-                  );
-
-                case NodeTypes.OUTPUT:
-                  return (
-                    <OutputNode
-                      key={idx}
-                      x={node.x}
-                      y={node.y}
-                      isActive={node.active}
-                      next={next as FlowChartNode}
-                      addNewNodeBtn={AddNewNodeBtn}
-                    />
-                  );
-
-                case NodeTypes.IF:
-                  return (
-                    <IfNode
-                      key={idx}
-                      x={node.x}
-                      y={node.y}
-                      isActive={node.active}
-                      next={next as ConditionalNodeNextNodes}
-                      addNewNodeBtn={AddNewNodeBtn}
-                    />
-                  );
-
-                default:
-                  return null;
-              }
+              return nodeTypeToNode({
+                node,
+                addNewNodeBtn: AddNewNodeBtn,
+                key: idx,
+                nextNode: next,
+              });
             })}
           </Layer>
           <Layer name="top-layer">
