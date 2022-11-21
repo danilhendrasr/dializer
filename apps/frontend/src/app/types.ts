@@ -13,6 +13,8 @@ export enum NodeTypes {
   IF = 'if',
 }
 
+export type Coordinate = { x: number; y: number };
+
 export interface FlowChartNode {
   type: NodeTypes;
   x: number;

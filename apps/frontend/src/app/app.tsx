@@ -10,6 +10,7 @@ import { NodesContext } from './contexts/nodes.context';
 import { nodesReducer } from './reducers/nodes.reducer';
 import {
   ConditionalNodeNextNodes,
+  Coordinate,
   FlowChartNode,
   NodeActions,
   NodeTypes,
@@ -22,6 +23,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { nodeTypeToNode } from './utils';
 import { ControlPanel } from './components/control-panel';
 import { Share } from 'tabler-icons-react';
+import { NewEnvironmentPopover } from './components/new-env-popover';
+import { AppStateProvider } from './contexts/app-state.context';
 
 const SCALE_BY = 1.2;
 
@@ -40,11 +43,11 @@ const App = () => {
 
   const [nodes, nodesDispatch] = useReducer(nodesReducer, INITIAL_NODES);
   const [animating, setAnimation] = useState(false);
-  const [selectNodePopover, setSelectNodePopover] = useState<{
-    x: number;
-    y: number;
-    onNodeSelect: (nodeType: NodeTypes) => void;
-  }>();
+  const [selectNodePopover, setSelectNodePopover] = useState<
+    Coordinate & { onNodeSelect: (nodeType: NodeTypes) => void }
+  >();
+
+  const [newEnvPopover, setNewEnvPopover] = useState<Coordinate>();
 
   useEffect(() => {
     if (!animating) {
@@ -102,7 +105,14 @@ const App = () => {
   }
 
   return (
-    <>
+    <AppStateProvider
+      value={{
+        newVarPopover: {
+          position: newEnvPopover,
+          setNewVarPopover: setNewEnvPopover,
+        },
+      }}
+    >
       <ControlPanel>
         <ToggleAnimationBtn
           isAnimationRunning={animating}
@@ -159,6 +169,7 @@ const App = () => {
                 addNewNodeBtn: AddNewNodeBtn,
                 key: idx,
                 nextNode: next,
+                onClick: () => setNewEnvPopover({ x: node.x, y: node.y }),
               });
             })}
           </Layer>
@@ -175,8 +186,11 @@ const App = () => {
         </Stage>
       </NodesContext.Provider>
       <EnvironmentPanel />
+      {newEnvPopover ? (
+        <NewEnvironmentPopover x={newEnvPopover.x} y={newEnvPopover.y} />
+      ) : null}
       <Toast position="bottom-center" theme="light" />
-    </>
+    </AppStateProvider>
   );
 };
 
