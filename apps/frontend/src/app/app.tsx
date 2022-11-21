@@ -20,6 +20,8 @@ import { ToastContainer } from 'react-toastify';
 import styled from 'styled-components';
 import 'react-toastify/dist/ReactToastify.css';
 import { nodeTypeToNode } from './utils';
+import { ControlPanel } from './components/control-panel';
+import { Share } from 'tabler-icons-react';
 
 const SCALE_BY = 1.2;
 
@@ -101,16 +103,19 @@ const App = () => {
 
   return (
     <>
-      <ToggleAnimationBtn
-        isAnimationRunning={animating}
-        onClick={() => setAnimation(!animating)}
-      />
+      <ControlPanel>
+        <ToggleAnimationBtn
+          isAnimationRunning={animating}
+          onClick={() => setAnimation(!animating)}
+        />
+        <Share size={15} />
+      </ControlPanel>
       <NodesContext.Provider value={{ nodes, nodesDispatch }}>
         <Stage
+          draggable
           ref={stageRef}
           width={window.innerWidth}
           height={window.innerHeight}
-          draggable
           onWheel={zoomStage}
         >
           <Layer>
