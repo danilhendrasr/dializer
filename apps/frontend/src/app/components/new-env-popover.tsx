@@ -4,6 +4,9 @@ import Draggable from 'react-draggable';
 import { useAppState } from '../contexts/app-state.context';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import { useEnvironmentContext } from '../contexts/environment.context';
+import { useNodesContext } from '../hooks/use-node-context.hook';
+import { NodeActions } from '../types';
 
 const Container = styled.div<{ x: number; y: number }>`
   position: absolute;
@@ -68,11 +71,15 @@ const SubmitBtn = styled.input`
 type Props = {
   x: number;
   y: number;
+  callerIdx: number;
 };
 
 export const NewEnvironmentPopover: React.FC<Props> = (props) => {
-  const { x, y } = props;
+  const { x, y, callerIdx } = props;
   const appState = useAppState();
+  const environmentContext = useEnvironmentContext();
+  const nodesContext = useNodesContext();
+
   const [newVarName, setNewVarName] = useState('');
   const [newVarVal, setNewVarVal] = useState('');
 
@@ -88,9 +95,26 @@ export const NewEnvironmentPopover: React.FC<Props> = (props) => {
       return;
     }
 
+    if (!environmentContext) {
+      toast("There's an error, please try again later.", { type: 'error' });
+      return;
+    }
+
+    const newEnv = { ...environmentContext.environment };
+    newEnv[newVarName] = parseInt(newVarVal);
+    environmentContext.setEnvironment(newEnv);
+
+    console.log('nodes context', nodesContext);
+    nodesContext?.nodesDispatch({
+      type: NodeActions.CHANGE_CONTENT,
+      atIdx: callerIdx,
+      content: `${newVarName} -> ${newVarVal}`,
+    });
+
     toast(`Var "${newVarName}" with value: "${newVarVal}" created.`, {
       type: 'success',
     });
+    appState?.newVarPopover.setNewVarPopover(undefined);
   };
 
   return (
