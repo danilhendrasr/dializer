@@ -26,6 +26,7 @@ import { Share } from 'tabler-icons-react';
 import { NewEnvironmentPopover } from './components/new-env-popover';
 import { AppStateProvider } from './contexts/app-state.context';
 import { EnvironmentContextProvider } from './contexts/environment.context';
+import { NodeContextMenu } from './components/node-context-menu';
 
 const SCALE_BY = 1.2;
 
@@ -50,6 +51,9 @@ const App = () => {
 
   const [newEnvPopover, setNewEnvPopover] = useState<
     Coordinate & { callerIdx: number }
+  >();
+  const [contextMenu, setContextMenu] = useState<
+    Coordinate & { callerIdx: number; callerType: NodeTypes }
   >();
   const [environment, setEnvironment] = useState<
     Record<string, number> | undefined
@@ -117,6 +121,10 @@ const App = () => {
           position: newEnvPopover,
           setNewVarPopover: setNewEnvPopover,
         },
+        contextMenu: {
+          position: contextMenu,
+          setContextMenu,
+        },
       }}
     >
       <EnvironmentContextProvider value={{ environment, setEnvironment }}>
@@ -179,6 +187,14 @@ const App = () => {
                   onClick: () => {
                     setNewEnvPopover({ x: node.x, y: node.y, callerIdx: idx });
                   },
+                  onRightClick: () => {
+                    setContextMenu({
+                      x: node.x,
+                      y: node.y,
+                      callerIdx: idx,
+                      callerType: node.type,
+                    });
+                  },
                 });
               })}
             </Layer>
@@ -199,6 +215,14 @@ const App = () => {
               x={newEnvPopover.x}
               y={newEnvPopover.y}
               callerIdx={newEnvPopover.callerIdx}
+            />
+          ) : null}
+          {contextMenu ? (
+            <NodeContextMenu
+              x={contextMenu.x}
+              y={contextMenu.y}
+              callerIdx={contextMenu.callerIdx}
+              callerType={contextMenu.callerType}
             />
           ) : null}
           <Toast position="bottom-center" theme="light" />
