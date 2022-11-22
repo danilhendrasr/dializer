@@ -12,10 +12,11 @@ type Params = {
   key?: number;
   text?: string;
   onClick?: () => void;
+  onRightClick?: () => void;
 };
 
 export const nodeTypeToNode = (params: Params) => {
-  const { node, nextNode, addNewNodeBtn, key, onClick } = params;
+  const { node, nextNode, addNewNodeBtn, key, onClick, onRightClick } = params;
 
   switch (node.type) {
     case NodeTypes.START:
@@ -48,6 +49,7 @@ export const nodeTypeToNode = (params: Params) => {
           next={nextNode as FlowChartNode}
           addNewNodeBtn={addNewNodeBtn}
           onClick={onClick}
+          onRightClick={onRightClick}
         />
       );
 
@@ -64,6 +66,7 @@ export const nodeTypeToNode = (params: Params) => {
           next={nextNode as FlowChartNode}
           addNewNodeBtn={addNewNodeBtn}
           onClick={onClick}
+          onRightClick={onRightClick}
         />
       );
 
@@ -80,6 +83,7 @@ export const nodeTypeToNode = (params: Params) => {
           next={nextNode as FlowChartNode}
           addNewNodeBtn={addNewNodeBtn}
           onClick={onClick}
+          onRightClick={onRightClick}
         />
       );
 
@@ -96,6 +100,7 @@ export const nodeTypeToNode = (params: Params) => {
           next={nextNode as ConditionalNodeNextNodes}
           addNewNodeBtn={addNewNodeBtn}
           onClick={onClick}
+          onRightClick={onRightClick}
         />
       );
 

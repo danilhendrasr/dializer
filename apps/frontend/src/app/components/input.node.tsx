@@ -1,3 +1,4 @@
+import { KonvaEventObject } from 'konva/lib/Node';
 import { useState } from 'react';
 import { Shape, Arrow, Group, Text } from 'react-konva';
 import { FlowChartNode } from '../types';
@@ -12,6 +13,7 @@ type Props = {
   height?: number;
   next?: FlowChartNode;
   onClick?: () => void;
+  onRightClick?: () => void;
 };
 
 const InputNode: React.FC<Props> = (props) => {
@@ -25,14 +27,22 @@ const InputNode: React.FC<Props> = (props) => {
     next,
     addNewNodeBtn,
     onClick,
+    onRightClick,
   } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
+
+  const handleRightClick = (e: KonvaEventObject<PointerEvent>) => {
+    if (!onRightClick) return;
+    e.evt.preventDefault();
+    onRightClick();
+  };
 
   return (
     <Group
       onMouseEnter={() => setDisplayAddNodeBtn(true)}
       onMouseLeave={() => setDisplayAddNodeBtn(false)}
       onClick={onClick}
+      onContextMenu={handleRightClick}
     >
       <Group>
         <Arrow
