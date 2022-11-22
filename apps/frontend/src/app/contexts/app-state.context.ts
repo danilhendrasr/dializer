@@ -5,7 +5,7 @@ type AppStateContext = {
   newVarPopover: {
     position: Coordinate | undefined;
     setNewVarPopover: React.Dispatch<
-      React.SetStateAction<Coordinate | undefined>
+      React.SetStateAction<(Coordinate & { callerIdx: number }) | undefined>
     >;
   };
 };

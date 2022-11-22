@@ -25,6 +25,7 @@ import { ControlPanel } from './components/control-panel';
 import { Share } from 'tabler-icons-react';
 import { NewEnvironmentPopover } from './components/new-env-popover';
 import { AppStateProvider } from './contexts/app-state.context';
+import { EnvironmentContextProvider } from './contexts/environment.context';
 
 const SCALE_BY = 1.2;
 
@@ -47,7 +48,12 @@ const App = () => {
     Coordinate & { onNodeSelect: (nodeType: NodeTypes) => void }
   >();
 
-  const [newEnvPopover, setNewEnvPopover] = useState<Coordinate>();
+  const [newEnvPopover, setNewEnvPopover] = useState<
+    Coordinate & { callerIdx: number }
+  >();
+  const [environment, setEnvironment] = useState<
+    Record<string, number> | undefined
+  >();
 
   useEffect(() => {
     if (!animating) {
@@ -113,83 +119,91 @@ const App = () => {
         },
       }}
     >
-      <ControlPanel>
-        <ToggleAnimationBtn
-          isAnimationRunning={animating}
-          onClick={() => setAnimation(!animating)}
-        />
-        <Share size={15} />
-      </ControlPanel>
-      <NodesContext.Provider value={{ nodes, nodesDispatch }}>
-        <Stage
-          draggable
-          ref={stageRef}
-          width={window.innerWidth}
-          height={window.innerHeight}
-          onWheel={zoomStage}
-        >
-          <Layer>
-            {nodes.map((node, idx) => {
-              let next: FlowChartNode | ConditionalNodeNextNodes | undefined =
-                undefined;
-              if (node.nextIdx) {
-                next = nodes[node.nextIdx];
-              } else if (node.nextIdxIfTrue && node.nextIdxIfFalse) {
-                next = {
-                  true: nodes[node.nextIdxIfTrue],
-                  false: nodes[node.nextIdxIfFalse],
+      <EnvironmentContextProvider value={{ environment, setEnvironment }}>
+        <NodesContext.Provider value={{ nodes, nodesDispatch }}>
+          <ControlPanel>
+            <ToggleAnimationBtn
+              isAnimationRunning={animating}
+              onClick={() => setAnimation(!animating)}
+            />
+            <Share size={15} />
+          </ControlPanel>
+          <Stage
+            draggable
+            ref={stageRef}
+            width={window.innerWidth}
+            height={window.innerHeight}
+            onWheel={zoomStage}
+          >
+            <Layer>
+              {nodes.map((node, idx) => {
+                let next: FlowChartNode | ConditionalNodeNextNodes | undefined =
+                  undefined;
+                if (node.nextIdx) {
+                  next = nodes[node.nextIdx];
+                } else if (node.nextIdxIfTrue && node.nextIdxIfFalse) {
+                  next = {
+                    true: nodes[node.nextIdxIfTrue],
+                    false: nodes[node.nextIdxIfFalse],
+                  };
+                }
+
+                const addNewNodeAtIdx = (nodeType: NodeTypes) => {
+                  nodesDispatch({
+                    type: NodeActions.ADD_NEW,
+                    atIdx: idx + 1,
+                    nodeType: nodeType,
+                  });
+                  setSelectNodePopover(undefined);
                 };
-              }
 
-              const addNewNodeAtIdx = (nodeType: NodeTypes) => {
-                nodesDispatch({
-                  type: NodeActions.ADD_NEW,
-                  atIdx: idx + 1,
-                  nodeType: nodeType,
+                const AddNewNodeBtn = (
+                  <AddNodeBtn
+                    x={node.x + node.width / 2}
+                    y={node.y + node.height}
+                    onClick={() => {
+                      setSelectNodePopover({
+                        x: node.x,
+                        y: node.y,
+                        onNodeSelect: addNewNodeAtIdx,
+                      });
+                    }}
+                  />
+                );
+
+                return nodeTypeToNode({
+                  node,
+                  addNewNodeBtn: AddNewNodeBtn,
+                  key: idx,
+                  nextNode: next,
+                  onClick: () => {
+                    setNewEnvPopover({ x: node.x, y: node.y, callerIdx: idx });
+                  },
                 });
-                setSelectNodePopover(undefined);
-              };
-
-              const AddNewNodeBtn = (
-                <AddNodeBtn
-                  x={node.x + node.width / 2}
-                  y={node.y + node.height}
-                  onClick={() => {
-                    setSelectNodePopover({
-                      x: node.x,
-                      y: node.y,
-                      onNodeSelect: addNewNodeAtIdx,
-                    });
-                  }}
+              })}
+            </Layer>
+            <Layer name="top-layer">
+              {selectNodePopover !== undefined ? (
+                <SelectNodePopover
+                  x={selectNodePopover.x - 10}
+                  y={selectNodePopover.y - 10}
+                  onSelect={selectNodePopover.onNodeSelect}
+                  onCancel={() => setSelectNodePopover(undefined)}
                 />
-              );
-
-              return nodeTypeToNode({
-                node,
-                addNewNodeBtn: AddNewNodeBtn,
-                key: idx,
-                nextNode: next,
-                onClick: () => setNewEnvPopover({ x: node.x, y: node.y }),
-              });
-            })}
-          </Layer>
-          <Layer name="top-layer">
-            {selectNodePopover !== undefined ? (
-              <SelectNodePopover
-                x={selectNodePopover.x - 10}
-                y={selectNodePopover.y - 10}
-                onSelect={selectNodePopover.onNodeSelect}
-                onCancel={() => setSelectNodePopover(undefined)}
-              />
-            ) : null}
-          </Layer>
-        </Stage>
-      </NodesContext.Provider>
-      <EnvironmentPanel />
-      {newEnvPopover ? (
-        <NewEnvironmentPopover x={newEnvPopover.x} y={newEnvPopover.y} />
-      ) : null}
-      <Toast position="bottom-center" theme="light" />
+              ) : null}
+            </Layer>
+          </Stage>
+          <EnvironmentPanel />
+          {newEnvPopover ? (
+            <NewEnvironmentPopover
+              x={newEnvPopover.x}
+              y={newEnvPopover.y}
+              callerIdx={newEnvPopover.callerIdx}
+            />
+          ) : null}
+          <Toast position="bottom-center" theme="light" />
+        </NodesContext.Provider>
+      </EnvironmentContextProvider>
     </AppStateProvider>
   );
 };
