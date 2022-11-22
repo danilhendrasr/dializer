@@ -6,6 +6,8 @@ export type NodesReducerActionObject = {
   atIdx: number;
   // Required if action type is NodeActions.ADD_NEW
   nodeType?: NodeTypes;
+  // Required if action type is NodeActions.CHANGE_CONTENT
+  content?: string;
 };
 
 export function nodesReducer(
@@ -17,6 +19,17 @@ export function nodesReducer(
     case NodeActions.ACTIVATE: {
       const targetNode = nodes[action.atIdx];
       targetNode.active = true;
+      return nodes;
+    }
+
+    case NodeActions.CHANGE_CONTENT: {
+      if (action.content === undefined) {
+        throw new Error(
+          'Content is required when changing the content of a node.'
+        );
+      }
+
+      nodes[action.atIdx].content = action.content;
       return nodes;
     }
 
