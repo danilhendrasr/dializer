@@ -15,6 +15,14 @@ export function nodesReducer(
   action: NodesReducerActionObject
 ) {
   let nodes = [...state];
+
+  const ifNodes = nodes.reduce((acc, cur, curIdx) => {
+    if (cur.type !== NodeTypes.IF) return acc;
+    if (!cur.nextIdxIfTrue || !cur.nextIdxIfFalse) return acc;
+    acc[curIdx] = [cur.nextIdxIfTrue, cur.nextIdxIfFalse];
+    return acc;
+  }, {} as Record<number, number[]>);
+
   switch (action.type) {
     case NodeActions.ACTIVATE: {
       const targetNode = nodes[action.atIdx];
@@ -81,8 +89,38 @@ export function nodesReducer(
     }
 
     case NodeActions.DELETE: {
-      console.log('Delete node action dispatched.');
-      return state;
+      for (const ifNode of Object.entries(ifNodes)) {
+        const nodeIdx = parseInt(ifNode[0]);
+        if (nodeIdx <= action.atIdx || ifNode[1][1] - 1 !== 0) continue;
+        toast(
+          'Cannot delete this node because if node has to have a predecessor.',
+          { type: 'error' }
+        );
+        return nodes;
+      }
+
+      const nodeToBeDeleted = nodes[action.atIdx];
+      nodes = nodes.map((node, idx, array) => {
+        const prevNode = array[idx - 1];
+        if (idx < action.atIdx) return node;
+
+        if (prevNode === nodeToBeDeleted) {
+          node.y = nodeToBeDeleted.y;
+        } else {
+          node.y = prevNode.y + prevNode.height + 50;
+        }
+
+        if (node.nextIdx) node.nextIdx--;
+        if (node.nextIdxIfTrue) node.nextIdxIfTrue--;
+        if (node.nextIdxIfFalse) {
+          node.nextIdxIfFalse--;
+        }
+
+        return node;
+      });
+
+      nodes.splice(action.atIdx, 1);
+      return nodes;
     }
 
     default:
