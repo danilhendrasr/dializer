@@ -76,7 +76,12 @@ export function nodesReducer(
 
         if (node.nextIdx) node.nextIdx++;
         if (node.nextIdxIfTrue) node.nextIdxIfTrue++;
-        if (node.nextIdxIfFalse && prevNodeIdx !== node.nextIdxIfFalse) {
+
+        const beforeCur = action.atIdx <= idx;
+        if (
+          node.nextIdxIfFalse &&
+          ((beforeCur && action.atIdx <= node.nextIdxIfFalse) || !beforeCur)
+        ) {
           node.nextIdxIfFalse++;
         }
 
