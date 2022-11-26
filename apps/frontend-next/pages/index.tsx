@@ -1,7 +1,9 @@
 import Head from 'next/head';
 import Image from 'next/image';
+import Link from 'next/link';
 import styled from 'styled-components';
 import { Plus as PlusIcon } from 'tabler-icons-react';
+import { v4 as uuidv4 } from 'uuid';
 
 const StyledPage = styled.div`
   position: absolute;
@@ -55,6 +57,8 @@ const NoWorkspaceText = styled.p`
 `;
 
 export function Index() {
+  const newWorkspaceId = uuidv4();
+
   return (
     <StyledPage>
       <Head>
@@ -62,9 +66,11 @@ export function Index() {
       </Head>
       <TopContainer>
         <h1>Workspaces</h1>
-        <NewWorkspaceBtn>
-          <PlusIcon size={18} />
-        </NewWorkspaceBtn>
+        <Link href={`/workspaces/${newWorkspaceId}`}>
+          <NewWorkspaceBtn>
+            <PlusIcon size={18} />
+          </NewWorkspaceBtn>
+        </Link>
       </TopContainer>
       <EmptyWorkspaceWrapper>
         <Image
