@@ -1,6 +1,6 @@
 import { Group, Rect } from 'react-konva';
-import { NodeTypes } from '../types';
-import { nodeTypeToNode } from '../utils';
+import { NodeTypes } from '../common/types';
+import { nodeTypeToNode } from '../common/utils';
 import { CloseIcon } from './close.icon';
 
 type Props = {

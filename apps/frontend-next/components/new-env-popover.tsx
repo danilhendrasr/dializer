@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useEnvironmentContext } from '../contexts/environment.context';
 import { useNodesContext } from '../hooks/use-node-context.hook';
-import { NodeActions } from '../types';
+import { NodeActions } from '../common/types';
 
 const Container = styled.div<{ x: number; y: number }>`
   position: absolute;

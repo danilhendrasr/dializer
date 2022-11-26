@@ -1,7 +1,7 @@
 import { KonvaEventObject } from 'konva/lib/Node';
 import { useState } from 'react';
 import { Shape, Arrow, Group, Text } from 'react-konva';
-import { FlowChartNode } from '../types';
+import { FlowChartNode } from '../common/types';
 
 type Props = {
   x: number;

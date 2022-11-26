@@ -4,7 +4,7 @@ import Draggable from 'react-draggable';
 import { useAppState } from '../contexts/app-state.context';
 import React from 'react';
 import { useNodesContext } from '../hooks/use-node-context.hook';
-import { NodeActions, NodeTypes } from '../types';
+import { NodeActions, NodeTypes } from '../common/types';
 
 const Container = styled.div<{ x: number; y: number }>`
   position: absolute;
