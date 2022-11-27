@@ -2,6 +2,7 @@ export enum NodeActions {
   ADD_NEW = 'add_new',
   DELETE = 'delete',
   ACTIVATE = 'activate',
+  DEACTIVATE = 'deactivate',
   CHANGE_CONTENT = 'change_content',
 }
 

@@ -30,6 +30,12 @@ export function nodesReducer(
       return nodes;
     }
 
+    case NodeActions.DEACTIVATE: {
+      const targetNode = nodes[action.atIdx];
+      targetNode.active = false;
+      return nodes;
+    }
+
     case NodeActions.CHANGE_CONTENT: {
       if (action.content === undefined) {
         throw new Error(
