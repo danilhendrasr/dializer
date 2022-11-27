@@ -179,12 +179,17 @@ export const WorkspacePage = () => {
                   />
                 );
 
+                const isTerminalNode =
+                  node.type === NodeTypes.START || node.type === NodeTypes.END;
+
                 return nodeTypeToNode({
                   node,
                   addNewNodeBtn: AddNewNodeBtn,
                   key: idx,
                   nextNode: next,
                   onClick: () => {
+                    if (isTerminalNode) return;
+
                     setNewEnvPopover({
                       x: node.x,
                       y: node.y,
