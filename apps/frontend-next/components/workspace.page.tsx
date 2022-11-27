@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useReducer, useRef, useState } from 'react';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { Stage as StageClass } from 'konva/lib/Stage';
 import { Stage, Layer } from 'react-konva';
@@ -11,6 +11,7 @@ import { nodesReducer } from '../reducers/nodes.reducer';
 import {
   ConditionalNodeNextNodes,
   Coordinate,
+  EnvironmentActions,
   FlowChartNode,
   NodeActions,
   NodeTypes,
@@ -27,8 +28,11 @@ import { EnvironmentPopover } from './env-popover';
 import { AppStateProvider } from '../contexts/app-state.context';
 import { EnvironmentContextProvider } from '../contexts/environment.context';
 import { NodeContextMenu } from '../components/node-context-menu';
+import { environmentReducer } from '../reducers/environment.reducer';
+import { useInterval } from 'usehooks-ts';
 
 const SCALE_BY = 1.2;
+const ANIMATION_PAUSE = 1000;
 
 const Toast = styled(ToastContainer)`
   .Toastify__toast-body {
@@ -42,6 +46,7 @@ export const WorkspacePage = () => {
   const stageRef = useRef<StageClass | null>(null);
   const animationRef = useRef<unknown>(null);
   const curNodeIdx = useRef<number>(0);
+  const prevNodeIdx = useRef<number>(-1);
 
   const [nodes, nodesDispatch] = useReducer(nodesReducer, INITIAL_NODES);
   const [animating, setAnimation] = useState(false);
@@ -55,37 +60,61 @@ export const WorkspacePage = () => {
   const [contextMenu, setContextMenu] = useState<
     Coordinate & { callerIdx: number; callerType: NodeTypes }
   >();
-  const [environment, setEnvironment] = useState<
-    Record<string, number> | undefined
-  >();
+  const [env, envDispatch] = useReducer(environmentReducer, {});
 
-  useEffect(() => {
-    if (!animating) {
-      clearInterval(animationRef.current as NodeJS.Timer);
-      return;
-    }
+  useInterval(
+    () => {
+      if (!animating) {
+        clearInterval(animationRef.current as NodeJS.Timer);
+        return;
+      }
 
-    animationRef.current = setInterval(() => {
       if (curNodeIdx.current === undefined) {
         clearInterval(animationRef.current as NodeJS.Timer);
         setAnimation(!animating);
         return;
       }
 
+      const curNode = nodes[curNodeIdx.current];
+      let nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
+
       nodesDispatch({
         type: NodeActions.ACTIVATE,
         atIdx: curNodeIdx.current,
       });
 
-      if (curNodeIdx.current - 1 >= 0) {
+      if (prevNodeIdx.current >= 0) {
         nodesDispatch({
           type: NodeActions.DEACTIVATE,
-          atIdx: curNodeIdx.current - 1,
+          atIdx: prevNodeIdx.current,
         });
       }
 
-      const curNode = nodes[curNodeIdx.current];
-      const nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
+      if (curNode.content && curNode.content.includes('==')) {
+        const [varName, varComparator] = curNode.content
+          .split('==')
+          .map((str) => str.trim());
+
+        if (env && env[varName] !== parseInt(varComparator))
+          nextNodeIdx = curNode.nextIdxIfFalse;
+      } else if (curNode.content && curNode.content.includes('=')) {
+        const [newVarName, newVarVal] = curNode.content
+          .split('=')
+          .map((str) => str.trim());
+
+        envDispatch({
+          type: EnvironmentActions.ADD_NEW,
+          target: newVarName,
+          value: parseInt(newVarVal),
+        });
+      } else if (curNode.content && curNode.content.includes('++')) {
+        const [varName] = curNode.content.split('++');
+
+        envDispatch({
+          type: EnvironmentActions.INCREMENT,
+          target: varName,
+        });
+      }
 
       if (nextNodeIdx === undefined) {
         setTimeout(() => {
@@ -93,15 +122,16 @@ export const WorkspacePage = () => {
             type: NodeActions.DEACTIVATE,
             atIdx: curNodeIdx.current,
           });
-        }, 500);
+        }, ANIMATION_PAUSE);
         clearInterval(animationRef.current as NodeJS.Timer);
         setAnimation(!animating);
       } else {
+        prevNodeIdx.current = curNodeIdx.current;
         curNodeIdx.current = nextNodeIdx;
       }
-    }, 500);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animating]);
+    },
+    animating ? ANIMATION_PAUSE : null
+  );
 
   function zoomStage(event: KonvaEventObject<WheelEvent>) {
     event.evt.preventDefault();
@@ -128,7 +158,12 @@ export const WorkspacePage = () => {
   }
 
   const onFlowChartPlay = () => {
-    const emptyNodesExists = nodes.some((node) => node.content === undefined);
+    const emptyNodesExists = nodes.some(
+      (node) =>
+        node.type !== NodeTypes.START &&
+        node.type !== NodeTypes.END &&
+        node.content === undefined
+    );
     if (emptyNodesExists) {
       toast('Cannot play flow chart while there are empty nodes.', {
         type: 'error',
@@ -152,7 +187,9 @@ export const WorkspacePage = () => {
         },
       }}
     >
-      <EnvironmentContextProvider value={{ environment, setEnvironment }}>
+      <EnvironmentContextProvider
+        value={{ environment: env, setEnvironment: envDispatch }}
+      >
         <NodesContext.Provider value={{ nodes, nodesDispatch }}>
           <ControlPanel>
             <ToggleAnimationBtn
