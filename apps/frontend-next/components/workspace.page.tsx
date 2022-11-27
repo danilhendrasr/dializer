@@ -23,7 +23,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { nodeTypeToNode } from '../common/utils';
 import { ControlPanel } from '../components/control-panel';
 import { Share } from 'tabler-icons-react';
-import { NewEnvironmentPopover } from '../components/new-env-popover';
+import { EnvironmentPopover } from './env-popover';
 import { AppStateProvider } from '../contexts/app-state.context';
 import { EnvironmentContextProvider } from '../contexts/environment.context';
 import { NodeContextMenu } from '../components/node-context-menu';
@@ -220,7 +220,7 @@ export const WorkspacePage = () => {
           </Stage>
           <EnvironmentPanel />
           {newEnvPopover ? (
-            <NewEnvironmentPopover
+            <EnvironmentPopover
               x={newEnvPopover.x}
               y={newEnvPopover.y}
               callerIdx={newEnvPopover.callerIdx}

@@ -74,7 +74,7 @@ type Props = {
   callerIdx: number;
 };
 
-export const NewEnvironmentPopover: React.FC<Props> = (props) => {
+export const EnvironmentPopover: React.FC<Props> = (props) => {
   const { x, y, callerIdx } = props;
   const appState = useAppState();
   const environmentContext = useEnvironmentContext();
