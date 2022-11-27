@@ -99,20 +99,12 @@ export const EnvironmentPopover: React.FC<Props> = (props) => {
       toast("There's an error, please try again later.", { type: 'error' });
       return;
     }
+
     if (textAreaVal.includes('==') && textAreaVal.length > 3) {
       if (callerType !== NodeTypes.IF) {
         toast('Cannot do equality checking in a non-if node.', {
           type: 'error',
         });
-        return;
-      }
-
-      const [varName] = textAreaVal.split('==');
-      if (
-        !environmentContext.environment ||
-        !(varName in environmentContext.environment)
-      ) {
-        toast(`Variable ${varName} does not exists.`, { type: 'error' });
         return;
       }
 
@@ -144,13 +136,6 @@ export const EnvironmentPopover: React.FC<Props> = (props) => {
       appState?.newVarPopover.setNewVarPopover(undefined);
     } else if (textAreaVal.includes('++')) {
       const [varName] = textAreaVal.split('++');
-      if (
-        !environmentContext?.environment ||
-        !(varName in environmentContext.environment)
-      ) {
-        toast(`Variable ${varName} does not exists.`, { type: 'error' });
-        return;
-      }
 
       nodesContext?.nodesDispatch({
         type: NodeActions.CHANGE_CONTENT,
@@ -161,13 +146,6 @@ export const EnvironmentPopover: React.FC<Props> = (props) => {
       appState?.newVarPopover.setNewVarPopover(undefined);
     } else if (textAreaVal.includes('--')) {
       const [varName] = textAreaVal.split('--');
-      if (
-        !environmentContext?.environment ||
-        !(varName in environmentContext.environment)
-      ) {
-        toast(`Variable ${varName} does not exists.`, { type: 'error' });
-        return;
-      }
 
       nodesContext?.nodesDispatch({
         type: NodeActions.CHANGE_CONTENT,
