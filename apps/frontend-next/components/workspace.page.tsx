@@ -77,10 +77,23 @@ export const WorkspacePage = () => {
         atIdx: curNodeIdx.current,
       });
 
+      if (curNodeIdx.current - 1 >= 0) {
+        nodesDispatch({
+          type: NodeActions.DEACTIVATE,
+          atIdx: curNodeIdx.current - 1,
+        });
+      }
+
       const curNode = nodes[curNodeIdx.current];
       const nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
 
       if (nextNodeIdx === undefined) {
+        setTimeout(() => {
+          nodesDispatch({
+            type: NodeActions.DEACTIVATE,
+            atIdx: curNodeIdx.current,
+          });
+        }, 500);
         clearInterval(animationRef.current as NodeJS.Timer);
         setAnimation(!animating);
       } else {
