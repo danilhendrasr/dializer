@@ -2,9 +2,7 @@ import React, { createContext, useContext } from 'react';
 
 type EnvironmentContextValue = {
   environment: Record<string, number> | undefined;
-  setEnvironment: React.Dispatch<
-    React.SetStateAction<Record<string, number> | undefined>
-  >;
+  setEnvironment: React.Dispatch<any>;
 };
 
 const EnvironmentContext = createContext<EnvironmentContextValue | null>(null);

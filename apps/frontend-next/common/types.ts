@@ -1,3 +1,8 @@
+export enum EnvironmentActions {
+  ADD_NEW = 'add_new',
+  INCREMENT = 'increment',
+  DECREMENT = 'decrement',
+}
 export enum NodeActions {
   ADD_NEW = 'add_new',
   DELETE = 'delete',
