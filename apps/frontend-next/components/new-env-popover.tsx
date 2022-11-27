@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useEnvironmentContext } from '../contexts/environment.context';
 import { useNodesContext } from '../hooks/use-node-context.hook';
-import { NodeActions } from '../common/types';
+import { NodeActions, NodeTypes } from '../common/types';
 
 const Container = styled.div<{ x: number; y: number }>`
   position: absolute;
@@ -48,7 +48,7 @@ const Form = styled.form`
   height: 100%;
 `;
 
-const VariableInput = styled.input`
+const VariableInput = styled.textarea`
   width: 100%;
   display: block;
   padding: 10px;
@@ -79,9 +79,9 @@ export const NewEnvironmentPopover: React.FC<Props> = (props) => {
   const appState = useAppState();
   const environmentContext = useEnvironmentContext();
   const nodesContext = useNodesContext();
+  const callerType = nodesContext?.nodes[callerIdx].type;
 
-  const [newVarName, setNewVarName] = useState('');
-  const [newVarVal, setNewVarVal] = useState('');
+  const [textAreaVal, setTextAreaVal] = useState('');
 
   const onPanelClose = () => {
     if (!appState || appState?.newVarPopover === null) return;
@@ -90,8 +90,8 @@ export const NewEnvironmentPopover: React.FC<Props> = (props) => {
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (newVarName === '' || newVarVal === '') {
-      toast('Please complete the form.', { type: 'error' });
+    if (textAreaVal === '') {
+      toast('Cannot submit empty code.', { type: 'error' });
       return;
     }
 
@@ -99,44 +99,102 @@ export const NewEnvironmentPopover: React.FC<Props> = (props) => {
       toast("There's an error, please try again later.", { type: 'error' });
       return;
     }
+    if (textAreaVal.includes('==') && textAreaVal.length > 3) {
+      if (callerType !== NodeTypes.IF) {
+        toast('Cannot do equality checking in a non-if node.', {
+          type: 'error',
+        });
+        return;
+      }
 
-    const newEnv = { ...environmentContext.environment };
-    newEnv[newVarName] = parseInt(newVarVal);
-    environmentContext.setEnvironment(newEnv);
+      const [varName] = textAreaVal.split('==');
+      if (
+        !environmentContext.environment ||
+        !(varName in environmentContext.environment)
+      ) {
+        toast(`Variable ${varName} does not exists.`, { type: 'error' });
+        return;
+      }
 
-    console.log('nodes context', nodesContext);
-    nodesContext?.nodesDispatch({
-      type: NodeActions.CHANGE_CONTENT,
-      atIdx: callerIdx,
-      content: `${newVarName} -> ${newVarVal}`,
-    });
+      nodesContext?.nodesDispatch({
+        type: NodeActions.CHANGE_CONTENT,
+        atIdx: callerIdx,
+        content: textAreaVal,
+      });
 
-    toast(`Var "${newVarName}" with value: "${newVarVal}" created.`, {
-      type: 'success',
-    });
-    appState?.newVarPopover.setNewVarPopover(undefined);
+      appState?.newVarPopover.setNewVarPopover(undefined);
+    } else if (textAreaVal.includes('=') && textAreaVal.length > 3) {
+      if (callerType === NodeTypes.IF) {
+        toast('Cannot do variable assignment on an if node.', {
+          type: 'error',
+        });
+        return;
+      }
+
+      const [newVarName, newVarVal] = textAreaVal
+        .split('=')
+        .map((str) => str.trim());
+
+      nodesContext?.nodesDispatch({
+        type: NodeActions.CHANGE_CONTENT,
+        atIdx: callerIdx,
+        content: `${newVarName} = ${newVarVal}`,
+      });
+
+      appState?.newVarPopover.setNewVarPopover(undefined);
+    } else if (textAreaVal.includes('++')) {
+      const [varName] = textAreaVal.split('++');
+      if (
+        !environmentContext?.environment ||
+        !(varName in environmentContext.environment)
+      ) {
+        toast(`Variable ${varName} does not exists.`, { type: 'error' });
+        return;
+      }
+
+      nodesContext?.nodesDispatch({
+        type: NodeActions.CHANGE_CONTENT,
+        atIdx: callerIdx,
+        content: `${varName}++`,
+      });
+
+      appState?.newVarPopover.setNewVarPopover(undefined);
+    } else if (textAreaVal.includes('--')) {
+      const [varName] = textAreaVal.split('--');
+      if (
+        !environmentContext?.environment ||
+        !(varName in environmentContext.environment)
+      ) {
+        toast(`Variable ${varName} does not exists.`, { type: 'error' });
+        return;
+      }
+
+      nodesContext?.nodesDispatch({
+        type: NodeActions.CHANGE_CONTENT,
+        atIdx: callerIdx,
+        content: `${varName}--`,
+      });
+
+      appState?.newVarPopover.setNewVarPopover(undefined);
+    } else {
+      toast(`Can't recognize this operation.`, { type: 'error' });
+      return;
+    }
   };
 
   return (
     <Draggable>
       <Container x={x} y={y}>
         <PanelTitle>
-          New variable <XIcon size={19} onClick={onPanelClose} />
+          Environment Variable <XIcon size={19} onClick={onPanelClose} />
         </PanelTitle>
         <PanelContentContainer>
           <Form onSubmit={onSubmit}>
             <VariableInput
-              type="text"
-              placeholder="Name"
-              value={newVarName}
-              onChange={(e) => setNewVarName(e.target.value)}
-            />
-            <VariableInput
-              type="text"
-              placeholder="Value"
-              value={newVarVal}
-              onChange={(e) => setNewVarVal(e.target.value)}
-            />
+              placeholder="testing = 3"
+              value={textAreaVal}
+              onChange={(e) => setTextAreaVal(e.target.value)}
+            ></VariableInput>
             <SubmitBtn type="submit" value="Save" />
           </Form>
         </PanelContentContainer>
