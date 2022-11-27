@@ -17,7 +17,7 @@ import {
 } from '../common/types';
 import { AddNodeBtn } from '../components/add-node.btn';
 import { SelectNodePopover } from '../components/select-node.popover';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import styled from 'styled-components';
 import 'react-toastify/dist/ReactToastify.css';
 import { nodeTypeToNode } from '../common/utils';
@@ -127,6 +127,18 @@ export const WorkspacePage = () => {
     }
   }
 
+  const onFlowChartPlay = () => {
+    const emptyNodesExists = nodes.some((node) => node.content === undefined);
+    if (emptyNodesExists) {
+      toast('Cannot play flow chart while there are empty nodes.', {
+        type: 'error',
+      });
+      return;
+    }
+
+    setAnimation(!animating);
+  };
+
   return (
     <AppStateProvider
       value={{
@@ -145,7 +157,7 @@ export const WorkspacePage = () => {
           <ControlPanel>
             <ToggleAnimationBtn
               isAnimationRunning={animating}
-              onClick={() => setAnimation(!animating)}
+              onClick={onFlowChartPlay}
             />
             <Share size={15} />
           </ControlPanel>
