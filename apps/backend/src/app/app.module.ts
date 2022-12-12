@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
+import { NodesModule } from './modules/nodes/nodes.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
     }),
     UsersModule,
     WorkspacesModule,
+    NodesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

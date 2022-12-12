@@ -5,7 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
+import { Node } from '../nodes/node.entity';
 import { User } from '../users/user.entity';
 
 @Entity()
@@ -24,6 +26,9 @@ export class Workspace {
 
   @ManyToOne(() => User, (user) => user.workspaces)
   owner: User;
+
+  @OneToMany(() => Node, (node) => node.workspace)
+  nodes: Node[];
 
   @CreateDateColumn()
   createdAt: Date;
