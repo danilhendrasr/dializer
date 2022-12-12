@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { Workspace } from '../workspaces/workspaces.entity';
+import { Workspace } from '../workspaces/workspace.entity';
 
 @Entity()
 export class User {

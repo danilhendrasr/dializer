@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Workspace } from '../workspaces/workspaces.entity';
+import { Workspace } from '../workspaces/workspace.entity';
 import { NodeTypes } from '@dializer/types';
 
 @Entity()

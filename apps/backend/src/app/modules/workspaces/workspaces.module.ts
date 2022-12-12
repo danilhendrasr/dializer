@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Workspace } from './workspaces.entity';
+import { Workspace } from './workspace.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Workspace])],
