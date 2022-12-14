@@ -16,7 +16,7 @@ export class User {
   @Column()
   fullName: string;
 
-  @Column()
+  @Column({ unique: true })
   username: string;
 
   @Column()
@@ -32,5 +32,5 @@ export class User {
   updatedAt: Date;
 
   @OneToMany(() => Workspace, (workspace) => workspace.owner)
-  workspaces: Workspace[];
+  workspaces?: Workspace[];
 }
