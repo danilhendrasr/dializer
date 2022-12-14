@@ -2,6 +2,7 @@ export interface IEnvironment {
   production: boolean;
   port: number;
   baseUrl: string;
+  jwtSecret: string;
   globalApiPrefix: string;
   database: IDatabaseEnvironment;
 }
