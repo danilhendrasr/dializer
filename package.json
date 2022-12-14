@@ -11,10 +11,13 @@
   "private": true,
   "dependencies": {
     "@nestjs/common": "^9.0.0",
+    "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
     "@nrwl/nest": "^15.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
     "core-js": "^3.6.5",
     "konva": "^8.3.13",
     "next": "13.0.0",
