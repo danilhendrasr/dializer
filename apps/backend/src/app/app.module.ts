@@ -6,6 +6,7 @@ import { NodesModule } from './modules/nodes/nodes.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getEnvConfig } from '../environments/env-config';
 import { IEnvironment } from '../environments/env.interface';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { IEnvironment } from '../environments/env.interface';
     UsersModule,
     WorkspacesModule,
     NodesModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
