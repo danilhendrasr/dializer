@@ -21,7 +21,7 @@ import { SelectNodePopover } from '../components/select-node.popover';
 import { toast, ToastContainer } from 'react-toastify';
 import styled from 'styled-components';
 import 'react-toastify/dist/ReactToastify.css';
-import { nodeTypeToNode } from '../common/utils';
+import { nodeTypeToNode } from '../common/konva-utils';
 import { ControlPanel } from '../components/control-panel';
 import { Share } from 'tabler-icons-react';
 import { EnvironmentPopover } from './env-popover';
