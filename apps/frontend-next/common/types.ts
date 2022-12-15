@@ -49,3 +49,7 @@ export type ConditionalNodeNextNodes = {
   true: FlowChartNode;
   false: FlowChartNode;
 };
+
+export enum LocalStorageItems {
+  ACCESS_TOKEN = 'accessToken',
+}

@@ -1,6 +1,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
+import { useRouteProtection } from '../../hooks/use-route-protection.hook';
 
 const Workspace = dynamic(
   () =>
@@ -9,6 +10,8 @@ const Workspace = dynamic(
 );
 
 export default function WorkspaceWrapper() {
+  useRouteProtection();
+
   return (
     <>
       <Head>

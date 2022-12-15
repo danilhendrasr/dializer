@@ -4,6 +4,7 @@ import Link from 'next/link';
 import styled from 'styled-components';
 import { Plus as PlusIcon } from 'tabler-icons-react';
 import { v4 as uuidv4 } from 'uuid';
+import { useRouteProtection } from '../../hooks/use-route-protection.hook';
 
 const StyledPage = styled.div`
   position: absolute;
@@ -57,6 +58,7 @@ const NoWorkspaceText = styled.p`
 `;
 
 export function Index() {
+  useRouteProtection();
   const newWorkspaceId = uuidv4();
 
   return (
