@@ -22,17 +22,20 @@ export class Node {
   @Column()
   height: number;
 
+  @Column()
+  index: number;
+
   @Column({ nullable: true })
   content?: string;
 
   @Column({ nullable: true })
-  next?: number;
+  nextIdx?: number;
 
   @Column({ nullable: true })
-  nextIfTrue?: number;
+  nextIdxIfTrue?: number;
 
   @Column({ nullable: true })
-  nextIfFalse?: number;
+  nextIdxIfFalse?: number;
 
   @ManyToOne(() => Workspace, (workspace) => workspace.nodes, {
     nullable: false,

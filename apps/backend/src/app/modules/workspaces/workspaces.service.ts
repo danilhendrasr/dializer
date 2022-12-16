@@ -20,10 +20,18 @@ export class WorkspacesService {
   }
 
   async getWorkspaceNodes(workspaceId: string) {
-    return await this.nodeRepo.find({
+    const nodes = await this.nodeRepo.find({
       where: {
         workspace: { id: workspaceId },
       },
+      order: {
+        index: 'ASC',
+      },
+      loadRelationIds: {
+        relations: ['next', 'nextIfTrue', 'nextIfFalse'],
+      },
     });
+
+    return nodes;
   }
 }
