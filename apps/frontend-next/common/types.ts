@@ -23,6 +23,7 @@ export enum NodeTypes {
 export type Coordinate = { x: number; y: number };
 
 export interface FlowChartNode {
+  id: string;
   type: NodeTypes;
   x: number;
   y: number;
@@ -32,7 +33,6 @@ export interface FlowChartNode {
   height: number;
 
   content?: string;
-
   // If node is of non-branching type, it refers to the next
   // node through this proeprty.
   nextIdx?: number;

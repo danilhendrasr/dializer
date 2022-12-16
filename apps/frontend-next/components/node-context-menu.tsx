@@ -3,8 +3,8 @@ import { X as XIcon } from 'tabler-icons-react';
 import Draggable from 'react-draggable';
 import { useAppState } from '../contexts/app-state.context';
 import React from 'react';
-import { useNodesContext } from '../hooks/use-node-context.hook';
 import { NodeActions, NodeTypes } from '../common/types';
+import { useNodesStore } from '../contexts/nodes.context';
 
 const Container = styled.div<{ x: number; y: number }>`
   position: absolute;
@@ -61,7 +61,7 @@ type Props = {
 export const NodeContextMenu: React.FC<Props> = (props) => {
   const { x, y, callerIdx } = props;
   const appState = useAppState();
-  const nodesContext = useNodesContext();
+  const nodesDispatch = useNodesStore((state) => state.dispatch);
 
   const handleClose = () => {
     if (!appState || appState?.contextMenu === null) return;
@@ -69,8 +69,7 @@ export const NodeContextMenu: React.FC<Props> = (props) => {
   };
 
   const handleOnDelete = () => {
-    if (!nodesContext) return;
-    nodesContext?.nodesDispatch({
+    nodesDispatch({
       type: NodeActions.DELETE,
       atIdx: callerIdx,
     });

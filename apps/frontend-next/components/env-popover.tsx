@@ -5,8 +5,8 @@ import { useAppState } from '../contexts/app-state.context';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useEnvironmentContext } from '../contexts/environment.context';
-import { useNodesContext } from '../hooks/use-node-context.hook';
 import { NodeActions, NodeTypes } from '../common/types';
+import { useNodesStore } from '../contexts/nodes.context';
 
 const Container = styled.div<{ x: number; y: number }>`
   position: absolute;
@@ -78,8 +78,9 @@ export const EnvironmentPopover: React.FC<Props> = (props) => {
   const { x, y, callerIdx } = props;
   const appState = useAppState();
   const environmentContext = useEnvironmentContext();
-  const nodesContext = useNodesContext();
-  const callerType = nodesContext?.nodes[callerIdx].type;
+  const nodes = useNodesStore((state) => state.nodes);
+  const nodesDispatch = useNodesStore((state) => state.dispatch);
+  const callerType = nodes[callerIdx].type;
 
   const [textAreaVal, setTextAreaVal] = useState('');
 
@@ -108,7 +109,7 @@ export const EnvironmentPopover: React.FC<Props> = (props) => {
         return;
       }
 
-      nodesContext?.nodesDispatch({
+      nodesDispatch({
         type: NodeActions.CHANGE_CONTENT,
         atIdx: callerIdx,
         content: textAreaVal,
@@ -127,7 +128,7 @@ export const EnvironmentPopover: React.FC<Props> = (props) => {
         .split('=')
         .map((str) => str.trim());
 
-      nodesContext?.nodesDispatch({
+      nodesDispatch({
         type: NodeActions.CHANGE_CONTENT,
         atIdx: callerIdx,
         content: `${newVarName} = ${newVarVal}`,
@@ -137,7 +138,7 @@ export const EnvironmentPopover: React.FC<Props> = (props) => {
     } else if (textAreaVal.includes('++')) {
       const [varName] = textAreaVal.split('++');
 
-      nodesContext?.nodesDispatch({
+      nodesDispatch({
         type: NodeActions.CHANGE_CONTENT,
         atIdx: callerIdx,
         content: `${varName}++`,
@@ -147,7 +148,7 @@ export const EnvironmentPopover: React.FC<Props> = (props) => {
     } else if (textAreaVal.includes('--')) {
       const [varName] = textAreaVal.split('--');
 
-      nodesContext?.nodesDispatch({
+      nodesDispatch({
         type: NodeActions.CHANGE_CONTENT,
         atIdx: callerIdx,
         content: `${varName}--`,

@@ -5,9 +5,7 @@ import { Stage, Layer } from 'react-konva';
 import { Vector2d } from 'konva/lib/types';
 import { ToggleAnimationBtn } from '../components/play-animation.btn';
 import { EnvironmentPanel } from '../components/environtment-panel';
-import { INITIAL_NODES } from '../common/data';
-import { NodesContext } from '../contexts/nodes.context';
-import { nodesReducer } from '../reducers/nodes.reducer';
+import { useNodesStore } from '../contexts/nodes.context';
 import {
   ConditionalNodeNextNodes,
   Coordinate,
@@ -44,11 +42,11 @@ const Toast = styled(ToastContainer)`
 
 export const WorkspacePage = () => {
   const stageRef = useRef<StageClass | null>(null);
-  const animationRef = useRef<unknown>(null);
   const curNodeIdx = useRef<number>(0);
   const prevNodeIdx = useRef<number>(-1);
 
-  const [nodes, nodesDispatch] = useReducer(nodesReducer, INITIAL_NODES);
+  const nodes = useNodesStore((state) => state.nodes);
+  const nodesDispatch = useNodesStore((state) => state.dispatch);
   const [animating, setAnimation] = useState(false);
   const [selectNodePopover, setSelectNodePopover] = useState<
     Coordinate & { onNodeSelect: (nodeType: NodeTypes) => void }
@@ -64,17 +62,6 @@ export const WorkspacePage = () => {
 
   useInterval(
     () => {
-      if (!animating) {
-        clearInterval(animationRef.current as NodeJS.Timer);
-        return;
-      }
-
-      if (curNodeIdx.current === undefined) {
-        clearInterval(animationRef.current as NodeJS.Timer);
-        setAnimation(!animating);
-        return;
-      }
-
       const curNode = nodes[curNodeIdx.current];
       let nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
 
@@ -116,14 +103,14 @@ export const WorkspacePage = () => {
         });
       }
 
-      if (nextNodeIdx === undefined) {
+      if (nextNodeIdx === null) {
         setTimeout(() => {
           nodesDispatch({
             type: NodeActions.DEACTIVATE,
             atIdx: curNodeIdx.current,
           });
         }, ANIMATION_PAUSE);
-        clearInterval(animationRef.current as NodeJS.Timer);
+
         setAnimation(!animating);
       } else {
         prevNodeIdx.current = curNodeIdx.current;
@@ -135,6 +122,7 @@ export const WorkspacePage = () => {
 
   function zoomStage(event: KonvaEventObject<WheelEvent>) {
     event.evt.preventDefault();
+    // TODO: Return early
     if (stageRef.current !== null) {
       const stage = stageRef.current;
       const oldScale = stage.scaleX();
@@ -190,23 +178,23 @@ export const WorkspacePage = () => {
       <EnvironmentContextProvider
         value={{ environment: env, setEnvironment: envDispatch }}
       >
-        <NodesContext.Provider value={{ nodes, nodesDispatch }}>
-          <ControlPanel>
-            <ToggleAnimationBtn
-              isAnimationRunning={animating}
-              onClick={onFlowChartPlay}
-            />
-            <Share size={15} />
-          </ControlPanel>
-          <Stage
-            draggable
-            ref={stageRef}
-            width={window.innerWidth}
-            height={window.innerHeight}
-            onWheel={zoomStage}
-          >
-            <Layer>
-              {nodes.map((node, idx) => {
+        <ControlPanel>
+          <ToggleAnimationBtn
+            isAnimationRunning={animating}
+            onClick={onFlowChartPlay}
+          />
+          <Share size={15} />
+        </ControlPanel>
+        <Stage
+          draggable
+          ref={stageRef}
+          width={window.innerWidth}
+          height={window.innerHeight}
+          onWheel={zoomStage}
+        >
+          <Layer>
+            {nodes &&
+              nodes.map((node, idx) => {
                 let next: FlowChartNode | ConditionalNodeNextNodes | undefined =
                   undefined;
                 if (node.nextIdx) {
@@ -268,36 +256,35 @@ export const WorkspacePage = () => {
                   },
                 });
               })}
-            </Layer>
-            <Layer name="top-layer">
-              {selectNodePopover !== undefined ? (
-                <SelectNodePopover
-                  x={selectNodePopover.x - 10}
-                  y={selectNodePopover.y - 10}
-                  onSelect={selectNodePopover.onNodeSelect}
-                  onCancel={() => setSelectNodePopover(undefined)}
-                />
-              ) : null}
-            </Layer>
-          </Stage>
-          <EnvironmentPanel />
-          {newEnvPopover ? (
-            <EnvironmentPopover
-              x={newEnvPopover.x}
-              y={newEnvPopover.y}
-              callerIdx={newEnvPopover.callerIdx}
-            />
-          ) : null}
-          {contextMenu ? (
-            <NodeContextMenu
-              x={contextMenu.x}
-              y={contextMenu.y}
-              callerIdx={contextMenu.callerIdx}
-              callerType={contextMenu.callerType}
-            />
-          ) : null}
-          <Toast position="bottom-center" theme="light" />
-        </NodesContext.Provider>
+          </Layer>
+          <Layer name="top-layer">
+            {selectNodePopover !== undefined ? (
+              <SelectNodePopover
+                x={selectNodePopover.x - 10}
+                y={selectNodePopover.y - 10}
+                onSelect={selectNodePopover.onNodeSelect}
+                onCancel={() => setSelectNodePopover(undefined)}
+              />
+            ) : null}
+          </Layer>
+        </Stage>
+        <EnvironmentPanel />
+        {newEnvPopover ? (
+          <EnvironmentPopover
+            x={newEnvPopover.x}
+            y={newEnvPopover.y}
+            callerIdx={newEnvPopover.callerIdx}
+          />
+        ) : null}
+        {contextMenu ? (
+          <NodeContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            callerIdx={contextMenu.callerIdx}
+            callerType={contextMenu.callerType}
+          />
+        ) : null}
+        <Toast position="bottom-center" theme="light" />
       </EnvironmentContextProvider>
     </AppStateProvider>
   );
