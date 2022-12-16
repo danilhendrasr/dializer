@@ -1,5 +1,6 @@
 import { FormEventHandler, useRef } from 'react';
 import Router from 'next/router';
+import { LocalStorageItems } from '../../common/types';
 
 export default function SignInPage() {
   const usernameRef = useRef<HTMLInputElement>();
@@ -22,7 +23,10 @@ export default function SignInPage() {
       const jsonResponse = await response.json();
       if (!response.ok) throw new Error(jsonResponse);
 
-      localStorage.setItem('accessToken', jsonResponse.access_token);
+      localStorage.setItem(
+        LocalStorageItems.ACCESS_TOKEN,
+        jsonResponse.access_token
+      );
       Router.replace('/workspaces');
     } catch (error) {
       alert(error);

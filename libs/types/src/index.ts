@@ -6,3 +6,12 @@ export enum NodeTypes {
   PROCESS = 'process',
   IF = 'if',
 }
+
+export interface WorkspaceEntity {
+  id: string;
+  title: string;
+  description?: string;
+  isPublic: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
