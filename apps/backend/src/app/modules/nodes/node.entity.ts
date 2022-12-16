@@ -7,8 +7,8 @@ export class Node {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ enum: NodeTypes })
-  type: string;
+  @Column({ enum: NodeTypes, type: 'enum' })
+  type: NodeTypes;
 
   @Column()
   x: number;
