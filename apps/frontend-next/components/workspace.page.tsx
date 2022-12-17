@@ -28,6 +28,7 @@ import { EnvironmentContextProvider } from '../contexts/environment.context';
 import { NodeContextMenu } from '../components/node-context-menu';
 import { environmentReducer } from '../reducers/environment.reducer';
 import { useInterval } from 'usehooks-ts';
+import { useRouter } from 'next/router';
 
 const SCALE_BY = 1.2;
 const ANIMATION_PAUSE = 1000;
@@ -44,6 +45,7 @@ export const WorkspacePage = () => {
   const stageRef = useRef<StageClass | null>(null);
   const curNodeIdx = useRef<number>(0);
   const prevNodeIdx = useRef<number>(-1);
+  const router = useRouter();
 
   const nodes = useNodesStore((state) => state.nodes);
   const nodesDispatch = useNodesStore((state) => state.dispatch);
@@ -183,7 +185,15 @@ export const WorkspacePage = () => {
             isAnimationRunning={animating}
             onClick={onFlowChartPlay}
           />
-          <Share size={15} />
+          <Share
+            size={15}
+            cursor="pointer"
+            onClick={() => {
+              navigator.clipboard.writeText(
+                `http://localhost:4200${router.asPath}`
+              );
+            }}
+          />
         </ControlPanel>
         <Stage
           draggable
