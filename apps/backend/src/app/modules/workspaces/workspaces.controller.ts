@@ -5,6 +5,11 @@ import { WorkspacesService } from './workspaces.service';
 export class WorkspacesController {
   constructor(private workspacesService: WorkspacesService) {}
 
+  @Get('/:id')
+  async getOne(@Param('id') workspaceId: string) {
+    return await this.workspacesService.getOne(workspaceId);
+  }
+
   @Get('/:id/nodes')
   async getUserWorkspaces(@Param('id') workspaceId: string) {
     return await this.workspacesService.getWorkspaceNodes(workspaceId);

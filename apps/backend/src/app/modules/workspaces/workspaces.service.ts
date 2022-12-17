@@ -19,6 +19,10 @@ export class WorkspacesService {
     });
   }
 
+  async getOne(workspaceId: string) {
+    return await this.workspaceRepo.findOneBy({ id: workspaceId });
+  }
+
   async getWorkspaceNodes(workspaceId: string) {
     const nodes = await this.nodeRepo.find({
       where: {
