@@ -7,7 +7,7 @@ function CustomApp({ Component, pageProps }: AppProps) {
       <Head>
         <title>Welcome to frontend-next!</title>
       </Head>
-      <main className="app">
+      <main>
         <Component {...pageProps} />
       </main>
     </>
