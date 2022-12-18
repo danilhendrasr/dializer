@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { UpdateWorkspaceNodesDTO } from './update-nodes.dto';
 import { WorkspacesService } from './workspaces.service';
 
@@ -14,6 +14,13 @@ export class WorkspacesController {
   @Get('/:id/nodes')
   async getUserWorkspaces(@Param('id') workspaceId: string) {
     return await this.workspacesService.getWorkspaceNodes(workspaceId);
+  }
+
+  @Post()
+  async createNewRepo() {
+    return await this.workspacesService.createNewWorkspace(
+      '34040969-9bb8-4a3a-846e-4d45b893562d'
+    );
   }
 
   @Put('/:id/nodes')
