@@ -3,12 +3,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styled from 'styled-components';
 import { Plus as PlusIcon } from 'tabler-icons-react';
-import { v4 as uuidv4 } from 'uuid';
 import { useRouteProtection } from '../../hooks/use-route-protection.hook';
 import useSWR from 'swr';
 import { useUserId } from '../../hooks/use-user-id.hook';
 import { swrFetcher } from '../../common/utils';
 import { WorkspaceEntity } from '@dializer/types';
+import Router from 'next/router';
 
 export default function Index() {
   useRouteProtection();
@@ -17,7 +17,20 @@ export default function Index() {
     userId ? `http://localhost:3333/api/users/${userId}/workspaces` : null,
     swrFetcher
   );
-  const newWorkspaceId = uuidv4();
+
+  const handleNewWorkspaceBtn = async () => {
+    const response = await fetch('http://localhost:3333/api/workspaces', {
+      method: 'POST',
+    });
+
+    if (!response.ok) {
+      alert('Failed creating new workspace, try again in a few minutes.');
+      return;
+    }
+
+    const { id: newWorkspaceId } = await response.json();
+    Router.replace(`/workspaces/${newWorkspaceId}`);
+  };
 
   if (error) return <h1>Error gan</h1>;
 
@@ -28,11 +41,9 @@ export default function Index() {
       </Head>
       <TopContainer>
         <h1>Workspaces</h1>
-        <Link href={`/workspaces/${newWorkspaceId}`}>
-          <NewWorkspaceBtn>
-            <PlusIcon size={18} />
-          </NewWorkspaceBtn>
-        </Link>
+        <NewWorkspaceBtn onClick={handleNewWorkspaceBtn}>
+          <PlusIcon size={18} />
+        </NewWorkspaceBtn>
       </TopContainer>
       {isLoading ? (
         <EmptyWorkspaceWrapper>
