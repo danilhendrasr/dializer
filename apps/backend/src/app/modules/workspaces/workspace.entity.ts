@@ -27,7 +27,7 @@ export class Workspace {
   @ManyToOne(() => User, (user) => user.workspaces)
   owner: User;
 
-  @OneToMany(() => Node, (node) => node.workspace)
+  @OneToMany(() => Node, (node) => node.workspace, { cascade: true })
   nodes: Node[];
 
   @CreateDateColumn()

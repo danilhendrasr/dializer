@@ -38,4 +38,19 @@ export class WorkspacesService {
 
     return nodes;
   }
+
+  async updateWorkspaceNodes(workspaceId: string, nodes: Node[]) {
+    const workspace = await this.workspaceRepo.findOne({
+      where: { id: workspaceId },
+      relations: { nodes: true },
+    });
+
+    workspace.nodes = nodes;
+
+    const updatedWorkspace = await this.workspaceRepo.save(workspace);
+    return {
+      ...workspace,
+      ...updatedWorkspace,
+    };
+  }
 }
