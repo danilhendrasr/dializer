@@ -196,6 +196,7 @@ export const WorkspacePage: React.FC<Props> = (props) => {
               navigator.clipboard.writeText(
                 `http://localhost:4200${router.asPath}`
               );
+              alert('Link copied to clipboard.');
             }}
           />
           <DeviceFloppy
