@@ -34,7 +34,7 @@ export default function WorkspaceWrapper() {
     };
 
     fetchWorkspaceDetail();
-  }, [router, fetchNodes]);
+  }, [router]);
 
   return (
     <>
@@ -44,7 +44,7 @@ export default function WorkspaceWrapper() {
       <WorkspaceTitleContainer>
         <h1>{workspace && workspace.title}</h1>
       </WorkspaceTitleContainer>
-      <Workspace />
+      <Workspace workspaceId={router.query['workspace-id'] as string} />
     </>
   );
 }

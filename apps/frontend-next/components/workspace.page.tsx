@@ -21,7 +21,7 @@ import styled from 'styled-components';
 import 'react-toastify/dist/ReactToastify.css';
 import { nodeTypeToNode } from '../common/konva-utils';
 import { ControlPanel } from '../components/control-panel';
-import { Share } from 'tabler-icons-react';
+import { Share, DeviceFloppy } from 'tabler-icons-react';
 import { EnvironmentPopover } from './env-popover';
 import { AppStateProvider } from '../contexts/app-state.context';
 import { EnvironmentContextProvider } from '../contexts/environment.context';
@@ -41,7 +41,11 @@ const Toast = styled(ToastContainer)`
   }
 `;
 
-export const WorkspacePage = () => {
+type Props = {
+  workspaceId: string;
+};
+
+export const WorkspacePage: React.FC<Props> = (props) => {
   const stageRef = useRef<StageClass | null>(null);
   const curNodeIdx = useRef<number>(0);
   const prevNodeIdx = useRef<number>(-1);
@@ -192,6 +196,24 @@ export const WorkspacePage = () => {
               navigator.clipboard.writeText(
                 `http://localhost:4200${router.asPath}`
               );
+            }}
+          />
+          <DeviceFloppy
+            size={16}
+            cursor="pointer"
+            onClick={async () => {
+              console.log('nodes', JSON.stringify({ nodes }));
+              await fetch(
+                `http://localhost:3333/api/workspaces/${props.workspaceId}/nodes`,
+                {
+                  method: 'PUT',
+                  body: JSON.stringify({ nodes }),
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                }
+              );
+              alert('Saved');
             }}
           />
         </ControlPanel>
