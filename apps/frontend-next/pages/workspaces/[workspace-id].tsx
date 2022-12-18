@@ -42,7 +42,25 @@ export default function WorkspaceWrapper() {
         <title>Flow Chart Editor | Dializer</title>
       </Head>
       <WorkspaceTitleContainer>
-        <h1>{workspace && workspace.title}</h1>
+        <h1
+          contentEditable
+          onBlur={async (e) => {
+            await fetch(
+              `http://localhost:3333/api/workspaces/${
+                router.query['workspace-id'] as string
+              }`,
+              {
+                method: 'PATCH',
+                body: JSON.stringify({ title: e.target.innerText }),
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+          }}
+        >
+          {workspace && workspace.title}
+        </h1>
       </WorkspaceTitleContainer>
       <Workspace workspaceId={router.query['workspace-id'] as string} />
     </>
