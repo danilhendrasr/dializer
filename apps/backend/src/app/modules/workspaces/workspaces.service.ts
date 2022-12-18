@@ -72,6 +72,19 @@ export class WorkspacesService {
     return await this.workspaceRepo.save(workspace);
   }
 
+  async updateWorkspace(workspaceId: string, payload: Partial<Workspace>) {
+    const workspace = await this.workspaceRepo.findOne({
+      where: { id: workspaceId },
+    });
+
+    const newWorkspace = this.workspaceRepo.create({
+      ...workspace,
+      ...payload,
+    });
+
+    return await this.workspaceRepo.save(newWorkspace);
+  }
+
   async updateWorkspaceNodes(workspaceId: string, nodes: Node[]) {
     const workspace = await this.workspaceRepo.findOne({
       where: { id: workspaceId },

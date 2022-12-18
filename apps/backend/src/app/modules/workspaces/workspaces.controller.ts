@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put } from '@nestjs/common';
 import { UpdateWorkspaceNodesDTO } from './update-nodes.dto';
 import { WorkspacesService } from './workspaces.service';
 
@@ -21,6 +21,14 @@ export class WorkspacesController {
     return await this.workspacesService.createNewWorkspace(
       '34040969-9bb8-4a3a-846e-4d45b893562d'
     );
+  }
+
+  @Patch('/:id')
+  async updateWorkspace(
+    @Param('id') workspaceId: string,
+    @Body() payload: any
+  ) {
+    return await this.workspacesService.updateWorkspace(workspaceId, payload);
   }
 
   @Put('/:id/nodes')
