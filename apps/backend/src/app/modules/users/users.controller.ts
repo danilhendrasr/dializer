@@ -1,7 +1,11 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { ApiEndpoints } from '../../types';
+import { capitalize } from '../../utils';
 import { WorkspacesService } from '../workspaces/workspaces.service';
 
-@Controller('users')
+@Controller(ApiEndpoints.USERS)
+@ApiTags(capitalize(ApiEndpoints.USERS))
 export class UsersController {
   constructor(private workspacesService: WorkspacesService) {}
 

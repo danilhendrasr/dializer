@@ -1,8 +1,12 @@
 import { Body, Controller, Get, Param, Patch, Post, Put } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { ApiEndpoints } from '../../types';
+import { capitalize } from '../../utils';
 import { UpdateWorkspaceNodesDTO } from './update-nodes.dto';
 import { WorkspacesService } from './workspaces.service';
 
-@Controller('workspaces')
+@Controller(ApiEndpoints.WORKSPACES)
+@ApiTags(capitalize(ApiEndpoints.WORKSPACES))
 export class WorkspacesController {
   constructor(private workspacesService: WorkspacesService) {}
 

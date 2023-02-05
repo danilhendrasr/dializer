@@ -1,9 +1,13 @@
 import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { ApiEndpoints } from '../../types';
+import { capitalize } from '../../utils';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LocalAuthGuard } from './local-auth.guard';
 
-@Controller('auth')
+@Controller(ApiEndpoints.AUTH)
+@ApiTags(capitalize(ApiEndpoints.AUTH))
 export class AuthController {
   constructor(private authService: AuthService) {}
 
