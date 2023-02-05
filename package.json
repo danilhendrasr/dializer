@@ -8,6 +8,9 @@
     "build": "nx build",
     "test": "nx test"
   },
+  "engines": {
+    "node": ">=18.13.0"
+  },
   "private": true,
   "dependencies": {
     "@nestjs/common": "^9.0.0",
