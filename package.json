@@ -16,6 +16,7 @@
     "@nestjs/jwt": "^9.0.0",
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/swagger": "^6.1.4",
     "@nestjs/typeorm": "^9.0.1",
     "@nrwl/nest": "^15.0.0",
     "axios": "^1.2.1",
