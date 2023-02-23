@@ -32,6 +32,7 @@ export const SelectNodePopover: React.FC<Props> = (props) => {
       const nodeText = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
       const Component = nodeTypeToNode({
         node: {
+          id: 'testing',
           type: nodeType,
           x: curNodeX,
           y: curNodeY + 5,

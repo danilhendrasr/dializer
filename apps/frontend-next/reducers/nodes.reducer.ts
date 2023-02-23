@@ -1,5 +1,6 @@
 import { toast } from 'react-toastify';
 import { FlowChartNode, NodeActions, NodeTypes } from '../common/types';
+import { v4 as uuidv4 } from 'uuid';
 
 export type NodesReducerActionObject = {
   type: NodeActions;
@@ -65,6 +66,7 @@ export function nodesReducer(
       const isNextIfNode = action.nodeType === NodeTypes.IF;
 
       const newNode: FlowChartNode = {
+        id: uuidv4(),
         type: action.nodeType,
         x: prevNode.x,
         y: prevNode.y + prevNode.height + 50,

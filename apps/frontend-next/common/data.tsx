@@ -4,6 +4,7 @@ const DEFAULT_NODE_WIDTH = 100;
 
 export const INITIAL_NODES: FlowChartNode[] = [
   {
+    id: '1',
     type: NodeTypes.START,
     x: window.innerWidth / 3 - 50,
     y: 50,
@@ -13,6 +14,7 @@ export const INITIAL_NODES: FlowChartNode[] = [
     nextIdx: 1,
   },
   {
+    id: '2',
     type: NodeTypes.PROCESS,
     x: window.innerWidth / 3 - 50,
     y: 150,
@@ -23,6 +25,7 @@ export const INITIAL_NODES: FlowChartNode[] = [
     content: 'testing = 3',
   },
   {
+    id: '3',
     type: NodeTypes.PROCESS,
     x: window.innerWidth / 3 - 50,
     y: 250,
@@ -33,6 +36,7 @@ export const INITIAL_NODES: FlowChartNode[] = [
     content: 'testing++',
   },
   {
+    id: '4',
     type: NodeTypes.IF,
     x: window.innerWidth / 3 - 50,
     y: 350,
@@ -44,6 +48,7 @@ export const INITIAL_NODES: FlowChartNode[] = [
     content: 'testing == 5',
   },
   {
+    id: '5',
     type: NodeTypes.END,
     x: window.innerWidth / 3 - 50,
     y: 450,

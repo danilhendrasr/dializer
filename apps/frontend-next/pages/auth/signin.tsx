@@ -53,7 +53,7 @@ export default function SignInPage() {
         <title>Sign In | Dializer</title>
       </Head>
       <PageWrapper>
-        <h1>Sign In</h1>
+        <h1 className="text-blue-500">Sign In</h1>
         <SignInForm
           onSubmit={handleSignIn}
           canSubmit={Boolean(username && password)}
