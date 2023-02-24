@@ -1,7 +1,11 @@
-import { FormEventHandler, useEffect, useState } from 'react';
+import {
+  ChangeEventHandler,
+  FormEventHandler,
+  useEffect,
+  useState,
+} from 'react';
 import Router from 'next/router';
 import { LocalStorageItems } from '../../common/types';
-import styled from 'styled-components';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Head from 'next/head';
@@ -41,9 +45,10 @@ export default function SignInPage() {
         LocalStorageItems.ACCESS_TOKEN,
         jsonResponse.access_token
       );
+
       Router.replace('/workspaces');
     } catch (error) {
-      alert(error);
+      toast(error, { type: 'error' });
     }
   };
 
@@ -52,79 +57,68 @@ export default function SignInPage() {
       <Head>
         <title>Sign In | Dializer</title>
       </Head>
-      <PageWrapper>
-        <h1 className="text-blue-500">Sign In</h1>
-        <SignInForm
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <h1 className="text-4xl text-center font-bold tracking-wider font-sans m-5 text-accent2">
+          Sign In
+        </h1>
+        <form
+          className="flex flex-col p-10 border-solid shadow-lg rounded-md"
           onSubmit={handleSignIn}
-          canSubmit={Boolean(username && password)}
         >
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            name="username"
+          <LoginInput
             id="username"
+            name="username"
             placeholder="Username"
+            value={username}
+            onChangeHandler={(e) => setUsername(e.target.value)}
+          />
+          <LoginInput
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Password"
+            value={password}
+            onChangeHandler={(e) => setPassword(e.target.value)}
           />
           <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            name="password"
-            id="password"
-            placeholder="Password"
+            disabled={!username || !password}
+            type="submit"
+            value="Sign in"
+            className="my-2 py-2 w-full text-primary1 bg-accent1 rounded-md transition cursor-pointer disabled:bg-primary2 disabled:pointer-events-none active:scale-95"
           />
-          <input type="submit" value="Sign in" />
-        </SignInForm>
-      </PageWrapper>
+        </form>
+      </div>
       <ToastContainer position="bottom-center" />
     </>
   );
 }
 
-const PageWrapper = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+const LoginInput: React.FC<{
+  type?: 'text' | 'password';
+  id?: string;
+  placeholder?: string;
+  name?: string;
+  value: string;
+  onChangeHandler: ChangeEventHandler<HTMLInputElement>;
+}> = (props) => {
+  const {
+    type = 'text',
+    id,
+    placeholder,
+    name,
+    value,
+    onChangeHandler,
+  } = props;
 
-  h1 {
-    font-family: sans-serif;
-    letter-spacing: 2px;
-    margin-bottom: 30px;
-  }
-`;
-
-const SignInForm = styled.form<{ canSubmit: boolean }>`
-  width: 250px;
-  padding: 10px 20px;
-  border: 1px solid grey;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-
-  input {
-    margin: 10px 0;
-    border: 1px solid lightgrey;
-    padding: 10px;
-  }
-
-  input[type='submit'] {
-    color: white;
-    border: none;
-    background-color: ${(p) => (p.canSubmit ? 'black' : 'darkgrey')};
-    border-radius: 8px;
-    transition: all 0.2s;
-
-    &:hover {
-      cursor: pointer;
-    }
-
-    &:active {
-      transform: scale(0.95);
-    }
-  }
-`;
+  return (
+    <input
+      type={type}
+      value={value}
+      onChange={onChangeHandler}
+      name={name}
+      id={id}
+      placeholder={placeholder}
+      className="px-4 py-2 mb-5 border border-solid border-primary2 rounded-md"
+    />
+  );
+};

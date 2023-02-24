@@ -6,7 +6,7 @@ function CustomApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Welcome to frontend-next!</title>
+        <title>Welcome to Dializer!</title>
       </Head>
       <main>
         <Component {...pageProps} />
