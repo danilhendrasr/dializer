@@ -6,7 +6,7 @@ export const useRouteProtection = () => {
   useEffect(() => {
     const accessToken = localStorage.getItem(LocalStorageItems.ACCESS_TOKEN);
     if (!accessToken) {
-      Router.replace('/auth/signin');
+      Router.replace('/auth/sign-in');
     }
   }, []);
 };
