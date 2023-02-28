@@ -21,8 +21,8 @@ export class UsersService {
     return await this.findOne({ id });
   }
 
-  async findOneByUsername(username: string) {
-    return await this.findOne({ username });
+  async findOneByEmail(email: string) {
+    return await this.findOne({ email });
   }
 
   async getUserWorkspaces(userId: string) {
@@ -31,5 +31,9 @@ export class UsersService {
         owner: { id: userId },
       },
     });
+  }
+
+  async create(user: User) {
+    return await this.userRepo.save(user);
   }
 }
