@@ -1,14 +1,13 @@
-import {
-  ChangeEventHandler,
-  FormEventHandler,
-  useEffect,
-  useState,
-} from 'react';
+import { FormEventHandler, useEffect, useState } from 'react';
 import Router from 'next/router';
 import { LocalStorageItems } from '../../common/types';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Head from 'next/head';
+import { AuthForm } from '../../components/auth-form';
+import { AuthInput } from '../../components/auth-input';
+import { AuthTitle } from '../../components/auth-title';
+import { AuthSubmitBtn } from '../../components/auth-submit';
 
 export default function SignInPage() {
   const [username, setUsername] = useState('');
@@ -58,21 +57,16 @@ export default function SignInPage() {
         <title>Sign In | Dializer</title>
       </Head>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <h1 className="text-4xl text-center font-bold tracking-wider font-sans m-5 text-accent2">
-          Sign In
-        </h1>
-        <form
-          className="flex flex-col p-10 border-solid shadow-lg rounded-md"
-          onSubmit={handleSignIn}
-        >
-          <LoginInput
+        <AuthTitle>Sign In</AuthTitle>
+        <AuthForm onSubmit={handleSignIn}>
+          <AuthInput
             id="username"
             name="username"
             placeholder="Username"
             value={username}
             onChangeHandler={(e) => setUsername(e.target.value)}
           />
-          <LoginInput
+          <AuthInput
             type="password"
             id="password"
             name="password"
@@ -80,45 +74,9 @@ export default function SignInPage() {
             value={password}
             onChangeHandler={(e) => setPassword(e.target.value)}
           />
-          <input
-            disabled={!username || !password}
-            type="submit"
-            value="Sign in"
-            className="my-2 py-2 w-full text-primary1 bg-accent1 rounded-md transition cursor-pointer disabled:bg-primary2 disabled:pointer-events-none active:scale-95"
-          />
-        </form>
+          <AuthSubmitBtn disabled={!username || !password} text="Sign in" />
+        </AuthForm>
       </div>
-      <ToastContainer position="bottom-center" />
     </>
   );
 }
-
-const LoginInput: React.FC<{
-  type?: 'text' | 'password';
-  id?: string;
-  placeholder?: string;
-  name?: string;
-  value: string;
-  onChangeHandler: ChangeEventHandler<HTMLInputElement>;
-}> = (props) => {
-  const {
-    type = 'text',
-    id,
-    placeholder,
-    name,
-    value,
-    onChangeHandler,
-  } = props;
-
-  return (
-    <input
-      type={type}
-      value={value}
-      onChange={onChangeHandler}
-      name={name}
-      id={id}
-      placeholder={placeholder}
-      className="px-4 py-2 mb-5 border border-solid border-primary2 rounded-md"
-    />
-  );
-};

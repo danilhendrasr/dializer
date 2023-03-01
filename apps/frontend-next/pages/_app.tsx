@@ -1,4 +1,5 @@
 import { AppProps } from 'next/app';
+import { ToastContainer } from 'react-toastify';
 import Head from 'next/head';
 import 'tailwindcss/tailwind.css';
 
@@ -11,6 +12,7 @@ function CustomApp({ Component, pageProps }: AppProps) {
       <main>
         <Component {...pageProps} />
       </main>
+      <ToastContainer position="bottom-center" />
     </>
   );
 }
