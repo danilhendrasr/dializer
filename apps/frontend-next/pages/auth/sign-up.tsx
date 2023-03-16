@@ -6,8 +6,10 @@ import { AuthSubmitBtn } from '../../components/auth-submit';
 import { toast } from 'react-toastify';
 import { LocalStorageItems } from '../../common/types';
 import Router from 'next/router';
+import { useAuthorizedProtection } from '../../hooks/use-authorized-protection.hook';
 
 export default function SignUpPage() {
+  useAuthorizedProtection();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');

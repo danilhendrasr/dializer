@@ -1,4 +1,4 @@
-import { FormEventHandler, useEffect, useState } from 'react';
+import { FormEventHandler, useState } from 'react';
 import Router from 'next/router';
 import { LocalStorageItems } from '../../common/types';
 import { toast } from 'react-toastify';
@@ -8,15 +8,12 @@ import { AuthForm } from '../../components/auth-form';
 import { AuthInput } from '../../components/auth-input';
 import { AuthTitle } from '../../components/auth-title';
 import { AuthSubmitBtn } from '../../components/auth-submit';
+import { useAuthorizedProtection } from '../../hooks/use-authorized-protection.hook';
 
 export default function SignInPage() {
+  useAuthorizedProtection();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
-  useEffect(() => {
-    const accessToken = localStorage.getItem(LocalStorageItems.ACCESS_TOKEN);
-    if (accessToken) Router.replace('/workspaces');
-  }, []);
 
   const handleSignIn: FormEventHandler = async (e) => {
     e.preventDefault();
