@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styled from 'styled-components';
 import { Plus as PlusIcon } from 'tabler-icons-react';
-import { useRouteProtection } from '../../hooks/use-route-protection.hook';
+import { useUnauthorizedProtection } from '../../hooks/use-unauthorized-protection.hook';
 import useSWR from 'swr';
 import { useUserId } from '../../hooks/use-user-id.hook';
 import { swrFetcher } from '../../common/utils';
@@ -11,7 +11,7 @@ import { WorkspaceEntity } from '@dializer/types';
 import Router from 'next/router';
 
 export default function Index() {
-  useRouteProtection();
+  useUnauthorizedProtection();
   const userId = useUserId();
   const { data, isLoading, error } = useSWR<WorkspaceEntity[]>(
     userId ? `http://localhost:3333/api/users/${userId}/workspaces` : null,
