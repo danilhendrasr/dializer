@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { LocalStorageItems } from '../../common/types';
 import Router from 'next/router';
 import { useAuthorizedProtection } from '../../hooks/use-authorized-protection.hook';
+import Link from 'next/link';
 
 export default function SignUpPage() {
   useAuthorizedProtection();
@@ -88,6 +89,16 @@ export default function SignUpPage() {
         />
         <AuthSubmitBtn disabled={!isComplete} text="Sign up" />
       </AuthForm>
+      <p className="text-sm text-center my-5 text-accent2">
+        Or{' '}
+        <Link
+          href="/auth/sign-in"
+          className="text-accent1 underline hover:no-underline hover:text-secondary"
+        >
+          sign in
+        </Link>{' '}
+        instead.
+      </p>
     </div>
   );
 }

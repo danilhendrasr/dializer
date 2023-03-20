@@ -9,6 +9,7 @@ import { AuthInput } from '../../components/auth-input';
 import { AuthTitle } from '../../components/auth-title';
 import { AuthSubmitBtn } from '../../components/auth-submit';
 import { useAuthorizedProtection } from '../../hooks/use-authorized-protection.hook';
+import Link from 'next/link';
 
 export default function SignInPage() {
   useAuthorizedProtection();
@@ -73,6 +74,16 @@ export default function SignInPage() {
           />
           <AuthSubmitBtn disabled={!username || !password} text="Sign in" />
         </AuthForm>
+        <p className="text-sm text-center my-5 text-accent2">
+          Or register{' '}
+          <Link
+            href="/auth/sign-up"
+            className="text-accent1 underline hover:no-underline hover:text-secondary"
+          >
+            here
+          </Link>
+          !
+        </p>
       </div>
     </>
   );
