@@ -9,7 +9,7 @@ export const useUnauthorizedProtection = () => {
   useEffect(() => {
     const accessToken = localStorage.getItem(LocalStorageItems.ACCESS_TOKEN);
     if (!accessToken) {
-      Router.replace('/auth/sign-in');
+      Router.replace('/sign-in');
     }
   }, []);
 };

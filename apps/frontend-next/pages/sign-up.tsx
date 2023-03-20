@@ -1,12 +1,12 @@
-import { AuthInput } from '../../components/auth-input';
-import { AuthTitle } from '../../components/auth-title';
+import { AuthInput } from '../components/auth-input';
+import { AuthTitle } from '../components/auth-title';
 import { FormEventHandler, useState } from 'react';
-import { AuthForm } from '../../components/auth-form';
-import { AuthSubmitBtn } from '../../components/auth-submit';
+import { AuthForm } from '../components/auth-form';
+import { AuthSubmitBtn } from '../components/auth-submit';
 import { toast } from 'react-toastify';
-import { LocalStorageItems } from '../../common/types';
+import { LocalStorageItems } from '../common/types';
 import Router from 'next/router';
-import { useAuthorizedProtection } from '../../hooks/use-authorized-protection.hook';
+import { useAuthorizedProtection } from '../hooks/use-authorized-protection.hook';
 import Link from 'next/link';
 
 export default function SignUpPage() {
@@ -92,7 +92,7 @@ export default function SignUpPage() {
       <p className="text-sm text-center my-5 text-accent2">
         Or{' '}
         <Link
-          href="/auth/sign-in"
+          href="/sign-in"
           className="text-accent1 underline hover:no-underline hover:text-secondary"
         >
           sign in

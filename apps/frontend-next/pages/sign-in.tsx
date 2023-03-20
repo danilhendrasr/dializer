@@ -1,14 +1,14 @@
 import { FormEventHandler, useState } from 'react';
 import Router from 'next/router';
-import { LocalStorageItems } from '../../common/types';
+import { LocalStorageItems } from '../common/types';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Head from 'next/head';
-import { AuthForm } from '../../components/auth-form';
-import { AuthInput } from '../../components/auth-input';
-import { AuthTitle } from '../../components/auth-title';
-import { AuthSubmitBtn } from '../../components/auth-submit';
-import { useAuthorizedProtection } from '../../hooks/use-authorized-protection.hook';
+import { AuthForm } from '../components/auth-form';
+import { AuthInput } from '../components/auth-input';
+import { AuthTitle } from '../components/auth-title';
+import { AuthSubmitBtn } from '../components/auth-submit';
+import { useAuthorizedProtection } from '../hooks/use-authorized-protection.hook';
 import Link from 'next/link';
 
 export default function SignInPage() {
@@ -77,7 +77,7 @@ export default function SignInPage() {
         <p className="text-sm text-center my-5 text-accent2">
           Or register{' '}
           <Link
-            href="/auth/sign-up"
+            href="/sign-up"
             className="text-accent1 underline hover:no-underline hover:text-secondary"
           >
             here
