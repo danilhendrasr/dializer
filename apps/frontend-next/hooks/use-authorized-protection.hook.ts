@@ -10,7 +10,7 @@ export const useAuthorizedProtection = () => {
   useEffect(() => {
     const accessToken = localStorage.getItem(LocalStorageItems.ACCESS_TOKEN);
     if (accessToken) {
-      Router.replace('/workspaces');
+      Router.replace('/');
     }
   }, []);
 };
