@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import styled from 'styled-components';
-import { Plus as PlusIcon } from 'tabler-icons-react';
+import { Plus as PlusIcon, UserCircle } from 'tabler-icons-react';
 import { useUnauthorizedProtection } from '../../hooks/use-unauthorized-protection.hook';
 import useSWR from 'swr';
 import { useUserId } from '../../hooks/use-user-id.hook';
@@ -18,7 +18,7 @@ export default function Index() {
     swrFetcher
   );
 
-  const handleNewWorkspaceBtn = async () => {
+  const createNewWorkspace = async () => {
     const response = await fetch('http://localhost:3333/api/workspaces', {
       method: 'POST',
     });
@@ -32,88 +32,95 @@ export default function Index() {
     Router.replace(`/workspaces/${newWorkspaceId}`);
   };
 
-  if (error) return <h1>Error gan</h1>;
+  const logout = () => {
+    localStorage.removeItem('accessToken');
+    Router.replace('/sign-in');
+  };
+
+  if (error) return <h1>There&apos;s an error occuring</h1>;
 
   return (
-    <StyledPage>
+    <>
       <Head>
         <title>Workspaces | Dializer</title>
       </Head>
-      <TopContainer>
-        <h1>Workspaces</h1>
-        <NewWorkspaceBtn onClick={handleNewWorkspaceBtn}>
-          <PlusIcon size={18} />
-        </NewWorkspaceBtn>
-      </TopContainer>
-      {isLoading ? (
-        <EmptyWorkspaceWrapper>
-          <Image
-            src="/no-data.svg"
-            alt="No data decorative image."
-            width={155}
-            height={155}
-            priority={true}
-            style={{ margin: 15 }}
-          />
-          <NoWorkspaceText>You have no workspace.</NoWorkspaceText>
-        </EmptyWorkspaceWrapper>
-      ) : (
-        data && (
-          <WorkspacesWrapper>
-            {data.map((workspace, idx) => {
-              console.log('updated at', workspace.updatedAt);
-              return (
-                <WorkspaceItem key={idx}>
-                  <Link href={`/workspaces/${workspace.id}`}>
-                    <h2>{workspace.title}</h2>
-                  </Link>
-                  <p>
-                    Last updated: {new Date(workspace.updatedAt).toDateString()}
-                  </p>
-                </WorkspaceItem>
-              );
-            })}
-          </WorkspacesWrapper>
-        )
-      )}
-    </StyledPage>
+
+      <div className="navbar bg-base-100 px-5 rounded-2xl shadow-md w-9/12 absolute left-1/2 top-5 -translate-x-1/2">
+        <h1 className="text-lg tracking-wider flex-1">Workspaces</h1>
+        <div>
+          <button
+            className="group btn btn-ghost btn-circle hover:bg-primary"
+            onClick={createNewWorkspace}
+          >
+            <PlusIcon
+              className="text-primary group-hover:text-base-100 transition-all"
+              size={22}
+            />
+          </button>
+
+          <div className="mr-1"></div>
+
+          <button className="rounded-full group hover:bg-base-200 transition-all">
+            <div className="dropdown dropdown-end p-0">
+              <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+                <div className="rounded-full">
+                  <UserCircle className="transition-all" size={22} />
+                </div>
+              </label>
+
+              <ul
+                tabIndex={0}
+                className="mt-1 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52"
+              >
+                <li>
+                  <a>Profile</a>
+                </li>
+                <li onClick={logout}>
+                  <a>Logout</a>
+                </li>
+              </ul>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div className="w-full h-full bg-base-200 px-10">
+        {isLoading ? (
+          <EmptyWorkspaceWrapper>
+            <Image
+              src="/no-data.svg"
+              alt="No data decorative image."
+              width={155}
+              height={155}
+              priority={true}
+              style={{ margin: 15 }}
+            />
+            <NoWorkspaceText>You have no workspace.</NoWorkspaceText>
+          </EmptyWorkspaceWrapper>
+        ) : (
+          data && (
+            <WorkspacesWrapper>
+              {data.map((workspace, idx) => {
+                console.log('updated at', workspace.updatedAt);
+                return (
+                  <WorkspaceItem key={idx}>
+                    <Link href={`/workspaces/${workspace.id}`}>
+                      <h2>{workspace.title}</h2>
+                    </Link>
+                    <p>
+                      Last updated:{' '}
+                      {new Date(workspace.updatedAt).toDateString()}
+                    </p>
+                  </WorkspaceItem>
+                );
+              })}
+            </WorkspacesWrapper>
+          )
+        )}
+      </div>
+    </>
   );
 }
-
-const StyledPage = styled.div`
-  position: absolute;
-  width: 600px;
-  height: 450px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: sans-serif;
-`;
-
-const TopContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  box-sizing: border-box;
-  padding: 10px 20px;
-  width: 100%;
-  margin-bottom: 15px;
-`;
-
-const NewWorkspaceBtn = styled.button`
-  margin: 20px;
-  border-radius: 8px;
-  border: none;
-  padding: 10px;
-  transition: 0.2s all;
-  align-self: flex-end;
-  box-sizing: border-box;
-
-  &:hover {
-    background-color: lightgrey;
-    transition: 0.2s all;
-    cursor: pointer;
-  }
-`;
 
 const EmptyWorkspaceWrapper = styled.div`
   display: flex;

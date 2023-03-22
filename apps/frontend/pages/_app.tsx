@@ -9,7 +9,7 @@ function CustomApp({ Component, pageProps }: AppProps) {
       <Head>
         <title>Welcome to Dializer!</title>
       </Head>
-      <main>
+      <main className="w-full h-screen box-border" data-theme="light">
         <Component {...pageProps} />
       </main>
       <ToastContainer position="bottom-center" />
