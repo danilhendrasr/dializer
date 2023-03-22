@@ -3,8 +3,8 @@ import { KonvaEventObject } from 'konva/lib/Node';
 import { Stage as StageClass } from 'konva/lib/Stage';
 import { Stage, Layer } from 'react-konva';
 import { Vector2d } from 'konva/lib/types';
-import { ToggleAnimationBtn } from '../components/play-animation.btn';
-import { EnvironmentPanel } from '../components/environtment-panel';
+import { ToggleAnimationBtn } from './play-animation.btn';
+import { EnvironmentPanel } from './environtment-panel';
 import { useNodesStore } from '../contexts/nodes.context';
 import {
   ConditionalNodeNextNodes,
@@ -14,18 +14,18 @@ import {
   NodeActions,
   NodeTypes,
 } from '../common/types';
-import { AddNodeBtn } from '../components/add-node.btn';
-import { SelectNodePopover } from '../components/select-node.popover';
+import { AddNodeBtn } from './add-node.btn';
+import { SelectNodePopover } from './select-node.popover';
 import { toast, ToastContainer } from 'react-toastify';
 import styled from 'styled-components';
 import 'react-toastify/dist/ReactToastify.css';
 import { nodeTypeToNode } from '../common/konva-utils';
-import { ControlPanel } from '../components/control-panel';
+import { ControlPanel } from './control-panel';
 import { Share, DeviceFloppy } from 'tabler-icons-react';
 import { EnvironmentPopover } from './env-popover';
 import { AppStateProvider } from '../contexts/app-state.context';
 import { EnvironmentContextProvider } from '../contexts/environment.context';
-import { NodeContextMenu } from '../components/node-context-menu';
+import { NodeContextMenu } from './node-context-menu';
 import { environmentReducer } from '../reducers/environment.reducer';
 import { useInterval } from 'usehooks-ts';
 import { useRouter } from 'next/router';
