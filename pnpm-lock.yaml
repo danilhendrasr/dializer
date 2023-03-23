@@ -72,6 +72,7 @@ specifiers:
   react-is: 18.2.0
   react-konva: 18.2.3
   react-konva-utils: ^0.3.0
+  react-loader-spinner: ^5.3.4
   react-test-renderer: 18.2.0
   react-toastify: ^9.1.1
   reflect-metadata: ^0.1.13
@@ -125,6 +126,7 @@ dependencies:
   react-is: 18.2.0
   react-konva: 18.2.3_ycsaxglfwmvsphhhrpeabwxklq
   react-konva-utils: 0.3.0_ycsaxglfwmvsphhhrpeabwxklq
+  react-loader-spinner: 5.3.4_biqbaboplfbrettd7655fr4n2y
   react-toastify: 9.1.1_biqbaboplfbrettd7655fr4n2y
   reflect-metadata: 0.1.13
   regenerator-runtime: 0.13.7
@@ -10195,6 +10197,19 @@ packages:
       scheduler: 0.23.0
     dev: false
 
+  /react-loader-spinner/5.3.4_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-G2vw4ssX+RDZ/vfaeva06yfNqyFViv/u+tVZ3kFLy5TKNlNx2DbuwreBSpRtPespQA+VxinxUJsigwLwG9erOg==}
+    peerDependencies:
+      react: ^16.0.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-is: 18.2.0
+      styled-components: 5.3.5_7i5myeigehqah43i5u7wbekgba
+      styled-tools: 1.7.2
+    dev: false
+
   /react-reconciler/0.29.0_react@18.2.0:
     resolution: {integrity: sha512-wa0fGj7Zht1EYMRhKWwoo1H9GApxYLBuhoAuXN0TlltESAjDssB+Apf0T/DngVqaMyPypDmabL37vw/2aRM98Q==}
     engines: {node: '>=0.10.0'}
@@ -11086,6 +11101,10 @@ packages:
       '@babel/core': 7.19.6
       client-only: 0.0.1
       react: 18.2.0
+
+  /styled-tools/1.7.2:
+    resolution: {integrity: sha512-IjLxzM20RMwAsx8M1QoRlCG/Kmq8lKzCGyospjtSXt/BTIIcvgTonaxQAsKnBrsZNwhpHzO9ADx5te0h76ILVg==}
+    dev: false
 
   /stylehacks/5.1.0_postcss@8.4.21:
     resolution: {integrity: sha512-SzLmvHQTrIWfSgljkQCw2++C9+Ne91d/6Sp92I8c5uHTcy/PgeHamwITIbBW9wnFTY/3ZfSXR9HIL6Ikqmcu6Q==}
