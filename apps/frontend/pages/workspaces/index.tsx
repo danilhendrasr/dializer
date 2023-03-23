@@ -1,7 +1,6 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
-import styled from 'styled-components';
 import { Plus as PlusIcon, UserCircle } from 'tabler-icons-react';
 import { useUnauthorizedProtection } from '../../hooks/use-unauthorized-protection.hook';
 import useSWR from 'swr';
@@ -9,6 +8,7 @@ import { useUserId } from '../../hooks/use-user-id.hook';
 import { swrFetcher } from '../../common/utils';
 import { WorkspaceEntity } from '@dializer/types';
 import Router from 'next/router';
+import { Oval } from 'react-loader-spinner';
 
 export default function Index() {
   useUnauthorizedProtection();
@@ -21,9 +21,13 @@ export default function Index() {
   const createNewWorkspace = async () => {
     const response = await fetch('http://localhost:3333/api/workspaces', {
       method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+      },
     });
 
     if (!response.ok) {
+      console.log(response.text());
       alert('Failed creating new workspace, try again in a few minutes.');
       return;
     }
@@ -45,7 +49,7 @@ export default function Index() {
         <title>Workspaces | Dializer</title>
       </Head>
 
-      <div className="navbar bg-base-100 px-5 rounded-2xl shadow-md w-9/12 absolute left-1/2 top-5 -translate-x-1/2">
+      <div className="navbar bg-base-100 px-5 shadow-sm">
         <h1 className="text-lg tracking-wider flex-1">Workspaces</h1>
         <div>
           <button
@@ -70,7 +74,7 @@ export default function Index() {
 
               <ul
                 tabIndex={0}
-                className="mt-1 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52"
+                className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52"
               >
                 <li>
                   <a>Profile</a>
@@ -84,88 +88,48 @@ export default function Index() {
         </div>
       </div>
 
-      <div className="w-full h-full bg-base-200 px-10">
+      <div className="w-full p-10">
         {isLoading ? (
-          <EmptyWorkspaceWrapper>
-            <Image
-              src="/no-data.svg"
-              alt="No data decorative image."
-              width={155}
-              height={155}
-              priority={true}
-              style={{ margin: 15 }}
-            />
-            <NoWorkspaceText>You have no workspace.</NoWorkspaceText>
-          </EmptyWorkspaceWrapper>
-        ) : (
-          data && (
-            <WorkspacesWrapper>
-              {data.map((workspace, idx) => {
-                console.log('updated at', workspace.updatedAt);
-                return (
-                  <WorkspaceItem key={idx}>
-                    <Link href={`/workspaces/${workspace.id}`}>
-                      <h2>{workspace.title}</h2>
-                    </Link>
+          <Oval
+            height={80}
+            width={80}
+            color="#570df8"
+            secondaryColor="#e5e6e6"
+            wrapperClass="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          />
+        ) : data && data.length > 0 ? (
+          <div className="grid grid-cols-3 gap-x-5">
+            {data.map((workspace, idx) => {
+              return (
+                <Link key={idx} href={`/workspaces/${workspace.id}`}>
+                  <div className="border border-base-300 hover:border-base-100 hover:bg-base-300 cursor-pointer px-5 py-3 box-border">
+                    <h2 className="font-bold">{workspace.title}</h2>
                     <p>
                       Last updated:{' '}
                       {new Date(workspace.updatedAt).toDateString()}
                     </p>
-                  </WorkspaceItem>
-                );
-              })}
-            </WorkspacesWrapper>
-          )
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <Image
+              src="/not_found.svg"
+              alt="No data decorative image."
+              width={170}
+              height={170}
+              priority={true}
+              style={{ margin: 15 }}
+            />
+            <p className="text-sm text-center leading-relaxed text-base-content my-5 font-sans">
+              Could not find any workspaces. <br /> Create one by clicking the
+              plus icon above.
+            </p>
+          </div>
         )}
       </div>
     </>
   );
 }
-
-const EmptyWorkspaceWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 10px;
-  box-sizing: border-box;
-`;
-
-const NoWorkspaceText = styled.p`
-  font-family: sans-serif;
-  color: grey;
-  font-size: 0.85rem;
-  letter-spacing: 0.5px;
-`;
-
-const WorkspacesWrapper = styled.div`
-  display: flex;
-`;
-
-const WorkspaceItem = styled.div`
-  height: fit-content;
-  width: 100%;
-  border: 1px solid lightgrey;
-  border-radius: 8px;
-  margin: 10px;
-  padding: 10px;
-
-  &:hover {
-    background-color: lightgrey;
-  }
-
-  a {
-    text-decoration: none;
-  }
-
-  h2 {
-    font-size: 0.9rem;
-    color: black;
-    margin: 0;
-  }
-
-  p {
-    margin-bottom: 0;
-    font-size: 0.7rem;
-  }
-`;
