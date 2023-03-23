@@ -1,7 +1,19 @@
-import { Body, Controller, Get, Param, Patch, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 import { ApiEndpoints } from '../../types';
 import { capitalize } from '../../utils';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdateWorkspaceNodesDTO } from './update-nodes.dto';
 import { WorkspacesService } from './workspaces.service';
 
@@ -21,10 +33,10 @@ export class WorkspacesController {
   }
 
   @Post()
-  async createNewRepo() {
-    return await this.workspacesService.createNewWorkspace(
-      '34040969-9bb8-4a3a-846e-4d45b893562d'
-    );
+  @UseGuards(JwtAuthGuard)
+  async createNewRepo(@Req() req: Request) {
+    const user = req.user as { id: string; email: string };
+    return await this.workspacesService.createNewWorkspace(user.id);
   }
 
   @Patch('/:id')
@@ -44,6 +56,7 @@ export class WorkspacesController {
       node.index = idx;
       return node;
     });
+
     return await this.workspacesService.updateWorkspaceNodes(
       workspaceId,
       nodes
