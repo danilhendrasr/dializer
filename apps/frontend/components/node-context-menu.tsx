@@ -4,7 +4,7 @@ import Draggable from 'react-draggable';
 import { useAppState } from '../contexts/app-state.context';
 import React from 'react';
 import { NodeActions, NodeTypes } from '../common/types';
-import { useNodesStore } from '../contexts/nodes.context';
+import { useFlowchartStore } from '../contexts/nodes.context';
 
 const Container = styled.div<{ x: number; y: number }>`
   position: absolute;
@@ -61,7 +61,7 @@ type Props = {
 export const NodeContextMenu: React.FC<Props> = (props) => {
   const { x, y, callerIdx } = props;
   const appState = useAppState();
-  const nodesDispatch = useNodesStore((state) => state.dispatch);
+  const nodesDispatch = useFlowchartStore((state) => state.dispatchNodeAction);
 
   const handleClose = () => {
     if (!appState || appState?.contextMenu === null) return;

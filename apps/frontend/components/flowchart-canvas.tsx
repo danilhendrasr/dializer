@@ -1,42 +1,42 @@
-import React, { useReducer, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { Stage as StageClass } from 'konva/lib/Stage';
 import { Stage, Layer } from 'react-konva';
 import { Vector2d } from 'konva/lib/types';
-import { useNodesStore } from '../contexts/nodes.context';
+import { useFlowchartStore } from '../contexts/nodes.context';
 import {
   ConditionalNodeNextNodes,
   Coordinate,
-  EnvironmentActions,
   FlowChartNode,
   NodeActions,
   NodeTypes,
 } from '../common/types';
 import { AddNodeBtn } from './add-node.btn';
 import { SelectNodePopover } from './select-node.popover';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { nodeTypeToNode } from '../common/konva-utils';
 import { EnvironmentPopover } from './env-popover';
 import { NodeContextMenu } from './node-context-menu';
-import { environmentReducer } from '../reducers/environment.reducer';
 import { useInterval } from 'usehooks-ts';
 
+// Constant used to determine how much to zoom-in and out on wheel movement
 const SCALE_BY = 1.2;
+
+// Constant used to determine how long to activate a node during animation
 const ANIMATION_PAUSE = 1000;
 
-type Props = {
-  workspaceId: string;
-};
-
-export const WorkspacePage: React.FC<Props> = (props) => {
+export const FlowchartCanvas: React.FC = () => {
   const stageRef = useRef<StageClass | null>(null);
+
+  // Currently to-be-actived node
   const curNodeIdx = useRef<number>(0);
+  // Previously activated node
   const prevNodeIdx = useRef<number>(-1);
 
-  const nodes = useNodesStore((state) => state.nodes);
-  const nodesDispatch = useNodesStore((state) => state.dispatch);
-  const [animating, setAnimation] = useState(false);
+  const nodes = useFlowchartStore((s) => s.nodes);
+  const isAnimationPlaying = useFlowchartStore((s) => s.isAnimationPlaying);
+  const toggleAnimation = useFlowchartStore((s) => s.toggleAnimation);
+  const nodesDispatch = useFlowchartStore((s) => s.dispatchNodeAction);
+
   const [selectNodePopover, setSelectNodePopover] = useState<
     Coordinate & { onNodeSelect: (nodeType: NodeTypes) => void }
   >();
@@ -44,15 +44,16 @@ export const WorkspacePage: React.FC<Props> = (props) => {
   const [newEnvPopover, setNewEnvPopover] = useState<
     Coordinate & { callerIdx: number }
   >();
+
   const [contextMenu, setContextMenu] = useState<
     Coordinate & { callerIdx: number; callerType: NodeTypes }
   >();
-  const [env, envDispatch] = useReducer(environmentReducer, {});
 
+  // Function to play the animation
   useInterval(
     () => {
       const curNode = nodes[curNodeIdx.current];
-      let nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
+      const nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
 
       nodesDispatch({
         type: NodeActions.ACTIVATE,
@@ -66,32 +67,6 @@ export const WorkspacePage: React.FC<Props> = (props) => {
         });
       }
 
-      if (curNode.content && curNode.content.includes('==')) {
-        const [varName, varComparator] = curNode.content
-          .split('==')
-          .map((str) => str.trim());
-
-        if (env && env[varName] !== parseInt(varComparator))
-          nextNodeIdx = curNode.nextIdxIfFalse;
-      } else if (curNode.content && curNode.content.includes('=')) {
-        const [newVarName, newVarVal] = curNode.content
-          .split('=')
-          .map((str) => str.trim());
-
-        envDispatch({
-          type: EnvironmentActions.ADD_NEW,
-          target: newVarName,
-          value: parseInt(newVarVal),
-        });
-      } else if (curNode.content && curNode.content.includes('++')) {
-        const [varName] = curNode.content.split('++');
-
-        envDispatch({
-          type: EnvironmentActions.INCREMENT,
-          target: varName,
-        });
-      }
-
       if (nextNodeIdx === null) {
         setTimeout(() => {
           nodesDispatch({
@@ -100,57 +75,38 @@ export const WorkspacePage: React.FC<Props> = (props) => {
           });
         }, ANIMATION_PAUSE);
 
-        setAnimation(!animating);
+        toggleAnimation();
       } else {
         prevNodeIdx.current = curNodeIdx.current;
         curNodeIdx.current = nextNodeIdx;
       }
     },
-    animating ? ANIMATION_PAUSE : null
+    isAnimationPlaying ? ANIMATION_PAUSE : null
   );
 
+  // Handle zooom-in and zoom-out of the flowchart canvas
   function zoomStage(event: KonvaEventObject<WheelEvent>) {
     event.evt.preventDefault();
-    // TODO: Return early
-    if (stageRef.current !== null) {
-      const stage = stageRef.current;
-      const oldScale = stage.scaleX();
-      const { x: pointerX, y: pointerY } =
-        stage.getPointerPosition() as Vector2d;
-      const mousePointTo = {
-        x: (pointerX - stage.x()) / oldScale,
-        y: (pointerY - stage.y()) / oldScale,
-      };
-      const newScale =
-        event.evt.deltaY > 0 ? oldScale * SCALE_BY : oldScale / SCALE_BY;
-      stage.scale({ x: newScale, y: newScale });
-      const newPos = {
-        x: pointerX - mousePointTo.x * newScale,
-        y: pointerY - mousePointTo.y * newScale,
-      };
+    if (stageRef.current === null) return;
 
-      stage.position(newPos);
-      stage.batchDraw();
-    }
+    const stage = stageRef.current;
+    const oldScale = stage.scaleX();
+    const { x: pointerX, y: pointerY } = stage.getPointerPosition() as Vector2d;
+    const mousePointTo = {
+      x: (pointerX - stage.x()) / oldScale,
+      y: (pointerY - stage.y()) / oldScale,
+    };
+    const newScale =
+      event.evt.deltaY > 0 ? oldScale * SCALE_BY : oldScale / SCALE_BY;
+    stage.scale({ x: newScale, y: newScale });
+    const newPos = {
+      x: pointerX - mousePointTo.x * newScale,
+      y: pointerY - mousePointTo.y * newScale,
+    };
+
+    stage.position(newPos);
+    stage.batchDraw();
   }
-
-  const onFlowChartPlay = () => {
-    const emptyNodesExists = nodes.some(
-      (node) =>
-        node.type !== NodeTypes.START &&
-        node.type !== NodeTypes.END &&
-        node.content === undefined
-    );
-
-    if (emptyNodesExists) {
-      toast('Cannot play flow chart while there are empty nodes.', {
-        type: 'error',
-      });
-      return;
-    }
-
-    setAnimation(!animating);
-  };
 
   return (
     <>
@@ -227,6 +183,7 @@ export const WorkspacePage: React.FC<Props> = (props) => {
               });
             })}
         </Layer>
+
         <Layer name="top-layer">
           {selectNodePopover !== undefined ? (
             <SelectNodePopover

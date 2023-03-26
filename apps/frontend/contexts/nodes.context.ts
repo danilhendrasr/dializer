@@ -4,25 +4,46 @@ import create from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 
 type NodesState = {
+  isAnimationPlaying: boolean;
   nodes: FlowChartNode[];
-  nullify: () => void;
-  reset: () => void;
-  fetch: (workspaceId: string) => void;
-  dispatch: (action: NodesReducerActionObject) => void;
+  computed: {
+    emptyNodeExists: boolean;
+  };
+  toggleAnimation: () => void;
+  nullifyNodes: () => void;
+  resetNodes: () => void;
+  fetchNodes: (workspaceId: string) => void;
+  dispatchNodeAction: (action: NodesReducerActionObject) => void;
 };
 
-export const useNodesStore = create<NodesState>()((set) => ({
+export const useFlowchartStore = create<NodesState>()((set, get) => ({
+  isAnimationPlaying: false,
   nodes: null,
-  nullify: () => set(() => ({ nodes: null })),
-  reset: () => set(() => ({ nodes: [] })),
-  fetch: async (workspaceId) => {
+  computed: {
+    get emptyNodeExists() {
+      if (get().nodes === null) return true;
+
+      return get().nodes.some(
+        (node) =>
+          node.type !== NodeTypes.START &&
+          node.type !== NodeTypes.END &&
+          node.content === undefined
+      );
+    },
+  },
+  toggleAnimation: () => {
+    set((state) => ({ isAnimationPlaying: !state.isAnimationPlaying }));
+  },
+  nullifyNodes: () => set(() => ({ nodes: null })),
+  resetNodes: () => set(() => ({ nodes: [] })),
+  fetchNodes: async (workspaceId) => {
     const data = await fetch(
       `http://localhost:3333/api/workspaces/${workspaceId}/nodes`
     );
     const nodes: FlowChartNode[] = await data.json();
     set({ nodes });
   },
-  dispatch: (action) => {
+  dispatchNodeAction: (action) => {
     set((state) => ({ nodes: nodesReducer(state.nodes, action) }));
   },
 }));

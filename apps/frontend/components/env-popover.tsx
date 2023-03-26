@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useEnvironmentContext } from '../contexts/environment.context';
 import { NodeActions, NodeTypes } from '../common/types';
-import { useNodesStore } from '../contexts/nodes.context';
+import { useFlowchartStore } from '../contexts/nodes.context';
 
 const Container = styled.div<{ x: number; y: number }>`
   position: absolute;
@@ -78,8 +78,8 @@ export const EnvironmentPopover: React.FC<Props> = (props) => {
   const { x, y, callerIdx } = props;
   const appState = useAppState();
   const environmentContext = useEnvironmentContext();
-  const nodes = useNodesStore((state) => state.nodes);
-  const nodesDispatch = useNodesStore((state) => state.dispatch);
+  const nodes = useFlowchartStore((state) => state.nodes);
+  const nodesDispatch = useFlowchartStore((state) => state.dispatchNodeAction);
   const callerType = nodes[callerIdx].type;
 
   const [textAreaVal, setTextAreaVal] = useState('');

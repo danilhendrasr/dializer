@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useUnauthorizedProtection } from '../../hooks/use-unauthorized-protection.hook';
 import { useRouter } from 'next/router';
-import { useNodesStore } from '../../contexts/nodes.context';
+import { useFlowchartStore } from '../../contexts/nodes.context';
 import { WorkspaceEntity } from '@dializer/types';
 import { ControlPanel } from '../../components/control-panel';
 import {
@@ -14,37 +14,43 @@ import {
   Share,
 } from 'tabler-icons-react';
 import Link from 'next/link';
-import { ToastContainer as Toast } from 'react-toastify';
+import useSWR from 'swr';
+import { swrFetcher } from '../../common/utils';
 
+// Dynamically load the flowchart canvas component and disable ssr for it,
+// as it requires the presence of the "window" object.
 const FlowchartCanvas = dynamic(
   () =>
-    import('../../components/workspace.page').then((mod) => mod.WorkspacePage),
+    import('../../components/flowchart-canvas').then(
+      (mod) => mod.FlowchartCanvas
+    ),
   { ssr: false }
 );
 
 export default function Workbench() {
   useUnauthorizedProtection();
   const router = useRouter();
-  const [workspace, setWorkspace] = useState<WorkspaceEntity>();
-  const fetchNodes = useNodesStore((state) => state.fetch);
-  const [isAnimationPlaying, setIsAnimationPlaying] = useState(false);
+
+  const { data: workspace } = useSWR<WorkspaceEntity>(
+    router.query['workspace-id']
+      ? `http://localhost:3333/api/workspaces/${router.query['workspace-id']}`
+      : null,
+    swrFetcher
+  );
+
+  const isAnimationPlaying = useFlowchartStore((s) => s.isAnimationPlaying);
+  const toggleAnimation = useFlowchartStore((s) => s.toggleAnimation);
+  const fetchNodes = useFlowchartStore((s) => s.fetchNodes);
 
   useEffect(() => {
     if (!router.isReady) return;
     const workspaceId = router.query['workspace-id'] as string;
     fetchNodes(workspaceId);
-
-    const fetchWorkspaceDetail = async () => {
-      const response = await fetch(
-        `http://localhost:3333/api/workspaces/${workspaceId}`
-      );
-
-      const jsonResponse = await response.json();
-      setWorkspace(jsonResponse);
-    };
-
-    fetchWorkspaceDetail();
   }, [router, fetchNodes]);
+
+  const handleFlowChartPlay = () => {
+    toggleAnimation();
+  };
 
   const handleTitleChange = async (e: React.FocusEvent<HTMLHeadingElement>) => {
     await fetch(
@@ -57,6 +63,15 @@ export default function Workbench() {
         },
       }
     );
+  };
+
+  const handleWorkspaceShare = () => {
+    navigator.clipboard.writeText(`http://localhost:4200${router.asPath}`);
+    alert('Link copied to clipboard.');
+  };
+
+  const handleWorkspaceSave = () => {
+    alert('Saved.');
   };
 
   return (
@@ -94,44 +109,40 @@ export default function Workbench() {
       <ControlPanel>
         <PlayerPlay
           size={18}
-          onClick={() => console.log('heytayo')}
-          className="cursor-pointer hover:fill-success transition hover:scale-110"
+          onClick={handleFlowChartPlay}
+          className={
+            isAnimationPlaying
+              ? 'pointer-events-none fill-base-300 text-base-300'
+              : 'cursor-pointer hover:fill-success transition hover:scale-110 active:scale-100'
+          }
         />
 
         <PlayerPause
           size={18}
-          onClick={() => console.log('testing')}
-          className="cursor-pointer hover:fill-error transition hover:scale-110"
+          onClick={toggleAnimation}
+          className={
+            !isAnimationPlaying
+              ? 'pointer-events-none fill-base-300 text-base-300'
+              : 'cursor-pointer hover:fill-error transition hover:scale-110 active:scale-100'
+          }
         />
 
         <Share
           size={18}
           cursor="pointer"
-          onClick={() => {
-            navigator.clipboard.writeText(
-              `http://localhost:4200${router.asPath}`
-            );
-
-            alert('Link copied to clipboard.');
-          }}
+          className="hover:fill-black hover:scale-110 active:scale-100 transition"
+          onClick={handleWorkspaceShare}
         />
 
         <DeviceFloppy
           size={18}
           cursor="pointer"
-          onClick={async () => {
-            alert('Saved');
-          }}
+          className="hover:fill-blue-200 hover:scale-110 active:scale-100 transition"
+          onClick={handleWorkspaceSave}
         />
       </ControlPanel>
 
-      <FlowchartCanvas workspaceId={router.query['workspace-id'] as string} />
-
-      <Toast
-        position="bottom-center"
-        theme="light"
-        className="font-sans text-black text-sm"
-      />
+      <FlowchartCanvas />
     </div>
   );
 }
