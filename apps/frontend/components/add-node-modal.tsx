@@ -10,7 +10,7 @@ type Props = {
   onCancel: () => void;
 };
 
-export const SelectNodePopover: React.FC<Props> = (props) => {
+export const AddNodeModal: React.FC<Props> = (props) => {
   const { x, y, onSelect, onCancel } = props;
 
   const padding = { x: 60, y: 15 };

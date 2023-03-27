@@ -12,17 +12,37 @@ import {
   NodeTypes,
 } from '../common/types';
 import { AddNodeBtn } from './add-node.btn';
-import { SelectNodePopover } from './select-node.popover';
-import { nodeTypeToNode } from '../common/konva-utils';
-import { EnvironmentPopover } from './env-popover';
-import { NodeContextMenu } from './node-context-menu';
+import { AddNodeModal } from './add-node-modal';
+import { ExpressionModal as ExprModal } from './expression-modal';
+import { ContextMenu } from './node-context-menu';
 import { useInterval } from 'usehooks-ts';
+import { StartEndNode } from './start-end.node';
+import { ProcessNode } from './process.node';
+import { InputNode } from './input.node';
+import { OutputNode } from './output.node';
+import { IfNode } from './if.node';
 
 // Constant used to determine how much to zoom-in and out on wheel movement
 const SCALE_BY = 1.2;
 
 // Constant used to determine how long to activate a node during animation
 const ANIMATION_PAUSE = 1000;
+
+type AddNodeModalState =
+  | (Coordinate & {
+      // Function to call when a node type is selected
+      onSelect: (nodeType: NodeTypes) => void;
+    })
+  | null;
+
+type ExprModalState = (Coordinate & { callerIdx: number }) | null;
+
+type ContextMenuState =
+  | (Coordinate & {
+      callerIdx: number;
+      callerType: NodeTypes;
+    })
+  | null;
 
 export const FlowchartCanvas: React.FC = () => {
   const stageRef = useRef<StageClass | null>(null);
@@ -37,17 +57,14 @@ export const FlowchartCanvas: React.FC = () => {
   const toggleAnimation = useFlowchartStore((s) => s.toggleAnimation);
   const nodesDispatch = useFlowchartStore((s) => s.dispatchNodeAction);
 
-  const [selectNodePopover, setSelectNodePopover] = useState<
-    Coordinate & { onNodeSelect: (nodeType: NodeTypes) => void }
-  >();
+  // MOdal used to add a new node
+  const [addNodeModal, setAddNodeModal] = useState<AddNodeModalState>(null);
 
-  const [newEnvPopover, setNewEnvPopover] = useState<
-    Coordinate & { callerIdx: number }
-  >();
+  // Modal used to add content to a node
+  const [exprModal, setExprModal] = useState<ExprModalState>(null);
 
-  const [contextMenu, setContextMenu] = useState<
-    Coordinate & { callerIdx: number; callerType: NodeTypes }
-  >();
+  // Right click context menu
+  const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
 
   // Function to play the animation
   useInterval(
@@ -132,24 +149,23 @@ export const FlowchartCanvas: React.FC = () => {
                 };
               }
 
-              const addNewNodeAtIdx = (nodeType: NodeTypes) => {
-                nodesDispatch({
-                  type: NodeActions.ADD_NEW,
-                  atIdx: idx + 1,
-                  nodeType: nodeType,
-                });
-                setSelectNodePopover(undefined);
-              };
-
               const AddNewNodeBtn = (
                 <AddNodeBtn
                   x={node.x + node.width / 2}
                   y={node.y + node.height}
                   onClick={() => {
-                    setSelectNodePopover({
-                      x: node.x,
-                      y: node.y,
-                      onNodeSelect: addNewNodeAtIdx,
+                    const pointerPos = stageRef.current.getPointerPosition();
+                    setAddNodeModal({
+                      x: pointerPos.x,
+                      y: pointerPos.y,
+                      onSelect: (nodeType: NodeTypes) => {
+                        nodesDispatch({
+                          type: NodeActions.ADD_NEW,
+                          atIdx: idx + 1,
+                          nodeType: nodeType,
+                        });
+                        setAddNodeModal(undefined);
+                      },
                     });
                   }}
                 />
@@ -158,60 +174,160 @@ export const FlowchartCanvas: React.FC = () => {
               const isTerminalNode =
                 node.type === NodeTypes.START || node.type === NodeTypes.END;
 
-              return nodeTypeToNode({
-                node,
-                addNewNodeBtn: AddNewNodeBtn,
-                key: idx,
-                nextNode: next,
-                onClick: () => {
-                  if (isTerminalNode) return;
+              // Only used in non-terminal nodes
+              const handleClick = () => {
+                if (isTerminalNode) return;
+                setExprModal({
+                  x: node.x,
+                  y: node.y,
+                  callerIdx: idx,
+                });
+              };
 
-                  setNewEnvPopover({
-                    x: node.x,
-                    y: node.y,
-                    callerIdx: idx,
-                  });
-                },
-                onRightClick: () => {
-                  setContextMenu({
-                    x: node.x,
-                    y: node.y,
-                    callerIdx: idx,
-                    callerType: node.type,
-                  });
-                },
-              });
+              // Only used in non-terminal nodes
+              const handleRightClick = () => {
+                const { x, y } = stageRef.current.getPointerPosition();
+                setContextMenu({
+                  x: x,
+                  y: y,
+                  callerIdx: idx,
+                  callerType: node.type,
+                });
+              };
+
+              switch (node.type) {
+                case NodeTypes.START:
+                case NodeTypes.END:
+                  return (
+                    <StartEndNode
+                      key={idx}
+                      x={node.x}
+                      y={node.y}
+                      width={node.width}
+                      height={node.height}
+                      isActive={node.active}
+                      type={node.type}
+                      next={next as FlowChartNode}
+                      addNewNodeBtn={AddNewNodeBtn}
+                    />
+                  );
+
+                case NodeTypes.PROCESS:
+                  return (
+                    <ProcessNode
+                      key={idx}
+                      x={node.x}
+                      y={node.y}
+                      width={node.width}
+                      height={node.height}
+                      text={node.content}
+                      isActive={node.active}
+                      next={next as FlowChartNode}
+                      addNewNodeBtn={AddNewNodeBtn}
+                      onClick={handleClick}
+                      onRightClick={handleRightClick}
+                    />
+                  );
+
+                case NodeTypes.INPUT:
+                  return (
+                    <InputNode
+                      key={idx}
+                      x={node.x}
+                      y={node.y}
+                      width={node.width}
+                      height={node.height}
+                      text={node.content}
+                      isActive={node.active}
+                      next={next as FlowChartNode}
+                      addNewNodeBtn={AddNewNodeBtn}
+                      onClick={handleClick}
+                      onRightClick={handleRightClick}
+                    />
+                  );
+
+                case NodeTypes.OUTPUT:
+                  return (
+                    <OutputNode
+                      key={idx}
+                      x={node.x}
+                      y={node.y}
+                      width={node.width}
+                      height={node.height}
+                      text={node.content}
+                      isActive={node.active}
+                      next={next as FlowChartNode}
+                      addNewNodeBtn={AddNewNodeBtn}
+                      onClick={handleClick}
+                      onRightClick={handleRightClick}
+                    />
+                  );
+
+                case NodeTypes.IF:
+                  return (
+                    <IfNode
+                      key={idx}
+                      x={node.x}
+                      y={node.y}
+                      width={node.width}
+                      height={node.height}
+                      text={node.content}
+                      isActive={node.active}
+                      next={next as ConditionalNodeNextNodes}
+                      addNewNodeBtn={AddNewNodeBtn}
+                      onClick={handleClick}
+                      onRightClick={handleRightClick}
+                    />
+                  );
+
+                default:
+                  return null;
+              }
             })}
         </Layer>
 
         <Layer name="top-layer">
-          {selectNodePopover !== undefined ? (
-            <SelectNodePopover
-              x={selectNodePopover.x - 10}
-              y={selectNodePopover.y - 10}
-              onSelect={selectNodePopover.onNodeSelect}
-              onCancel={() => setSelectNodePopover(undefined)}
+          {!addNodeModal ? null : (
+            <AddNodeModal
+              x={addNodeModal.x}
+              y={addNodeModal.y}
+              onSelect={addNodeModal.onSelect}
+              onCancel={() => setAddNodeModal(null)}
             />
-          ) : null}
+          )}
         </Layer>
       </Stage>
 
-      {newEnvPopover ? (
-        <EnvironmentPopover
-          x={newEnvPopover.x}
-          y={newEnvPopover.y}
-          callerIdx={newEnvPopover.callerIdx}
+      {!exprModal ? null : (
+        <ExprModal
+          x={exprModal.x}
+          y={exprModal.y}
+          callerIdx={exprModal.callerIdx}
+          onClose={() => setExprModal(null)}
         />
-      ) : null}
+      )}
 
-      {contextMenu ? (
-        <NodeContextMenu
+      {!contextMenu ? null : (
+        <ContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
-          callerIdx={contextMenu.callerIdx}
-          callerType={contextMenu.callerType}
-        />
-      ) : null}
+          onClose={() => setContextMenu(null)}
+        >
+          <button
+            className="btn btn-error btn-sm"
+            onClick={() => {
+              nodesDispatch({
+                atIdx: contextMenu.callerIdx,
+                type: NodeActions.DELETE,
+              });
+
+              setContextMenu(null);
+            }}
+          >
+            Delete
+          </button>
+        </ContextMenu>
+      )}
     </>
   );
 };
