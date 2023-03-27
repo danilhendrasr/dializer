@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useUnauthorizedProtection } from '../../hooks/use-unauthorized-protection.hook';
 import { useRouter } from 'next/router';
-import { useFlowchartStore } from '../../contexts/nodes.context';
+import { useFlowchartStore } from '../../stores/flowchart';
 import { WorkspaceEntity } from '@dializer/types';
 import { ControlPanel } from '../../components/control-panel';
 import {

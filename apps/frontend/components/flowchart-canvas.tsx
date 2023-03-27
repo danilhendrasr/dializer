@@ -3,7 +3,7 @@ import { KonvaEventObject } from 'konva/lib/Node';
 import { Stage as StageClass } from 'konva/lib/Stage';
 import { Stage, Layer } from 'react-konva';
 import { Vector2d } from 'konva/lib/types';
-import { useFlowchartStore } from '../contexts/nodes.context';
+import { useFlowchartStore } from '../stores/flowchart';
 import {
   ConditionalNodeNextNodes,
   Coordinate,
