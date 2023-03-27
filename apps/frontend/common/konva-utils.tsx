@@ -1,8 +1,8 @@
-import { IfNode } from '../components/if.node';
-import { InputNode } from '../components/input.node';
-import { OutputNode } from '../components/output.node';
-import { ProcessNode } from '../components/process.node';
-import { StartEndNode } from '../components/start-end.node';
+import { IfNode } from '../components/nodes/if-node';
+import { InputNode } from '../components/nodes/input-node';
+import { OutputNode } from '../components/nodes/output-node';
+import { ProcessNode } from '../components/nodes/process-node';
+import { StartEndNode } from '../components/nodes/start-end-node';
 import { ConditionalNodeNextNodes, FlowChartNode, NodeTypes } from './types';
 
 type Params = {

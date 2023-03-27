@@ -16,11 +16,11 @@ import { AddNodeModal } from './add-node-modal';
 import { ExpressionModal as ExprModal } from './expression-modal';
 import { ContextMenu } from './node-context-menu';
 import { useInterval } from 'usehooks-ts';
-import { StartEndNode } from './start-end.node';
-import { ProcessNode } from './process.node';
-import { InputNode } from './input.node';
-import { OutputNode } from './output.node';
-import { IfNode } from './if.node';
+import { StartEndNode } from './nodes/start-end-node';
+import { ProcessNode } from './nodes/process-node';
+import { InputNode } from './nodes/input-node';
+import { OutputNode } from './nodes/output-node';
+import { IfNode } from './nodes/if-node';
 
 // Constant used to determine how much to zoom-in and out on wheel movement
 const SCALE_BY = 1.2;

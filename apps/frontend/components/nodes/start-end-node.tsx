@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Arrow, Group, Rect, Text } from 'react-konva';
-import { FlowChartNode, NodeTypes } from '../common/types';
+import { FlowChartNode, NodeTypes } from '../../common/types';
 
 type Props = {
   type: NodeTypes.START | NodeTypes.END;
