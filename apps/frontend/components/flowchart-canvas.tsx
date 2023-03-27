@@ -175,7 +175,7 @@ export const FlowchartCanvas: React.FC = () => {
                 node.type === NodeTypes.START || node.type === NodeTypes.END;
 
               // Only used in non-terminal nodes
-              const handleClick = () => {
+              const handleDblClick = () => {
                 if (isTerminalNode) return;
                 setExprModal({
                   x: node.x,
@@ -224,7 +224,7 @@ export const FlowchartCanvas: React.FC = () => {
                       isActive={node.active}
                       next={next as FlowChartNode}
                       addNewNodeBtn={AddNewNodeBtn}
-                      onClick={handleClick}
+                      onDblClick={handleDblClick}
                       onRightClick={handleRightClick}
                     />
                   );
@@ -241,7 +241,7 @@ export const FlowchartCanvas: React.FC = () => {
                       isActive={node.active}
                       next={next as FlowChartNode}
                       addNewNodeBtn={AddNewNodeBtn}
-                      onClick={handleClick}
+                      onDblClick={handleDblClick}
                       onRightClick={handleRightClick}
                     />
                   );
@@ -258,7 +258,7 @@ export const FlowchartCanvas: React.FC = () => {
                       isActive={node.active}
                       next={next as FlowChartNode}
                       addNewNodeBtn={AddNewNodeBtn}
-                      onClick={handleClick}
+                      onDblClick={handleDblClick}
                       onRightClick={handleRightClick}
                     />
                   );
@@ -275,7 +275,7 @@ export const FlowchartCanvas: React.FC = () => {
                       isActive={node.active}
                       next={next as ConditionalNodeNextNodes}
                       addNewNodeBtn={AddNewNodeBtn}
-                      onClick={handleClick}
+                      onDblClick={handleDblClick}
                       onRightClick={handleRightClick}
                     />
                   );

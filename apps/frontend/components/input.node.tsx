@@ -12,7 +12,7 @@ type Props = {
   width?: number;
   height?: number;
   next?: FlowChartNode;
-  onClick?: () => void;
+  onDblClick?: () => void;
   onRightClick?: () => void;
 };
 
@@ -26,7 +26,7 @@ const InputNode: React.FC<Props> = (props) => {
     height = 50,
     next,
     addNewNodeBtn,
-    onClick,
+    onDblClick,
     onRightClick,
   } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
@@ -41,7 +41,7 @@ const InputNode: React.FC<Props> = (props) => {
     <Group
       onMouseEnter={() => setDisplayAddNodeBtn(true)}
       onMouseLeave={() => setDisplayAddNodeBtn(false)}
-      onClick={onClick}
+      onDblClick={onDblClick}
       onContextMenu={handleRightClick}
     >
       <Group>

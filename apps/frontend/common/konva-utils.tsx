@@ -48,7 +48,7 @@ export const nodeTypeToNode = (params: Params) => {
           isActive={node.active}
           next={nextNode as FlowChartNode}
           addNewNodeBtn={addNewNodeBtn}
-          onClick={onClick}
+          onDblClick={onClick}
           onRightClick={onRightClick}
         />
       );
@@ -65,7 +65,7 @@ export const nodeTypeToNode = (params: Params) => {
           isActive={node.active}
           next={nextNode as FlowChartNode}
           addNewNodeBtn={addNewNodeBtn}
-          onClick={onClick}
+          onDblClick={onClick}
           onRightClick={onRightClick}
         />
       );
@@ -82,7 +82,7 @@ export const nodeTypeToNode = (params: Params) => {
           isActive={node.active}
           next={nextNode as FlowChartNode}
           addNewNodeBtn={addNewNodeBtn}
-          onClick={onClick}
+          onDblClick={onClick}
           onRightClick={onRightClick}
         />
       );
@@ -99,7 +99,7 @@ export const nodeTypeToNode = (params: Params) => {
           isActive={node.active}
           next={nextNode as ConditionalNodeNextNodes}
           addNewNodeBtn={addNewNodeBtn}
-          onClick={onClick}
+          onDblClick={onClick}
           onRightClick={onRightClick}
         />
       );

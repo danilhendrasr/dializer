@@ -15,7 +15,7 @@ type Props = {
   addNewNodeBtn?: JSX.Element;
   width?: number;
   height?: number;
-  onClick?: () => void;
+  onDblClick?: () => void;
   onRightClick?: () => void;
 };
 
@@ -29,7 +29,7 @@ const IfNode: React.FC<Props> = (props) => {
     height = 70,
     next,
     addNewNodeBtn,
-    onClick,
+    onDblClick,
     onRightClick,
   } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
@@ -44,7 +44,7 @@ const IfNode: React.FC<Props> = (props) => {
     <Group
       onMouseEnter={() => setDisplayAddNodeBtn(true)}
       onMouseLeave={() => setDisplayAddNodeBtn(false)}
-      onClick={onClick}
+      onDblClick={onDblClick}
       onContextMenu={handleRightClick}
     >
       <Group x={x} y={y}>
