@@ -6,6 +6,7 @@ type Props = PropsWithChildren<{
   title: string;
   x: number;
   y: number;
+  className?: string;
   onClose: () => void;
 }>;
 
@@ -13,12 +14,12 @@ type Props = PropsWithChildren<{
  * Reusable modal container for the workbench page.
  */
 export const WorkbenchModal: React.FC<Props> = (props) => {
-  const { title, x, y, children, onClose } = props;
+  const { title, x, y, children, className: classNames, onClose } = props;
 
   return (
     <Draggable>
       <div
-        className={`absolute w-72 h-fit bg-base-100 shadow-md`}
+        className={`absolute w-72 h-fit bg-base-100 shadow-md ` + classNames}
         // Left and top is not set in the className because it seems in tailwind we
         // cannot use string interpolation (e.g. left-[${x}px] or top-[${y}px]).
         style={{ left: x, top: y }}

@@ -11,7 +11,13 @@ export const ContextMenu: React.FC<Props> = (props) => {
   const { x, y, children, onClose } = props;
 
   return (
-    <WorkbenchModal x={x} y={y} title="Actions" onClose={onClose}>
+    <WorkbenchModal
+      className="w-32"
+      x={x}
+      y={y}
+      title="Actions"
+      onClose={onClose}
+    >
       {children}
     </WorkbenchModal>
   );

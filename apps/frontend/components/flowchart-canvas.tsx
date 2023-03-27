@@ -12,7 +12,6 @@ import {
   NodeTypes,
 } from '../common/types';
 import { AddNodeBtn } from './add-node.btn';
-import { AddNodeModal } from './add-node-modal';
 import { ExpressionModal as ExprModal } from './expression-modal';
 import { ContextMenu } from './node-context-menu';
 import { useInterval } from 'usehooks-ts';
@@ -21,6 +20,7 @@ import { ProcessNode } from './nodes/process-node';
 import { InputNode } from './nodes/input-node';
 import { OutputNode } from './nodes/output-node';
 import { IfNode } from './nodes/if-node';
+import { NewNodeModal } from './new-node-modal';
 
 // Constant used to determine how much to zoom-in and out on wheel movement
 const SCALE_BY = 1.2;
@@ -35,12 +35,17 @@ type AddNodeModalState =
     })
   | null;
 
-type ExprModalState = (Coordinate & { callerIdx: number }) | null;
+type ExprModalState =
+  | (Coordinate & {
+      // The index of the node that was double-clicked
+      nodeIdx: number;
+    })
+  | null;
 
 type ContextMenuState =
   | (Coordinate & {
-      callerIdx: number;
-      callerType: NodeTypes;
+      // The index of the node that was right-clicked
+      nodeIdx: number;
     })
   | null;
 
@@ -125,6 +130,23 @@ export const FlowchartCanvas: React.FC = () => {
     stage.batchDraw();
   }
 
+  /**
+   * Get the position of the cursor relative to the canvas.
+   * This function should only be called ad-hoc when there is the need
+   * such as in an event handler function.
+   *
+   * @returns The position of the cursor relative to the canvas
+   */
+  const getPointerPositions = () => {
+    const pointerPos = stageRef.current.getPointerPosition();
+    // The pointer position is relative to the canvas, so we need to
+    // add the pointer's x position with the width of the side bar
+    // in order to get the correct position of the pointer relative
+    // to the window.
+    pointerPos.x = (25 / 100) * window.innerWidth + pointerPos.x;
+    return pointerPos;
+  };
+
   return (
     <>
       <Stage
@@ -154,64 +176,66 @@ export const FlowchartCanvas: React.FC = () => {
                   x={node.x + node.width / 2}
                   y={node.y + node.height}
                   onClick={() => {
-                    const pointerPos = stageRef.current.getPointerPosition();
+                    const pointerPos = getPointerPositions();
                     setAddNodeModal({
                       x: pointerPos.x,
                       y: pointerPos.y,
                       onSelect: (nodeType: NodeTypes) => {
+                        // Add new node after the current node (idx + 1)
                         nodesDispatch({
                           type: NodeActions.ADD_NEW,
                           atIdx: idx + 1,
                           nodeType: nodeType,
                         });
-                        setAddNodeModal(undefined);
+
+                        setAddNodeModal(null);
                       },
                     });
                   }}
                 />
               );
 
-              const isTerminalNode =
-                node.type === NodeTypes.START || node.type === NodeTypes.END;
+              // Return early if the node is a terminal node
+              // This is done for no particular reason, it's just easier to reason
+              // about the code this way.
+              if (
+                node.type === NodeTypes.START ||
+                node.type === NodeTypes.END
+              ) {
+                return (
+                  <StartEndNode
+                    key={idx}
+                    x={node.x}
+                    y={node.y}
+                    width={node.width}
+                    height={node.height}
+                    isActive={node.active}
+                    type={node.type}
+                    next={next as FlowChartNode}
+                    addNewNodeBtn={AddNewNodeBtn}
+                  />
+                );
+              }
 
-              // Only used in non-terminal nodes
               const handleDblClick = () => {
-                if (isTerminalNode) return;
+                const pointerPos = getPointerPositions();
                 setExprModal({
-                  x: node.x,
-                  y: node.y,
-                  callerIdx: idx,
+                  x: pointerPos.x,
+                  y: pointerPos.y,
+                  nodeIdx: idx,
                 });
               };
 
-              // Only used in non-terminal nodes
               const handleRightClick = () => {
-                const { x, y } = stageRef.current.getPointerPosition();
+                const pointerPos = getPointerPositions();
                 setContextMenu({
-                  x: x,
-                  y: y,
-                  callerIdx: idx,
-                  callerType: node.type,
+                  x: pointerPos.x,
+                  y: pointerPos.y,
+                  nodeIdx: idx,
                 });
               };
 
               switch (node.type) {
-                case NodeTypes.START:
-                case NodeTypes.END:
-                  return (
-                    <StartEndNode
-                      key={idx}
-                      x={node.x}
-                      y={node.y}
-                      width={node.width}
-                      height={node.height}
-                      isActive={node.active}
-                      type={node.type}
-                      next={next as FlowChartNode}
-                      addNewNodeBtn={AddNewNodeBtn}
-                    />
-                  );
-
                 case NodeTypes.PROCESS:
                   return (
                     <ProcessNode
@@ -286,23 +310,24 @@ export const FlowchartCanvas: React.FC = () => {
             })}
         </Layer>
 
-        <Layer name="top-layer">
-          {!addNodeModal ? null : (
-            <AddNodeModal
-              x={addNodeModal.x}
-              y={addNodeModal.y}
-              onSelect={addNodeModal.onSelect}
-              onCancel={() => setAddNodeModal(null)}
-            />
-          )}
-        </Layer>
+        {/* Any canvas element that needs to act as an overlay can attach to this layer */}
+        <Layer name="top-layer" />
       </Stage>
+
+      {!addNodeModal ? null : (
+        <NewNodeModal
+          x={addNodeModal.x}
+          y={addNodeModal.y}
+          onSelect={addNodeModal.onSelect}
+          onClose={() => setAddNodeModal(null)}
+        />
+      )}
 
       {!exprModal ? null : (
         <ExprModal
           x={exprModal.x}
           y={exprModal.y}
-          callerIdx={exprModal.callerIdx}
+          callerIdx={exprModal.nodeIdx}
           onClose={() => setExprModal(null)}
         />
       )}
@@ -317,7 +342,7 @@ export const FlowchartCanvas: React.FC = () => {
             className="btn btn-error btn-sm"
             onClick={() => {
               nodesDispatch({
-                atIdx: contextMenu.callerIdx,
+                atIdx: contextMenu.nodeIdx,
                 type: NodeActions.DELETE,
               });
 

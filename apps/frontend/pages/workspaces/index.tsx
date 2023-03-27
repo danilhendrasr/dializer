@@ -116,7 +116,7 @@ export default function Index() {
         ) : (
           <div className="flex flex-col items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <Image
-              src="/not_found.svg"
+              src="/not-found.svg"
               alt="No data decorative image."
               width={170}
               height={170}
