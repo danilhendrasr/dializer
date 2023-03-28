@@ -63,8 +63,7 @@ export class WorkspacesService {
           y: 200,
           height: 40,
           width: 100,
-          index: 0,
-          nextIdx: 1,
+          index: 1,
         },
       ],
     });
