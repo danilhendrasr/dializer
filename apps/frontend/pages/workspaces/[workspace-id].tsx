@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useUnauthorizedProtection } from '../../hooks/use-unauthorized-protection.hook';
@@ -27,6 +27,11 @@ const FlowchartCanvas = dynamic(
   { ssr: false }
 );
 
+enum SideTab {
+  Environment = 'Environment',
+  Nodes = 'Nodes',
+}
+
 export default function Workbench() {
   useUnauthorizedProtection();
   const router = useRouter();
@@ -38,6 +43,11 @@ export default function Workbench() {
     swrFetcher
   );
 
+  const [activeTab, setActiveTab] = useState(SideTab.Environment);
+
+  const terminalNoesOnly = useFlowchartStore(
+    (s) => s.computed.flowchartOnlyHasTerminalNodes
+  );
   const isAnimationPlaying = useFlowchartStore((s) => s.isAnimationPlaying);
   const toggleAnimation = useFlowchartStore((s) => s.toggleAnimation);
   const fetchNodes = useFlowchartStore((s) => s.fetchNodes);
@@ -92,17 +102,38 @@ export default function Workbench() {
             className="hover:bg-base-200 focus:bg-base-300 flex-1 box-border p-2"
             contentEditable
             onBlur={handleTitleChange}
+            suppressContentEditableWarning={true}
           >
             {workspace && workspace.title}
           </h1>
         </div>
 
         <div>
-          <h2>Nodes</h2>
-        </div>
+          <div className="tabs w-full py-1">
+            {Object.values(SideTab).map((tabName, idx) => {
+              let className = 'tab tab-bordered flex-1';
+              if (tabName === activeTab) {
+                className += ' tab-active';
+              }
 
-        <div>
-          <h2>Environments</h2>
+              return (
+                <h2
+                  key={idx}
+                  className={className}
+                  onClick={() => setActiveTab(tabName)}
+                >
+                  {tabName}
+                </h2>
+              );
+            })}
+          </div>
+          {/* Tab contents */}
+          <div className="p-5">
+            {activeTab === SideTab.Environment ? (
+              <h1>Environment Tab</h1>
+            ) : null}
+            {activeTab === SideTab.Nodes ? <h1>Nodes Tab</h1> : null}
+          </div>
         </div>
       </div>
 
@@ -111,7 +142,7 @@ export default function Workbench() {
           size={18}
           onClick={handleFlowChartPlay}
           className={
-            isAnimationPlaying
+            isAnimationPlaying || terminalNoesOnly
               ? 'pointer-events-none fill-base-300 text-base-300'
               : 'cursor-pointer hover:fill-success transition hover:scale-110 active:scale-100'
           }

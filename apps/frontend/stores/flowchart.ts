@@ -8,6 +8,7 @@ type NodesState = {
   nodes: FlowChartNode[];
   computed: {
     emptyNodeExists: boolean;
+    flowchartOnlyHasTerminalNodes: boolean;
   };
   toggleAnimation: () => void;
   nullifyNodes: () => void;
@@ -29,6 +30,11 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
           node.type !== NodeTypes.END &&
           node.content === undefined
       );
+    },
+    get flowchartOnlyHasTerminalNodes() {
+      const nodes = get().nodes;
+      if (nodes === null) return false;
+      return nodes.length === 2;
     },
   },
   toggleAnimation: () => {

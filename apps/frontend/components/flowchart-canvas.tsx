@@ -26,7 +26,7 @@ import { NewNodeModal } from './new-node-modal';
 const SCALE_BY = 1.2;
 
 // Constant used to determine how long to activate a node during animation
-const ANIMATION_PAUSE = 1000;
+const ANIMATION_PAUSE = 600;
 
 type AddNodeModalState =
   | (Coordinate & {
@@ -89,12 +89,18 @@ export const FlowchartCanvas: React.FC = () => {
         });
       }
 
-      if (nextNodeIdx === null) {
+      if (curNode === null || nextNodeIdx === null) {
+        // One last deactivation of the current node
+        // needs to be put in a setTimeout because
+        // we have to conform to the animation pause.
         setTimeout(() => {
           nodesDispatch({
             type: NodeActions.DEACTIVATE,
             atIdx: curNodeIdx.current,
           });
+
+          curNodeIdx.current = 0;
+          prevNodeIdx.current = -1;
         }, ANIMATION_PAUSE);
 
         toggleAnimation();

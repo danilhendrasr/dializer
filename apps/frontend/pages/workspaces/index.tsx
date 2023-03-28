@@ -98,7 +98,7 @@ export default function Index() {
             wrapperClass="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           />
         ) : data && data.length > 0 ? (
-          <div className="grid grid-cols-3 gap-x-5">
+          <div className="grid grid-cols-3 gap-5">
             {data.map((workspace, idx) => {
               return (
                 <Link key={idx} href={`/workspaces/${workspace.id}`}>
@@ -106,7 +106,7 @@ export default function Index() {
                     <h2 className="font-bold">{workspace.title}</h2>
                     <p>
                       Last updated:{' '}
-                      {new Date(workspace.updatedAt).toDateString()}
+                      {new Date(workspace.updatedAt).toLocaleString()}
                     </p>
                   </div>
                 </Link>
