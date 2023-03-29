@@ -17,6 +17,7 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import { swrFetcher } from '../../common/utils';
 import { toast } from 'react-toastify';
+import { AnimationState } from '../../common/types';
 
 // Dynamically load the flowchart canvas component and disable ssr for it,
 // as it requires the presence of the "window" object.
@@ -50,8 +51,9 @@ export default function Workbench() {
     (s) => s.computed.flowchartOnlyHasTerminalNodes
   );
   const thereIsUnsavedChanges = useFlowchartStore((s) => s.unsavedChangesExist);
-  const isAnimationPlaying = useFlowchartStore((s) => s.isAnimationPlaying);
-  const toggleAnimation = useFlowchartStore((s) => s.toggleAnimation);
+  const animationState = useFlowchartStore((s) => s.animationState);
+  const startAnimation = useFlowchartStore((s) => s.startAnimation);
+  const stopAnimation = useFlowchartStore((s) => s.stopAnimation);
   const fetchNodes = useFlowchartStore((s) => s.fetchNodes);
   const saveNodes = useFlowchartStore((s) => s.saveNodes);
 
@@ -60,10 +62,6 @@ export default function Workbench() {
     const workspaceId = router.query['workspace-id'] as string;
     fetchNodes(workspaceId);
   }, [router, fetchNodes]);
-
-  const handleFlowChartPlay = () => {
-    toggleAnimation();
-  };
 
   const handleTitleChange = async (e: React.FocusEvent<HTMLHeadingElement>) => {
     await fetch(
@@ -81,10 +79,6 @@ export default function Workbench() {
   const handleWorkspaceShare = () => {
     navigator.clipboard.writeText(`http://localhost:4200${router.asPath}`);
     toast('Link copied to clipboard.', { type: 'success' });
-  };
-
-  const handleWorkspaceSave = () => {
-    saveNodes(workspace.id);
   };
 
   return (
@@ -143,9 +137,11 @@ export default function Workbench() {
       <ControlPanel>
         <PlayerPlay
           size={18}
-          onClick={handleFlowChartPlay}
+          onClick={startAnimation}
           className={
-            isAnimationPlaying || terminalNodesOnly
+            animationState === AnimationState.Playing ||
+            animationState === AnimationState.TemporaryStopped ||
+            terminalNodesOnly
               ? 'pointer-events-none fill-base-300 text-base-300'
               : 'cursor-pointer hover:fill-success transition hover:scale-110 active:scale-100'
           }
@@ -153,9 +149,9 @@ export default function Workbench() {
 
         <PlayerPause
           size={18}
-          onClick={toggleAnimation}
+          onClick={stopAnimation}
           className={
-            !isAnimationPlaying
+            animationState !== AnimationState.Playing
               ? 'pointer-events-none fill-base-300 text-base-300'
               : 'cursor-pointer hover:fill-error transition hover:scale-110 active:scale-100'
           }
@@ -171,12 +167,12 @@ export default function Workbench() {
         <DeviceFloppy
           size={18}
           cursor="pointer"
+          onClick={() => saveNodes(workspace.id)}
           className={
             thereIsUnsavedChanges
               ? 'hover:fill-blue-200 hover:scale-110 active:scale-100 transition'
               : 'pointer-events-none fill-base-100 text-base-300'
           }
-          onClick={handleWorkspaceSave}
         />
       </ControlPanel>
 

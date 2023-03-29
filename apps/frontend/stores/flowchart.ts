@@ -1,17 +1,24 @@
 import { toast } from 'react-toastify';
-import { FlowChartNode, NodeActions, NodeTypes } from '../common/types';
+import {
+  AnimationState,
+  FlowChartNode,
+  NodeActions,
+  NodeTypes,
+} from '../common/types';
 import create from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 
 type NodesState = {
-  isAnimationPlaying: boolean;
-  nodes: FlowChartNode[];
+  animationState: AnimationState;
+  nodes: FlowChartNode[] | null;
   computed: {
     emptyNodeExists: boolean;
     flowchartOnlyHasTerminalNodes: boolean;
   };
   unsavedChangesExist: boolean;
-  toggleAnimation: () => void;
+  startAnimation: () => void;
+  stopAnimation: () => void;
+  stopAnimationTemporarily: () => void;
   nullifyNodes: () => void;
   resetNodes: () => void;
   fetchNodes: (workspaceId: string) => void;
@@ -20,7 +27,7 @@ type NodesState = {
 };
 
 export const useFlowchartStore = create<NodesState>()((set, get) => ({
-  isAnimationPlaying: false,
+  animationState: AnimationState.Stopped,
   nodes: null,
   computed: {
     get emptyNodeExists() {
@@ -40,8 +47,10 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
     },
   },
   unsavedChangesExist: false,
-  toggleAnimation: () => {
-    set((state) => ({ isAnimationPlaying: !state.isAnimationPlaying }));
+  startAnimation: () => set({ animationState: AnimationState.Playing }),
+  stopAnimation: () => set({ animationState: AnimationState.Stopped }),
+  stopAnimationTemporarily: () => {
+    set({ animationState: AnimationState.TemporaryStopped });
   },
   nullifyNodes: () => set(() => ({ nodes: null })),
   resetNodes: () => set(() => ({ nodes: [] })),
@@ -74,6 +83,13 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
   },
   dispatchNodeAction: (action) => {
     set((state) => ({ nodes: nodesReducer(state.nodes, action) }));
+
+    if (
+      action.type === NodeActions.ACTIVATE &&
+      get().nodes[action.atIdx].type === NodeTypes.INPUT
+    ) {
+      set({ animationState: AnimationState.TemporaryStopped });
+    }
 
     if (
       action.type !== NodeActions.ACTIVATE &&

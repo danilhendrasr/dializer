@@ -5,6 +5,7 @@ import { Stage, Layer } from 'react-konva';
 import { Vector2d } from 'konva/lib/types';
 import { useFlowchartStore } from '../stores/flowchart';
 import {
+  AnimationState,
   ConditionalNodeNextNodes,
   Coordinate,
   FlowChartNode,
@@ -58,8 +59,8 @@ export const FlowchartCanvas: React.FC = () => {
   const prevNodeIdx = useRef<number>(-1);
 
   const nodes = useFlowchartStore((s) => s.nodes);
-  const isAnimationPlaying = useFlowchartStore((s) => s.isAnimationPlaying);
-  const toggleAnimation = useFlowchartStore((s) => s.toggleAnimation);
+  const animationState = useFlowchartStore((s) => s.animationState);
+  const stopAnimation = useFlowchartStore((s) => s.stopAnimation);
   const nodesDispatch = useFlowchartStore((s) => s.dispatchNodeAction);
 
   // MOdal used to add a new node
@@ -103,13 +104,13 @@ export const FlowchartCanvas: React.FC = () => {
           prevNodeIdx.current = -1;
         }, ANIMATION_PAUSE);
 
-        toggleAnimation();
+        stopAnimation();
       } else {
         prevNodeIdx.current = curNodeIdx.current;
         curNodeIdx.current = nextNodeIdx;
       }
     },
-    isAnimationPlaying ? ANIMATION_PAUSE : null
+    animationState === AnimationState.Playing ? ANIMATION_PAUSE : null
   );
 
   // Handle zooom-in and zoom-out of the flowchart canvas

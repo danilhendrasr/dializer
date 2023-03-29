@@ -55,3 +55,9 @@ export type ConditionalNodeNextNodes = {
 export enum LocalStorageItems {
   ACCESS_TOKEN = 'accessToken',
 }
+
+export enum AnimationState {
+  Playing = 'Playing',
+  Stopped = 'Stopped',
+  TemporaryStopped = 'TemporaryStopped',
+}
