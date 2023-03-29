@@ -43,6 +43,8 @@ export interface FlowChartNode {
   // If node is of branching type, it refers to the next
   // node through this proeprty.
   nextIdxIfFalse?: number;
+
+  workspaceId: string;
 }
 
 export type ConditionalNodeNextNodes = {

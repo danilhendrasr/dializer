@@ -10,10 +10,12 @@ type NodesState = {
     emptyNodeExists: boolean;
     flowchartOnlyHasTerminalNodes: boolean;
   };
+  unsavedChangesExist: boolean;
   toggleAnimation: () => void;
   nullifyNodes: () => void;
   resetNodes: () => void;
   fetchNodes: (workspaceId: string) => void;
+  saveNodes: (workspaceId: string) => void;
   dispatchNodeAction: (action: NodesReducerActionObject) => void;
 };
 
@@ -37,6 +39,7 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
       return nodes.length === 2;
     },
   },
+  unsavedChangesExist: false,
   toggleAnimation: () => {
     set((state) => ({ isAnimationPlaying: !state.isAnimationPlaying }));
   },
@@ -49,8 +52,35 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
     const nodes: FlowChartNode[] = await data.json();
     set({ nodes });
   },
+  saveNodes: async (workspaceId) => {
+    const nodes = get().nodes;
+    const res = await fetch(
+      `http://localhost:3333/api/workspaces/${workspaceId}/nodes`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ nodes }),
+      }
+    );
+
+    if (res.ok) {
+      toast.success('Flowchart saved!');
+      set({ unsavedChangesExist: false });
+    } else {
+      toast.error('Cannot save workspace, try again later.');
+    }
+  },
   dispatchNodeAction: (action) => {
     set((state) => ({ nodes: nodesReducer(state.nodes, action) }));
+
+    if (
+      action.type !== NodeActions.ACTIVATE &&
+      action.type !== NodeActions.DEACTIVATE
+    ) {
+      set({ unsavedChangesExist: true });
+    }
   },
 }));
 
@@ -128,6 +158,8 @@ export function nodesReducer(
         nextIdx: !isNextIfNode ? action.atIdx + 1 : undefined,
         nextIdxIfTrue: isNextIfNode ? action.atIdx + 1 : undefined,
         nextIdxIfFalse: isNextIfNode ? action.atIdx - 1 : undefined,
+        // The start node always has the correct workspaceId
+        workspaceId: nodes[0].workspaceId,
       };
 
       nodes = nodes.map((node, idx) => {

@@ -16,6 +16,7 @@ import {
 import Link from 'next/link';
 import useSWR from 'swr';
 import { swrFetcher } from '../../common/utils';
+import { toast } from 'react-toastify';
 
 // Dynamically load the flowchart canvas component and disable ssr for it,
 // as it requires the presence of the "window" object.
@@ -45,12 +46,14 @@ export default function Workbench() {
 
   const [activeTab, setActiveTab] = useState(SideTab.Environment);
 
-  const terminalNoesOnly = useFlowchartStore(
+  const terminalNodesOnly = useFlowchartStore(
     (s) => s.computed.flowchartOnlyHasTerminalNodes
   );
+  const thereIsUnsavedChanges = useFlowchartStore((s) => s.unsavedChangesExist);
   const isAnimationPlaying = useFlowchartStore((s) => s.isAnimationPlaying);
   const toggleAnimation = useFlowchartStore((s) => s.toggleAnimation);
   const fetchNodes = useFlowchartStore((s) => s.fetchNodes);
+  const saveNodes = useFlowchartStore((s) => s.saveNodes);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -77,11 +80,11 @@ export default function Workbench() {
 
   const handleWorkspaceShare = () => {
     navigator.clipboard.writeText(`http://localhost:4200${router.asPath}`);
-    alert('Link copied to clipboard.');
+    toast('Link copied to clipboard.', { type: 'success' });
   };
 
   const handleWorkspaceSave = () => {
-    alert('Saved.');
+    saveNodes(workspace.id);
   };
 
   return (
@@ -142,7 +145,7 @@ export default function Workbench() {
           size={18}
           onClick={handleFlowChartPlay}
           className={
-            isAnimationPlaying || terminalNoesOnly
+            isAnimationPlaying || terminalNodesOnly
               ? 'pointer-events-none fill-base-300 text-base-300'
               : 'cursor-pointer hover:fill-success transition hover:scale-110 active:scale-100'
           }
@@ -168,7 +171,11 @@ export default function Workbench() {
         <DeviceFloppy
           size={18}
           cursor="pointer"
-          className="hover:fill-blue-200 hover:scale-110 active:scale-100 transition"
+          className={
+            thereIsUnsavedChanges
+              ? 'hover:fill-blue-200 hover:scale-110 active:scale-100 transition'
+              : 'pointer-events-none fill-base-100 text-base-300'
+          }
           onClick={handleWorkspaceSave}
         />
       </ControlPanel>

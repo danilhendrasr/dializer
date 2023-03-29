@@ -85,6 +85,10 @@ export class WorkspacesService {
   }
 
   async updateWorkspaceNodes(workspaceId: string, nodes: Node[]) {
+    // Delete existing nodes first before updating it
+    // with the new set of nodes.
+    await this.nodeRepo.delete({ workspace: { id: workspaceId } });
+
     const workspace = await this.workspaceRepo.findOne({
       where: { id: workspaceId },
       relations: { nodes: true },
