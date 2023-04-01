@@ -9,12 +9,16 @@ import { swrFetcher } from '../../common/utils';
 import { WorkspaceEntity } from '@dializer/types';
 import Router from 'next/router';
 import { Oval } from 'react-loader-spinner';
+import { useState } from 'react';
 
 export default function Index() {
   useUnauthorizedProtection();
   const userId = useUserId();
+  const [queryParams, setQueryParams] = useState('');
   const { data, isLoading, error } = useSWR<WorkspaceEntity[]>(
-    userId ? `http://localhost:3333/api/users/${userId}/workspaces` : null,
+    userId
+      ? `http://localhost:3333/api/users/${userId}/workspaces?${queryParams}`
+      : null,
     swrFetcher
   );
 
@@ -52,12 +56,21 @@ export default function Index() {
       <div className="navbar bg-base-100 px-5 shadow-sm">
         <h1 className="text-lg tracking-wider flex-1">Workspaces</h1>
         <div>
+          <div className="form-control mx-3">
+            <input
+              type="text"
+              placeholder="Search workspace"
+              className="input input-bordered input-sm w-64 transition-all"
+              onChange={(e) => setQueryParams(`search=${e.target.value}`)}
+            />
+          </div>
+
           <button
             className="group btn btn-ghost btn-circle hover:bg-primary"
             onClick={createNewWorkspace}
           >
             <PlusIcon
-              className="text-primary group-hover:text-base-100 transition-all"
+              className="text-black group-hover:text-base-100 transition-all"
               size={22}
             />
           </button>

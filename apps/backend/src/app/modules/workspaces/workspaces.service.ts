@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Workspace } from './workspace.entity';
 import { Node } from '../nodes/node.entity';
 import { NodeTypes } from '@dializer/types';
@@ -13,10 +13,14 @@ export class WorkspacesService {
     @InjectRepository(Node) private nodeRepo: Repository<Node>
   ) {}
 
-  async getUserWorkspaces(userId: string) {
+  async getUserWorkspaces(userId: string, search?: string) {
     return await this.workspaceRepo.find({
       where: {
         owner: { id: userId },
+        title: search ? ILike('%' + search + '%') : undefined,
+      },
+      order: {
+        updatedAt: 'DESC',
       },
     });
   }
