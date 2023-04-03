@@ -2,6 +2,7 @@ import { toast } from 'react-toastify';
 import {
   AnimationState,
   FlowChartNode,
+  LocalStorageItems,
   NodeActions,
   NodeTypes,
 } from '../common/types';
@@ -56,7 +57,14 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
   resetNodes: () => set(() => ({ nodes: [] })),
   fetchNodes: async (workspaceId) => {
     const data = await fetch(
-      `http://localhost:3333/api/workspaces/${workspaceId}/nodes`
+      `http://localhost:3333/api/workspaces/${workspaceId}/nodes`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem(
+            LocalStorageItems.ACCESS_TOKEN
+          )}`,
+        },
+      }
     );
     const nodes: FlowChartNode[] = await data.json();
     set({ nodes });

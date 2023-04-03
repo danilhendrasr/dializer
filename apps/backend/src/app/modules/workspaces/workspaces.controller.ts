@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { ApiEndpoints } from '../../types';
 import { capitalize } from '../../utils';
@@ -22,32 +22,38 @@ import { WorkspacesService } from './workspaces.service';
 export class WorkspacesController {
   constructor(private workspacesService: WorkspacesService) {}
 
+  @ApiOperation({ summary: 'Get one workspace by id' })
   @Get('/:id')
+  @UseGuards(JwtAuthGuard)
   async getOne(@Param('id') workspaceId: string) {
     return await this.workspacesService.getOne(workspaceId);
   }
 
+  @ApiOperation({ summary: 'Get nodes of a workspace' })
   @Get('/:id/nodes')
-  async getUserWorkspaces(@Param('id') workspaceId: string) {
+  @UseGuards(JwtAuthGuard)
+  async getNodes(@Param('id') workspaceId: string) {
     return await this.workspacesService.getWorkspaceNodes(workspaceId);
   }
 
+  @ApiOperation({ summary: 'Create new workspace' })
   @Post()
   @UseGuards(JwtAuthGuard)
-  async createNewRepo(@Req() req: Request) {
+  async create(@Req() req: Request) {
     const user = req.user as { id: string; email: string };
     return await this.workspacesService.createNewWorkspace(user.id);
   }
 
+  @ApiOperation({ summary: "Update a workspace's metadata (title, etc.)" })
   @Patch('/:id')
-  async updateWorkspace(
-    @Param('id') workspaceId: string,
-    @Body() payload: any
-  ) {
+  @UseGuards(JwtAuthGuard)
+  async updateMetadata(@Param('id') workspaceId: string, @Body() payload: any) {
     return await this.workspacesService.updateWorkspace(workspaceId, payload);
   }
 
+  @ApiOperation({ summary: "Update a workspace's nodes" })
   @Put('/:id/nodes')
+  @UseGuards(JwtAuthGuard)
   async updateNodes(
     @Param('id') workspaceId: string,
     @Body() payload: UpdateWorkspaceNodesDTO

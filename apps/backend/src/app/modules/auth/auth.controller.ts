@@ -1,9 +1,8 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiEndpoints } from '../../types';
 import { capitalize } from '../../utils';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
 import { LocalAuthGuard } from './local-auth.guard';
 import { Request } from 'express';
 import { RegisterUserDTO } from './dto/register.dto';
@@ -13,18 +12,14 @@ import { RegisterUserDTO } from './dto/register.dto';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @UseGuards(LocalAuthGuard)
+  @ApiOperation({ summary: 'User login' })
   @Post('/login')
+  @UseGuards(LocalAuthGuard)
   async login(@Req() req: Request) {
     return this.authService.login(req.user as any);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('/profile')
-  async profile(@Req() req: Request) {
-    return req.user;
-  }
-
+  @ApiOperation({ summary: 'Register new user' })
   @Post('/register')
   async register(@Body() data: RegisterUserDTO) {
     return this.authService.register(data);
