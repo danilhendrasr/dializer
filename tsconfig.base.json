@@ -15,6 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@dializer/expression-interpreter": [
+        "libs/expression-interpreter/src/index.ts"
+      ],
       "@dializer/types": ["libs/types/src/index.ts"]
     }
   },
