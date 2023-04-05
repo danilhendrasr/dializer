@@ -13,12 +13,12 @@ import Link from 'next/link';
 
 export default function SignInPage() {
   useAuthorizedProtection();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSignIn: FormEventHandler = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
+    if (!email || !password) {
       toast('Please provide complete credentials', { type: 'error' });
       return;
     }
@@ -27,7 +27,7 @@ export default function SignInPage() {
       const response = await fetch('http://localhost:3333/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({
-          username,
+          username: email,
           password,
         }),
         headers: {
@@ -54,15 +54,15 @@ export default function SignInPage() {
       <Head>
         <title>Sign In | Dializer</title>
       </Head>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3">
         <AuthTitle>Sign In</AuthTitle>
         <AuthForm onSubmit={handleSignIn}>
           <AuthInput
-            id="username"
-            name="username"
-            placeholder="Username"
-            value={username}
-            onChangeHandler={(e) => setUsername(e.target.value)}
+            id="email"
+            name="email"
+            placeholder="Email"
+            value={email}
+            onChangeHandler={(e) => setEmail(e.target.value)}
           />
           <AuthInput
             type="password"
@@ -72,7 +72,7 @@ export default function SignInPage() {
             value={password}
             onChangeHandler={(e) => setPassword(e.target.value)}
           />
-          <AuthSubmitBtn disabled={!username || !password} text="Sign in" />
+          <AuthSubmitBtn disabled={!email || !password} text="Sign in" />
         </AuthForm>
         <p className="text-sm text-center my-5 text-accent2">
           Or register{' '}
