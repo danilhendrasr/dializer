@@ -12,7 +12,7 @@ export const ContextMenu: React.FC<Props> = (props) => {
 
   return (
     <WorkbenchModal
-      className="w-32"
+      className="w-28"
       x={x}
       y={y}
       title="Actions"
