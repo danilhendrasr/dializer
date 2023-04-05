@@ -17,7 +17,7 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import { swrFetcher } from '../../common/utils';
 import { toast } from 'react-toastify';
-import { AnimationState } from '../../common/types';
+import { AnimationState, LocalStorageItems } from '../../common/types';
 
 // Dynamically load the flowchart canvas component and disable ssr for it,
 // as it requires the presence of the "window" object.
@@ -71,6 +71,9 @@ export default function Workbench() {
         body: JSON.stringify({ title: e.target.innerText }),
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem(
+            LocalStorageItems.ACCESS_TOKEN
+          )}`,
         },
       }
     );
