@@ -1,3 +1,5 @@
+import { Token } from './expression-interpreter';
+
 export enum TokenType {
   IDENTIFIER = 'identifier',
   INTEGER = 'integer',
@@ -21,4 +23,30 @@ export enum TokenType {
   TRUE = 'true',
   FALSE = 'false',
   EOF = 'eof',
+}
+
+export class Expr {}
+
+export class Literal extends Expr {
+  constructor(public value: unknown) {
+    super();
+  }
+}
+
+export class Unary extends Expr {
+  constructor(public operator: Token, public right: Expr) {
+    super();
+  }
+}
+
+export class Binary extends Expr {
+  constructor(public left: Expr, public operator: Token, public right: Expr) {
+    super();
+  }
+}
+
+export class Grouping extends Expr {
+  constructor(public expr: Expr) {
+    super();
+  }
 }

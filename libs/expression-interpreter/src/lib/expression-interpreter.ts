@@ -1,17 +1,18 @@
 import { TokenType } from './types';
+import { Expr, Binary, Unary, Grouping, Literal } from './types';
 
 /**
  * Class to hold a token data, which is its type, its text, and its literal value.
  */
-class Token {
+export class Token {
   constructor(
-    private type: TokenType,
+    public type: TokenType,
     // The string of the token
-    private text: string,
+    public text: string,
     // The string that's already processed.
     // For example, if a token is integer of value 5, its text is "5"
     // while its literal is 5 (the number).
-    private literal: unknown
+    public literal: unknown
   ) {}
 }
 
@@ -197,5 +198,146 @@ export class Tokenizer {
   private addToken(tokenType: TokenType, literal: unknown = null) {
     const text = this.getCurLexeme();
     this.tokens.push(new Token(tokenType, text, literal));
+  }
+}
+
+/** Class to parse a string of tokens. */
+export class Parser {
+  private currentPosition = 0;
+
+  constructor(private tokens: Token[]) {}
+
+  public parse() {
+    return this.expression();
+  }
+
+  private expression(): Expr {
+    return this.equality();
+  }
+
+  private equality(): Expr {
+    let expr = this.comparison();
+
+    while (this.match(TokenType.EQUALS, TokenType.NOT_EQUALS)) {
+      const operator = this.prevToken();
+      const rightExpr = this.comparison();
+      expr = new Binary(expr, operator, rightExpr);
+    }
+
+    return expr;
+  }
+
+  private comparison(): Expr {
+    let expr = this.term();
+
+    const tokensToLookFor = [
+      TokenType.GREATER_THAN,
+      TokenType.GREATER_THAN_OR_EQUAL,
+      TokenType.LESS_THAN,
+      TokenType.LESS_THAN_OR_EQUAL,
+    ];
+
+    while (this.match(...tokensToLookFor)) {
+      const operator = this.prevToken();
+      const rightExpr = this.term();
+      expr = new Binary(expr, operator, rightExpr);
+    }
+
+    return expr;
+  }
+
+  private term(): Expr {
+    let expr = this.factor();
+
+    while (this.match(TokenType.PLUS, TokenType.MINUS)) {
+      console.log('test');
+      const operator = this.prevToken();
+      const rightExpr = this.factor();
+      expr = new Binary(expr, operator, rightExpr);
+    }
+
+    return expr;
+  }
+
+  private factor(): Expr {
+    let expr = this.unary();
+
+    while (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
+      const operator = this.prevToken();
+      const rightExpr = this.unary();
+      expr = new Binary(expr, operator, rightExpr);
+    }
+
+    return expr;
+  }
+
+  private unary(): Expr {
+    if (this.match(TokenType.NOT, TokenType.MINUS)) {
+      const operator = this.prevToken();
+      const rightExpr = this.unary();
+      return new Unary(operator, rightExpr);
+    }
+
+    return this.primary();
+  }
+
+  private primary(): Expr {
+    if (this.match(TokenType.FALSE)) {
+      return new Literal(false);
+    }
+
+    if (this.match(TokenType.TRUE)) {
+      return new Literal(true);
+    }
+
+    if (this.match(TokenType.INTEGER)) {
+      return new Literal(this.prevToken().literal as number);
+    }
+
+    if (this.match(TokenType.OPEN_PARENTHESIS)) {
+      const expr = this.expression();
+
+      if (this.curToken().type === TokenType.CLOSE_PARENTHESIS) {
+        this.advancePointer();
+      } else {
+        throw new Error("Expecting ')' but not found.");
+      }
+
+      return new Grouping(expr);
+    }
+
+    throw new Error('Parsing error, expecting expression.');
+  }
+
+  private advancePointer() {
+    const curToken = this.curToken();
+    this.currentPosition++;
+    return curToken;
+  }
+
+  /** See if current token matches with one of the given token types. */
+  private match(...tokenTypes: TokenType[]) {
+    for (const type of tokenTypes) {
+      if (!this.isPointerAtEnd() && this.curToken().type === type) {
+        this.advancePointer();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private isPointerAtEnd() {
+    return this.currentPosition >= this.tokens.length;
+  }
+
+  /** See current token without advancing the pointer. */
+  private curToken() {
+    return this.tokens[this.currentPosition];
+  }
+
+  /** See the previous token without modifying the pointer. */
+  private prevToken() {
+    return this.tokens[this.currentPosition - 1];
   }
 }
