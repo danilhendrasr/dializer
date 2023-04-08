@@ -66,48 +66,48 @@ export class Tokenizer {
         break;
       case '=':
         if (this.code[this.currentPosition] === '=') {
-          this.addToken(TokenType.EQUALS);
           this.currentPosition++;
+          this.addToken(TokenType.EQUALS);
         } else {
           this.addToken(TokenType.MATCH);
         }
         break;
       case '!':
         if (this.code[this.currentPosition] === '=') {
-          this.addToken(TokenType.NOT_EQUALS);
           this.currentPosition++;
+          this.addToken(TokenType.NOT_EQUALS);
         } else {
           this.addToken(TokenType.NOT);
         }
         break;
       case '>':
         if (this.code[this.currentPosition] === '=') {
-          this.addToken(TokenType.GREATER_THAN_OR_EQUAL);
           this.currentPosition++;
+          this.addToken(TokenType.GREATER_THAN_OR_EQUAL);
         } else {
           this.addToken(TokenType.GREATER_THAN);
         }
         break;
       case '<':
         if (this.code[this.currentPosition] === '=') {
-          this.addToken(TokenType.LESS_THAN_OR_EQUAL);
           this.currentPosition++;
+          this.addToken(TokenType.LESS_THAN_OR_EQUAL);
         } else {
           this.addToken(TokenType.LESS_THAN);
         }
         break;
       case '&':
         if (this.code[this.currentPosition] === '&') {
-          this.addToken(TokenType.AND);
           this.currentPosition++;
+          this.addToken(TokenType.AND);
         } else {
           throw new Error("Unexpected character, expecting a '&'.");
         }
         break;
       case '|':
         if (this.code[this.currentPosition] === '|') {
-          this.addToken(TokenType.OR);
           this.currentPosition++;
+          this.addToken(TokenType.OR);
         } else {
           throw new Error("Unexpected character, expecting a '|'.");
         }
@@ -118,7 +118,13 @@ export class Tokenizer {
       case ')':
         this.addToken(TokenType.CLOSE_PARENTHESIS);
         break;
+      // Ignore whitespaces
       case ' ':
+      case '\r':
+      case '\t':
+        break;
+      case '"':
+        this.scanWholeString();
         break;
       default:
         if (this.isDigit(char)) {
@@ -133,7 +139,7 @@ export class Tokenizer {
 
   /** Get the current character and advance the current pointer. */
   private getCurCharAndAdvance(): string {
-    const char = this.code.charAt(this.currentPosition);
+    const char = this.code[this.currentPosition];
     this.currentPosition++;
     return char;
   }
@@ -169,6 +175,23 @@ export class Tokenizer {
     }
 
     this.addToken(TokenType.INTEGER, parseInt(this.getCurLexeme()));
+  }
+
+  /**
+   * Advance the current pointer until a corresponding " is encountered.
+   */
+  private scanWholeString() {
+    while (this.code[this.currentPosition] !== '"') {
+      this.getCurCharAndAdvance();
+    }
+
+    // Consume the closing "
+    this.getCurCharAndAdvance();
+
+    this.addToken(
+      TokenType.STRING,
+      this.code.slice(this.tokenStartPosition + 1, this.currentPosition - 1)
+    );
   }
 
   /**
@@ -212,7 +235,19 @@ export class Parser {
   }
 
   private expression(): Expr {
-    return this.equality();
+    return this.equalityChaining();
+  }
+
+  private equalityChaining(): Expr {
+    let expr = this.equality();
+
+    while (this.match(TokenType.AND, TokenType.OR)) {
+      const operator = this.prevToken();
+      const rightExpr = this.equality();
+      expr = new Binary(expr, operator, rightExpr);
+    }
+
+    return expr;
   }
 
   private equality(): Expr {
@@ -250,9 +285,18 @@ export class Parser {
     let expr = this.factor();
 
     while (this.match(TokenType.PLUS, TokenType.MINUS)) {
-      console.log('test');
       const operator = this.prevToken();
       const rightExpr = this.factor();
+
+      if (expr instanceof Literal && rightExpr instanceof Literal) {
+        if (
+          expr.type !== TokenType.INTEGER ||
+          rightExpr.type !== TokenType.INTEGER
+        ) {
+          throw new Error('Can only do arithmetic operations on numbers.');
+        }
+      }
+
       expr = new Binary(expr, operator, rightExpr);
     }
 
@@ -265,6 +309,16 @@ export class Parser {
     while (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
       const operator = this.prevToken();
       const rightExpr = this.unary();
+
+      if (expr instanceof Literal && rightExpr instanceof Literal) {
+        if (
+          expr.type !== TokenType.INTEGER ||
+          rightExpr.type !== TokenType.INTEGER
+        ) {
+          throw new Error('Can only do arithmetic operations on numbers.');
+        }
+      }
+
       expr = new Binary(expr, operator, rightExpr);
     }
 
@@ -275,6 +329,15 @@ export class Parser {
     if (this.match(TokenType.NOT, TokenType.MINUS)) {
       const operator = this.prevToken();
       const rightExpr = this.unary();
+
+      if (
+        operator.type === TokenType.MINUS &&
+        rightExpr instanceof Literal &&
+        rightExpr.type !== TokenType.INTEGER
+      ) {
+        throw new Error("Expecting a number after the '-' unary operator.");
+      }
+
       return new Unary(operator, rightExpr);
     }
 
@@ -283,15 +346,19 @@ export class Parser {
 
   private primary(): Expr {
     if (this.match(TokenType.FALSE)) {
-      return new Literal(false);
+      return new Literal(false, TokenType.FALSE);
     }
 
     if (this.match(TokenType.TRUE)) {
-      return new Literal(true);
+      return new Literal(true, TokenType.TRUE);
     }
 
     if (this.match(TokenType.INTEGER)) {
-      return new Literal(this.prevToken().literal as number);
+      return new Literal(this.prevToken().literal as number, TokenType.INTEGER);
+    }
+
+    if (this.match(TokenType.STRING)) {
+      return new Literal(this.prevToken().literal as string, TokenType.STRING);
     }
 
     if (this.match(TokenType.OPEN_PARENTHESIS)) {
@@ -339,5 +406,10 @@ export class Parser {
   /** See the previous token without modifying the pointer. */
   private prevToken() {
     return this.tokens[this.currentPosition - 1];
+  }
+
+  /** See the next token without modifying the pointer. */
+  private nextToken() {
+    return this.tokens[this.currentPosition + 1];
   }
 }
