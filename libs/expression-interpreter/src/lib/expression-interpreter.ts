@@ -1,4 +1,4 @@
-import { TokenType } from './types';
+import { Assignment, Stmt, TokenType } from './types';
 import { Expr, Binary, Unary, Grouping, Literal } from './types';
 
 /**
@@ -230,8 +230,22 @@ export class Parser {
 
   constructor(private tokens: Token[]) {}
 
-  public parse() {
+  public parse(): Stmt {
+    if (
+      this.curToken().type === TokenType.IDENTIFIER &&
+      this.nextToken().type === TokenType.MATCH
+    ) {
+      return this.assignmentStatement();
+    }
+
     return this.expression();
+  }
+
+  private assignmentStatement(): Assignment {
+    const identifier = this.prevToken();
+    this.match(TokenType.MATCH);
+    const value = this.expression();
+    return new Assignment(identifier, value);
   }
 
   private expression(): Expr {
@@ -359,6 +373,11 @@ export class Parser {
 
     if (this.match(TokenType.STRING)) {
       return new Literal(this.prevToken().literal as string, TokenType.STRING);
+    }
+
+    if (this.match(TokenType.IDENTIFIER)) {
+      // TODO: hook into the environment
+      // return new Literal(value, TokenType.INTEGER);
     }
 
     if (this.match(TokenType.OPEN_PARENTHESIS)) {

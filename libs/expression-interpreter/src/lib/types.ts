@@ -25,11 +25,24 @@ export enum TokenType {
   FALSE = 'false',
 }
 
-export class Expr {
+export class Stmt {
   public evaluate(): unknown {
     throw new Error("Method 'evaluate' needs to be implemented.");
   }
 }
+
+export class Assignment extends Stmt {
+  constructor(public identifier: Token, public value: Expr) {
+    super();
+  }
+
+  public override evaluate() {
+    // TODO: hook into the environment
+    return `${this.identifier.text} = ${this.value.evaluate()}`;
+  }
+}
+
+export class Expr extends Stmt {}
 
 export class Literal extends Expr {
   constructor(public value: unknown, public type: TokenType) {
