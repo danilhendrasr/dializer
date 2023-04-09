@@ -1,4 +1,4 @@
-import { Token } from './expression-interpreter';
+import { StoreApi } from 'zustand';
 
 export enum TokenType {
   IDENTIFIER = 'identifier',
@@ -32,24 +32,48 @@ export class Stmt {
 }
 
 export class Assignment extends Stmt {
-  constructor(public identifier: Token, public value: Expr) {
+  constructor(
+    public identifier: Token,
+    public value: Expr,
+    private envStore: StoreApi<{ variables: Record<string, unknown> }>
+  ) {
     super();
   }
 
   public override evaluate() {
-    // TODO: hook into the environment
-    return `${this.identifier.text} = ${this.value.evaluate()}`;
+    const value = this.value.evaluate();
+
+    this.envStore.setState({
+      variables: {
+        ...this.envStore.getState().variables,
+        [this.identifier.text]: value,
+      },
+    });
   }
 }
 
 export class Expr extends Stmt {}
 
 export class Literal extends Expr {
-  constructor(public value: unknown, public type: TokenType) {
+  constructor(
+    public value: unknown,
+    public type: TokenType,
+    private envStore?: StoreApi<{ variables: Record<string, unknown> }>
+  ) {
     super();
   }
 
   public override evaluate() {
+    if (this.type === TokenType.IDENTIFIER && this.envStore) {
+      if (
+        this.envStore.getState().variables[this.value as string] === undefined
+      ) {
+        throw new Error(
+          `Variable with the name "${this.value}" cannot be found.`
+        );
+      }
+    }
+
     return this.value;
   }
 }
@@ -124,4 +148,19 @@ export class Grouping extends Expr {
   public override evaluate() {
     return this.expr.evaluate();
   }
+}
+
+/**
+ * Class to hold a token data, which is its type, its text, and its literal value.
+ */
+export class Token {
+  constructor(
+    public type: TokenType,
+    // The string of the token
+    public text: string,
+    // The string that's already processed.
+    // For example, if a token is integer of value 5, its text is "5"
+    // while its literal is 5 (the number).
+    public literal: unknown
+  ) {}
 }

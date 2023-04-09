@@ -8,6 +8,7 @@ import {
 } from '../common/types';
 import create from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
+import { envStore } from './environment';
 
 type NodesState = {
   animationState: AnimationState;
@@ -49,7 +50,10 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
   },
   unsavedChangesExist: false,
   startAnimation: () => set({ animationState: AnimationState.Playing }),
-  stopAnimation: () => set({ animationState: AnimationState.Stopped }),
+  stopAnimation: () => {
+    set({ animationState: AnimationState.Stopped });
+    envStore.setState({ variables: {} });
+  },
   stopAnimationTemporarily: () => {
     set({ animationState: AnimationState.TemporaryStopped });
   },
@@ -77,6 +81,9 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem(
+            LocalStorageItems.ACCESS_TOKEN
+          )}`,
         },
         body: JSON.stringify({ nodes }),
       }

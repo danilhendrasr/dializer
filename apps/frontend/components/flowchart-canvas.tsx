@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { Stage as StageClass } from 'konva/lib/Stage';
 import { Stage, Layer } from 'react-konva';
@@ -22,6 +22,8 @@ import { InputNode } from './nodes/input-node';
 import { OutputNode } from './nodes/output-node';
 import { IfNode } from './nodes/if-node';
 import { NewNodeModal } from './new-node-modal';
+import { InterpreterContext } from '../contexts/expression-interpreter.context';
+import { toast } from 'react-toastify';
 
 // Constant used to determine how much to zoom-in and out on wheel movement
 const SCALE_BY = 1.2;
@@ -51,6 +53,7 @@ type ContextMenuState =
   | null;
 
 export const FlowchartCanvas: React.FC = () => {
+  const interpreter = useContext(InterpreterContext);
   const stageRef = useRef<StageClass | null>(null);
 
   // Currently to-be-actived node
@@ -78,16 +81,41 @@ export const FlowchartCanvas: React.FC = () => {
       const curNode = nodes[curNodeIdx.current];
       const nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
 
-      nodesDispatch({
-        type: NodeActions.ACTIVATE,
-        atIdx: curNodeIdx.current,
-      });
-
       if (prevNodeIdx.current >= 0) {
         nodesDispatch({
           type: NodeActions.DEACTIVATE,
           atIdx: prevNodeIdx.current,
         });
+      }
+
+      nodesDispatch({
+        type: NodeActions.ACTIVATE,
+        atIdx: curNodeIdx.current,
+      });
+
+      if (curNode.type === NodeTypes.PROCESS || curNode.type === NodeTypes.IF) {
+        try {
+          interpreter.interpret(curNode.content);
+        } catch (e) {
+          const err = e as Error;
+          toast(`Error: ${err.message}`, { type: 'error' });
+          stopAnimation();
+
+          // Deactivate error node after a delay
+          // TODO: Find a better way to do this
+          setTimeout(() => {
+            nodesDispatch({
+              type: NodeActions.DEACTIVATE,
+              atIdx: curNodeIdx.current,
+            });
+
+            // Reset the pointers
+            curNodeIdx.current = 0;
+            prevNodeIdx.current = -1;
+          }, 2000);
+
+          return;
+        }
       }
 
       if (curNode === null || nextNodeIdx === null) {
@@ -334,8 +362,17 @@ export const FlowchartCanvas: React.FC = () => {
         <ExprModal
           x={exprModal.x}
           y={exprModal.y}
-          callerIdx={exprModal.nodeIdx}
+          initialValue={nodes[exprModal.nodeIdx].content}
           onClose={() => setExprModal(null)}
+          onSubmit={(expressionText) => {
+            nodesDispatch({
+              atIdx: exprModal.nodeIdx,
+              type: NodeActions.CHANGE_CONTENT,
+              content: expressionText,
+            });
+
+            setExprModal(null);
+          }}
         />
       )}
 
