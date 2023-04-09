@@ -17,7 +17,7 @@ export const WorkbenchModal: React.FC<Props> = (props) => {
   const { title, x, y, children, className: classNames, onClose } = props;
 
   return (
-    <Draggable>
+    <Draggable handle="#header">
       <div
         className={`absolute w-72 h-fit bg-base-100 shadow-md ` + classNames}
         // Left and top is not set in the className because it seems in tailwind we
@@ -25,7 +25,10 @@ export const WorkbenchModal: React.FC<Props> = (props) => {
         style={{ left: x, top: y }}
       >
         {/* Panel's top section */}
-        <div className="px-3 py-1 flex items-center justify-between border-b border-base-200">
+        <div
+          className="px-3 py-1 flex items-center justify-between border-b border-base-200 cursor-grab active:cursor-grabbing"
+          id="header"
+        >
           <p className="text-sm">{title}</p>
           <X
             className="hover:bg-base-200 cursor-pointer"
