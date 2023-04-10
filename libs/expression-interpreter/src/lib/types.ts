@@ -65,13 +65,14 @@ export class Literal extends Expr {
 
   public override evaluate() {
     if (this.type === TokenType.IDENTIFIER && this.envStore) {
-      if (
-        this.envStore.getState().variables[this.value as string] === undefined
-      ) {
+      const val = this.envStore.getState().variables[this.value as string];
+      if (val === undefined) {
         throw new Error(
           `Variable with the name "${this.value}" cannot be found.`
         );
       }
+
+      return val;
     }
 
     return this.value;

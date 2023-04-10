@@ -24,6 +24,7 @@ import { IfNode } from './nodes/if-node';
 import { NewNodeModal } from './new-node-modal';
 import { InterpreterContext } from '../contexts/expression-interpreter.context';
 import { toast } from 'react-toastify';
+import { OutputModal } from './output-modal';
 
 // Constant used to determine how much to zoom-in and out on wheel movement
 const SCALE_BY = 1.2;
@@ -45,6 +46,8 @@ type ExprModalState =
     })
   | null;
 
+type OutputModalState = (Coordinate & { text: string }) | null;
+
 type ContextMenuState =
   | (Coordinate & {
       // The index of the node that was right-clicked
@@ -64,6 +67,10 @@ export const FlowchartCanvas: React.FC = () => {
   const nodes = useFlowchartStore((s) => s.nodes);
   const animationState = useFlowchartStore((s) => s.animationState);
   const stopAnimation = useFlowchartStore((s) => s.stopAnimation);
+  const stopAnimationTemporarily = useFlowchartStore(
+    (s) => s.stopAnimationTemporarily
+  );
+  const startAnimation = useFlowchartStore((s) => s.startAnimation);
   const nodesDispatch = useFlowchartStore((s) => s.dispatchNodeAction);
 
   // MOdal used to add a new node
@@ -71,6 +78,9 @@ export const FlowchartCanvas: React.FC = () => {
 
   // Modal used to add content to a node
   const [exprModal, setExprModal] = useState<ExprModalState>(null);
+
+  // Modal used to add content to a node
+  const [outputModal, setOutputModal] = useState<OutputModalState>(null);
 
   // Right click context menu
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
@@ -96,6 +106,37 @@ export const FlowchartCanvas: React.FC = () => {
       if (curNode.type === NodeTypes.PROCESS || curNode.type === NodeTypes.IF) {
         try {
           interpreter.interpret(curNode.content);
+        } catch (e) {
+          const err = e as Error;
+          toast(`Error: ${err.message}`, { type: 'error' });
+          stopAnimation();
+
+          // Deactivate error node after a delay
+          // TODO: Find a better way to do this
+          setTimeout(() => {
+            nodesDispatch({
+              type: NodeActions.DEACTIVATE,
+              atIdx: curNodeIdx.current,
+            });
+
+            // Reset the pointers
+            curNodeIdx.current = 0;
+            prevNodeIdx.current = -1;
+          }, 2000);
+
+          return;
+        }
+      }
+
+      if (curNode.type === NodeTypes.OUTPUT) {
+        try {
+          const interpretResult = interpreter.interpret(curNode.content);
+          stopAnimationTemporarily();
+          setOutputModal({
+            x: curNode.x,
+            y: curNode.y,
+            text: interpretResult as string,
+          });
         } catch (e) {
           const err = e as Error;
           toast(`Error: ${err.message}`, { type: 'error' });
@@ -355,6 +396,18 @@ export const FlowchartCanvas: React.FC = () => {
           y={addNodeModal.y}
           onSelect={addNodeModal.onSelect}
           onClose={() => setAddNodeModal(null)}
+        />
+      )}
+
+      {!outputModal ? null : (
+        <OutputModal
+          x={outputModal.x}
+          y={outputModal.y}
+          text={outputModal.text}
+          onClose={() => {
+            setOutputModal(null);
+            startAnimation();
+          }}
         />
       )}
 
