@@ -22,23 +22,25 @@ export class AuthService {
   ) {}
 
   async validateUser(
-    username: string,
+    email: string,
     pass: string
   ): Promise<Omit<User, 'password'>> {
-    const user = await this.usersService.findOneByEmail(username);
+    const user = await this.usersService.findOneByEmail(email);
 
     if (!user) {
       throw new UnauthorizedException({
-        message: 'Cannot find user with username: ' + username,
+        message: 'Email is not registered.',
       });
     }
 
-    if (user.password === pass) {
-      delete user.password;
-      return user;
+    if (user.password !== pass) {
+      throw new UnauthorizedException({
+        message: 'Invalid credentials.',
+      });
     }
 
-    return null;
+    delete user.password;
+    return user;
   }
 
   async login(user: User) {
