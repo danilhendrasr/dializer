@@ -14,6 +14,7 @@ export class Parser {
   public parse(): Stmt {
     if (
       this.curToken().type === TokenType.IDENTIFIER &&
+      this.nextToken() &&
       this.nextToken().type === TokenType.MATCH
     ) {
       return this.assignmentStatement();
