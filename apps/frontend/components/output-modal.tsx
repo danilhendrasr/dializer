@@ -23,13 +23,7 @@ export const OutputModal: React.FC<Props> = (props) => {
       onClose={onClose}
       title="Output"
     >
-      <p className="text-xs my-1">{text}</p>
-      <input
-        className="btn btn-primary btn-sm mt-2"
-        type="submit"
-        value="OK"
-        onClick={onClose}
-      />
+      <p className="text-base my-1">{text}</p>
     </WorkbenchModal>
   );
 };
