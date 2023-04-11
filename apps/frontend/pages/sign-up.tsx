@@ -15,11 +15,13 @@ export default function SignUpPage() {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [isSubmittingData, setIsSubmitting] = useState(false);
 
   const isComplete = email && password && firstName;
 
   const handleSignUp: FormEventHandler = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     if (!isComplete) {
       toast('Please provide complete credentials', { type: 'error' });
@@ -41,7 +43,7 @@ export default function SignUpPage() {
       });
 
       const jsonResponse = await response.json();
-      if (!response.ok) throw new Error(jsonResponse);
+      if (!response.ok) throw new Error(jsonResponse.message);
 
       localStorage.setItem(
         LocalStorageItems.ACCESS_TOKEN,
@@ -51,6 +53,7 @@ export default function SignUpPage() {
       Router.replace('/workspaces');
     } catch (error) {
       toast(error, { type: 'error' });
+      setIsSubmitting(false);
     }
   };
 
@@ -87,7 +90,11 @@ export default function SignUpPage() {
           value={password}
           onChangeHandler={(e) => setPassword(e.target.value)}
         />
-        <AuthSubmitBtn disabled={!isComplete} text="Sign up" />
+        <AuthSubmitBtn
+          isSubmitting={isSubmittingData}
+          disabled={!isComplete}
+          text={isSubmittingData ? 'Signing Up...' : 'Sign up'}
+        />
       </AuthForm>
       <p className="text-sm text-center my-5 text-accent2">
         Or{' '}
