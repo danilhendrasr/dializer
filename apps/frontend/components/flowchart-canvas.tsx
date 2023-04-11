@@ -133,7 +133,7 @@ export const FlowchartCanvas: React.FC = () => {
           const interpretResult = interpreter.interpret(curNode.content);
           stopAnimationTemporarily();
           setOutputModal({
-            x: curNode.x,
+            x: curNode.x + (25 / 100) * window.innerWidth,
             y: curNode.y,
             text: interpretResult as string,
           });
