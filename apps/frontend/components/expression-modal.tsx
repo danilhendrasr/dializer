@@ -7,6 +7,7 @@ type Props = {
   y: number;
   // Supply this props if node already has a text
   initialValue?: string;
+  placeholder?: string;
   onClose: () => void;
   onSubmit: (expression: string) => void;
 };
@@ -16,7 +17,7 @@ type Props = {
  * Primarily used to input expressions for the flowchart nodes' content.
  */
 export const ExpressionModal: React.FC<Props> = (props) => {
-  const { x, y, initialValue, onClose, onSubmit } = props;
+  const { x, y, initialValue, placeholder, onClose, onSubmit } = props;
 
   const interpreter = useContext(InterpreterContext);
   const [expression, setExpression] = useState(initialValue ?? '');
@@ -29,6 +30,7 @@ export const ExpressionModal: React.FC<Props> = (props) => {
       onSubmit(expression);
     } catch (e) {
       const err = (e as Error).message;
+      console.error(err);
       setErr(err);
     }
   };
@@ -39,7 +41,7 @@ export const ExpressionModal: React.FC<Props> = (props) => {
         <textarea
           className="w-full h-14 px-3 py-2 font-sans text-sm border border-base-200"
           id="expression-textarea"
-          placeholder="testing = 3"
+          placeholder={placeholder ?? 'testing = 3'}
           value={expression}
           onChange={(e) => {
             if (err) setErr(null);

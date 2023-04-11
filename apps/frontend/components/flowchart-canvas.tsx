@@ -25,6 +25,7 @@ import { NewNodeModal } from './new-node-modal';
 import { InterpreterContext } from '../contexts/expression-interpreter.context';
 import { toast } from 'react-toastify';
 import { OutputModal } from './output-modal';
+import { InputModal } from './input-modal';
 
 // Constant used to determine how much to zoom-in and out on wheel movement
 const SCALE_BY = 1.2;
@@ -47,6 +48,20 @@ type ExprModalState =
   | null;
 
 type OutputModalState = (Coordinate & { text: string }) | null;
+
+type InputModalState =
+  | (Coordinate & {
+      // The index of the node that was double-clicked
+      nodeIdx: number;
+    })
+  | null;
+
+type RuntimeInputModalState =
+  | (Coordinate & {
+      // The index of the node that was double-clicked
+      nodeIdx: number;
+    })
+  | null;
 
 type ContextMenuState =
   | (Coordinate & {
@@ -79,8 +94,15 @@ export const FlowchartCanvas: React.FC = () => {
   // Modal used to add content to a node
   const [exprModal, setExprModal] = useState<ExprModalState>(null);
 
-  // Modal used to add content to a node
+  // Modal used to display outputs
   const [outputModal, setOutputModal] = useState<OutputModalState>(null);
+
+  // Modal used for user to select to which variable to store the input
+  const [inputModal, setInputModal] = useState<InputModalState>(null);
+
+  // Modal used for user to select to which variable to store the input
+  const [runtimeInputModal, setRuntimeInputModal] =
+    useState<RuntimeInputModalState>(null);
 
   // Right click context menu
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
@@ -157,6 +179,13 @@ export const FlowchartCanvas: React.FC = () => {
 
           return;
         }
+      } else if (curNode.type === NodeTypes.INPUT) {
+        stopAnimationTemporarily();
+        setRuntimeInputModal({
+          x: curNode.x + (25 / 100) * window.innerWidth,
+          y: curNode.y,
+          nodeIdx: curNodeIdx.current,
+        });
       }
 
       if (curNode === null || nextNodeIdx === null) {
@@ -295,11 +324,19 @@ export const FlowchartCanvas: React.FC = () => {
 
               const handleDblClick = () => {
                 const pointerPos = getPointerPositions();
-                setExprModal({
-                  x: pointerPos.x,
-                  y: pointerPos.y,
-                  nodeIdx: idx,
-                });
+                if (node.type === NodeTypes.INPUT) {
+                  setInputModal({
+                    x: pointerPos.x,
+                    y: pointerPos.y,
+                    nodeIdx: idx,
+                  });
+                } else {
+                  setExprModal({
+                    x: pointerPos.x,
+                    y: pointerPos.y,
+                    nodeIdx: idx,
+                  });
+                }
               };
 
               const handleRightClick = () => {
@@ -407,6 +444,59 @@ export const FlowchartCanvas: React.FC = () => {
           onClose={() => {
             setOutputModal(null);
             startAnimation();
+          }}
+        />
+      )}
+
+      {!inputModal ? null : (
+        <InputModal
+          x={inputModal.x}
+          y={inputModal.y}
+          onClose={() => setInputModal(null)}
+          onSave={(variableName) => {
+            nodesDispatch({
+              type: NodeActions.CHANGE_CONTENT,
+              content: variableName,
+              atIdx: inputModal.nodeIdx,
+            });
+
+            setInputModal(null);
+          }}
+        />
+      )}
+
+      {!runtimeInputModal ? null : (
+        <ExprModal
+          x={runtimeInputModal.x}
+          y={runtimeInputModal.y}
+          placeholder="Enter expression"
+          onClose={() => setRuntimeInputModal(null)}
+          onSubmit={(expression) => {
+            try {
+              const existingContent = nodes[runtimeInputModal.nodeIdx].content;
+              interpreter.parse(expression);
+              startAnimation();
+              const fullExpr = `${existingContent} = ${expression}`;
+              interpreter.interpret(fullExpr);
+            } catch (e) {
+              const err = e as Error;
+              toast(`Error: ${err.message}`, { type: 'error' });
+              stopAnimation();
+
+              // Deactivate error node after a delay
+              // TODO: Find a better way to do this
+              setTimeout(() => {
+                nodesDispatch({
+                  type: NodeActions.DEACTIVATE,
+                  atIdx: curNodeIdx.current,
+                });
+
+                // Reset the pointers
+                curNodeIdx.current = 0;
+                prevNodeIdx.current = -1;
+              }, 2000);
+            }
+            setRuntimeInputModal(null);
           }}
         />
       )}
