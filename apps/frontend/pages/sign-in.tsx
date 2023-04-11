@@ -15,9 +15,11 @@ export default function SignInPage() {
   useAuthorizedProtection();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmittingData, setIsSubmitting] = useState(false);
 
   const handleSignIn: FormEventHandler = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     if (!email || !password) {
       toast('Please provide complete credentials', { type: 'error' });
       return;
@@ -36,7 +38,7 @@ export default function SignInPage() {
       });
 
       const jsonResponse = await response.json();
-      if (!response.ok) throw new Error(jsonResponse);
+      if (!response.ok) throw new Error(jsonResponse.message);
 
       localStorage.setItem(
         LocalStorageItems.ACCESS_TOKEN,
@@ -45,7 +47,9 @@ export default function SignInPage() {
 
       Router.replace('/workspaces');
     } catch (error) {
-      toast(error, { type: 'error' });
+      const err = error as { statusCode: number; message: string };
+      toast(err.message, { type: 'error' });
+      setIsSubmitting(false);
     }
   };
 
@@ -72,7 +76,11 @@ export default function SignInPage() {
             value={password}
             onChangeHandler={(e) => setPassword(e.target.value)}
           />
-          <AuthSubmitBtn disabled={!email || !password} text="Sign in" />
+          <AuthSubmitBtn
+            isSubmitting={isSubmittingData}
+            disabled={!email || !password || isSubmittingData}
+            text={isSubmittingData ? 'Signin In...' : 'Sign in'}
+          />
         </AuthForm>
         <p className="text-sm text-center my-5 text-accent2">
           Or register{' '}
