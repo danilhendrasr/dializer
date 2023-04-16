@@ -8,6 +8,7 @@ import { LocalStorageItems } from '../common/types';
 import Router from 'next/router';
 import { useAuthorizedProtection } from '../hooks/use-authorized-protection.hook';
 import Link from 'next/link';
+import Head from 'next/head';
 
 export default function SignUpPage() {
   useAuthorizedProtection();
@@ -58,54 +59,60 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3">
-      <AuthTitle>Sign Up</AuthTitle>
-      <AuthForm onSubmit={handleSignUp}>
-        <AuthInput
-          id="firstName"
-          name="firstName"
-          placeholder="First Name"
-          value={firstName}
-          onChangeHandler={(e) => setFirstName(e.target.value)}
-        />
-        <AuthInput
-          id="lastName"
-          name="lastName"
-          placeholder="Last Name"
-          value={lastName}
-          onChangeHandler={(e) => setLastName(e.target.value)}
-        />
-        <AuthInput
-          id="email"
-          name="email"
-          placeholder="Email"
-          value={email}
-          onChangeHandler={(e) => setEmail(e.target.value)}
-        />
-        <AuthInput
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Password"
-          value={password}
-          onChangeHandler={(e) => setPassword(e.target.value)}
-        />
-        <AuthSubmitBtn
-          isSubmitting={isSubmittingData}
-          disabled={!isComplete}
-          text={isSubmittingData ? 'Signing Up...' : 'Sign up'}
-        />
-      </AuthForm>
-      <p className="text-sm text-center my-5 text-accent2">
-        Or{' '}
-        <Link
-          href="/sign-in"
-          className="text-accent1 underline hover:no-underline hover:text-secondary"
-        >
-          sign in
-        </Link>{' '}
-        instead.
-      </p>
-    </div>
+    <>
+      <Head>
+        <title>Sign Up | Dializer</title>
+      </Head>
+
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3">
+        <AuthTitle>Sign Up</AuthTitle>
+        <AuthForm onSubmit={handleSignUp}>
+          <AuthInput
+            id="firstName"
+            name="firstName"
+            placeholder="First Name"
+            value={firstName}
+            onChangeHandler={(e) => setFirstName(e.target.value)}
+          />
+          <AuthInput
+            id="lastName"
+            name="lastName"
+            placeholder="Last Name"
+            value={lastName}
+            onChangeHandler={(e) => setLastName(e.target.value)}
+          />
+          <AuthInput
+            id="email"
+            name="email"
+            placeholder="Email"
+            value={email}
+            onChangeHandler={(e) => setEmail(e.target.value)}
+          />
+          <AuthInput
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Password"
+            value={password}
+            onChangeHandler={(e) => setPassword(e.target.value)}
+          />
+          <AuthSubmitBtn
+            isSubmitting={isSubmittingData}
+            disabled={!isComplete}
+            text={isSubmittingData ? 'Signing Up...' : 'Sign up'}
+          />
+        </AuthForm>
+        <p className="text-sm text-center my-5 text-accent2">
+          Or{' '}
+          <Link
+            href="/sign-in"
+            className="text-accent1 underline hover:no-underline hover:text-secondary"
+          >
+            sign in
+          </Link>{' '}
+          instead.
+        </p>
+      </div>
+    </>
   );
 }
