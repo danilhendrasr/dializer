@@ -8,7 +8,11 @@ function CustomApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Welcome to Dializer!</title>
+        <link
+          rel="shortcut icon"
+          href="dializer-logo-round-white.png"
+          type="image/x-icon"
+        />
       </Head>
       <main className="w-full h-screen box-border" data-theme="light">
         <Component {...pageProps} />
