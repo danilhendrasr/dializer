@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  Param,
+  Query,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiEndpoints } from '../../types';
 import { capitalize } from '../../utils';
@@ -25,8 +33,8 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Get user profile' })
-  @Get('/:id/profile')
-  @UseGuards(JwtAuthGuard)
+  @Get('/:id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async getProfile(@Param('id') userId: string) {
     return this.usersService.findOne({ id: userId });
   }

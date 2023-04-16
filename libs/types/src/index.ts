@@ -7,11 +7,20 @@ export enum NodeTypes {
   IF = 'if',
 }
 
-export interface WorkspaceEntity {
+export type WorkspaceEntity = {
   id: string;
   title: string;
   description?: string;
   isPublic: boolean;
   createdAt: Date;
   updatedAt: Date;
-}
+};
+
+export type UserEntity = {
+  id: string;
+  fullName: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
