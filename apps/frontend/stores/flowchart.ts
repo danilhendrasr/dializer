@@ -61,7 +61,7 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
   resetNodes: () => set(() => ({ nodes: [] })),
   fetchNodes: async (workspaceId) => {
     const data = await fetch(
-      `http://localhost:3333/api/workspaces/${workspaceId}/nodes`,
+      `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${workspaceId}/nodes`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem(
@@ -76,7 +76,7 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
   saveNodes: async (workspaceId) => {
     const nodes = get().nodes;
     const res = await fetch(
-      `http://localhost:3333/api/workspaces/${workspaceId}/nodes`,
+      `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${workspaceId}/nodes`,
       {
         method: 'PUT',
         headers: {

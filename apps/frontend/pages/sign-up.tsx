@@ -30,18 +30,21 @@ export default function SignUpPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:3333/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          firstName,
-          lastName,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            firstName,
+            lastName,
+          }),
+        }
+      );
 
       const jsonResponse = await response.json();
       if (!response.ok) throw new Error(jsonResponse.message);

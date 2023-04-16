@@ -15,8 +15,8 @@ import { LocalStorageItems } from '../common/types';
 
 export default function ProfilePage() {
   const userId = useUserId();
-  const { data, isLoading, error } = useSWR<UserEntity>(
-    userId ? `http://localhost:3333/api/users/${userId}` : null,
+  const { data, isLoading } = useSWR<UserEntity>(
+    userId ? `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}` : null,
     swrFetcher
   );
 
@@ -36,19 +36,22 @@ export default function ProfilePage() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`http://localhost:3333/api/users/${userId}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem(
-            LocalStorageItems.ACCESS_TOKEN
-          )}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fullName: name,
-          email,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem(
+              LocalStorageItems.ACCESS_TOKEN
+            )}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fullName: name,
+            email,
+          }),
+        }
+      );
 
       if (!res.ok) {
         const jsonResp = (await res.json()) as { message: string };

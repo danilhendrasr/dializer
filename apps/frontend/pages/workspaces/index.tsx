@@ -18,18 +18,21 @@ export default function Index() {
   const [queryParams, setQueryParams] = useState('');
   const { data, isLoading, error } = useSWR<WorkspaceEntity[]>(
     userId
-      ? `http://localhost:3333/api/users/${userId}/workspaces?${queryParams}`
+      ? `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/workspaces?${queryParams}`
       : null,
     swrFetcher
   );
 
   const createNewWorkspace = async () => {
-    const response = await fetch('http://localhost:3333/api/workspaces', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-      },
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/workspaces`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       console.log(response.text());

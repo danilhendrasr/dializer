@@ -43,7 +43,7 @@ export default function Workbench() {
 
   const { data: workspace } = useSWR<WorkspaceEntity>(
     router.query['workspace-id']
-      ? `http://localhost:3333/api/workspaces/${router.query['workspace-id']}`
+      ? `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${router.query['workspace-id']}`
       : null,
     swrFetcher
   );
@@ -72,7 +72,7 @@ export default function Workbench() {
 
   const handleTitleChange = async (e: React.FocusEvent<HTMLHeadingElement>) => {
     await fetch(
-      `http://localhost:3333/api/workspaces/${router.query['workspace-id']}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${router.query['workspace-id']}`,
       {
         method: 'PATCH',
         body: JSON.stringify({ title: e.target.innerText }),
@@ -87,7 +87,9 @@ export default function Workbench() {
   };
 
   const handleWorkspaceShare = () => {
-    navigator.clipboard.writeText(`http://localhost:4200${router.asPath}`);
+    navigator.clipboard.writeText(
+      `${process.env.NEXT_PUBLIC_APP_HOST}${router.asPath}`
+    );
     toast('Link copied to clipboard.', { type: 'success' });
   };
 

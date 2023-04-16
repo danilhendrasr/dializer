@@ -26,16 +26,19 @@ export default function SignInPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:3333/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({
-          username: email,
-          password,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            username: email,
+            password,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       const jsonResponse = await response.json();
       if (!response.ok) throw new Error(jsonResponse.message);
