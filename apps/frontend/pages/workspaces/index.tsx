@@ -10,6 +10,7 @@ import { WorkspaceEntity } from '@dializer/types';
 import Router from 'next/router';
 import { Oval } from 'react-loader-spinner';
 import { useState } from 'react';
+import { LocalStorageItems } from 'apps/frontend/common/types';
 
 export default function Index() {
   useUnauthorizedProtection();
@@ -41,7 +42,7 @@ export default function Index() {
   };
 
   const logout = () => {
-    localStorage.removeItem('accessToken');
+    localStorage.removeItem(LocalStorageItems.ACCESS_TOKEN);
     Router.replace('/sign-in');
   };
 
@@ -54,7 +55,16 @@ export default function Index() {
       </Head>
 
       <div className="navbar bg-base-100 px-5 shadow-sm">
-        <h1 className="text-lg tracking-wider flex-1">Workspaces</h1>
+        <div className="flex-1">
+          <Image
+            src={'/dializer-logo.svg'}
+            alt="Dializer logo"
+            width={40}
+            height={40}
+          />
+          <div className="mx-2"></div>
+          <h1 className="text-lg tracking-wider">Workspaces</h1>
+        </div>
         <div>
           <div className="form-control mx-3">
             <input
