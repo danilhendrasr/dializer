@@ -8,9 +8,10 @@ import { AuthForm } from '../components/auth-form';
 import { AuthInput } from '../components/auth-input';
 import { Oval } from 'react-loader-spinner';
 import { AuthSubmitBtn } from '../components/auth-submit';
-import { ArrowLeft, Edit } from 'tabler-icons-react';
+import { ArrowLeft, Edit, X } from 'tabler-icons-react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
+import { LocalStorageItems } from '../common/types';
 
 export default function ProfilePage() {
   const userId = useUserId();
@@ -20,11 +21,48 @@ export default function ProfilePage() {
   );
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = useState(data?.fullName ?? '');
+  const [email, setEmail] = useState(data?.email ?? '');
 
-  const handleEditSave: FormEventHandler<HTMLFormElement> = (e) => {
+  useEffect(() => {
+    if (!data) return;
+    setName(data.fullName);
+    setEmail(data.email);
+  }, [data]);
+
+  const handleEditSave: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    toast('Changes saved successfully.', { type: 'success' });
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch(`http://localhost:3333/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem(
+            LocalStorageItems.ACCESS_TOKEN
+          )}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: name,
+          email,
+        }),
+      });
+
+      if (!res.ok) {
+        const jsonResp = (await res.json()) as { message: string };
+        throw new Error(jsonResp.message);
+      }
+
+      toast('Profile updated successfully.', { type: 'success' });
+    } catch (e) {
+      const err = e as Error;
+      toast(err.message, { type: 'error' });
+    }
+
     setIsEditing(false);
+    setIsSubmitting(false);
   };
 
   if (!data || isLoading) {
@@ -56,7 +94,13 @@ export default function ProfilePage() {
             </Link>
             <h1 className="text-2xl">Personal Data</h1>
           </div>
-          {isEditing ? null : (
+          {isEditing ? (
+            <X
+              className="cursor-pointer hover:bg-base-200 active:scale-95"
+              size={20}
+              onClick={() => setIsEditing(false)}
+            />
+          ) : (
             <Edit
               className="cursor-pointer hover:bg-base-200 active:scale-95"
               size={20}
@@ -71,8 +115,8 @@ export default function ProfilePage() {
             </label>
             <AuthInput
               type="text"
-              value={data.fullName}
-              onChangeHandler={() => console.log('Name changes')}
+              value={name}
+              onChangeHandler={(e) => setName(e.target.value)}
               disabled={!isEditing}
             />
           </div>
@@ -82,17 +126,13 @@ export default function ProfilePage() {
             </label>
             <AuthInput
               type="email"
-              value={data.email}
-              onChangeHandler={() => console.log('Email changes')}
+              value={email}
+              onChangeHandler={(e) => setEmail(e.target.value)}
               disabled={!isEditing}
             />
           </div>
           {!isEditing ? null : (
-            <AuthSubmitBtn
-              text="Simpan"
-              isSubmitting={false}
-              disabled={false}
-            />
+            <AuthSubmitBtn text="Save" isSubmitting={isSubmitting} />
           )}
         </AuthForm>
       </div>

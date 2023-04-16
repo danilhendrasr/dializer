@@ -1,8 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { Workspace } from '../workspaces/workspace.entity';
 import { User } from './user.entity';
+import { EditProfileDTO } from './dto/edit-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -35,5 +40,27 @@ export class UsersService {
 
   async create(user: User) {
     return await this.userRepo.save(user);
+  }
+
+  async updateUser(userId: string, payload?: EditProfileDTO) {
+    if (!payload) {
+      throw new BadRequestException(
+        'Cannot update user data with using empty payload.'
+      );
+    }
+
+    const user = await this.findOneById(userId);
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} cannot be found.`);
+    }
+
+    const updatedUser = this.userRepo.create({
+      ...user,
+      ...payload,
+      updatedAt: new Date(),
+    });
+
+    return await this.userRepo.save(updatedUser);
   }
 }

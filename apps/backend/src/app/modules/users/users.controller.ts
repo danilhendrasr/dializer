@@ -1,8 +1,10 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
+  Put,
   Query,
   UseGuards,
   UseInterceptors,
@@ -13,6 +15,7 @@ import { capitalize } from '../../utils';
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
+import { EditProfileDTO } from './dto/edit-profile.dto';
 
 @Controller(ApiEndpoints.USERS)
 @ApiTags(capitalize(ApiEndpoints.USERS))
@@ -37,5 +40,16 @@ export class UsersController {
   @UseInterceptors(ClassSerializerInterceptor)
   async getProfile(@Param('id') userId: string) {
     return this.usersService.findOne({ id: userId });
+  }
+
+  @ApiOperation({ summary: 'Edit user profile' })
+  @Put('/:id')
+  @UseGuards(JwtAuthGuard)
+  async editProfile(
+    @Param('id') userId: string,
+    @Body() payload: EditProfileDTO
+  ) {
+    console.log('payload', payload);
+    return this.usersService.updateUser(userId, payload);
   }
 }

@@ -1,5 +1,5 @@
 type AuthSubmitBtnProps = {
-  disabled: boolean;
+  disabled?: boolean;
   text: string;
   isSubmitting: boolean;
 };
