@@ -24,6 +24,8 @@ export default function ProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState(data?.fullName ?? '');
   const [email, setEmail] = useState(data?.email ?? '');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
     if (!data) return;
@@ -34,6 +36,14 @@ export default function ProfilePage() {
   const handleEditSave: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    if (password !== confirmPassword) {
+      toast('Password and confirmed password does not match.', {
+        type: 'error',
+      });
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const res = await fetch(
@@ -49,6 +59,7 @@ export default function ProfilePage() {
           body: JSON.stringify({
             fullName: name,
             email,
+            password,
           }),
         }
       );
@@ -59,12 +70,12 @@ export default function ProfilePage() {
       }
 
       toast('Profile updated successfully.', { type: 'success' });
+      setIsEditing(false);
     } catch (e) {
       const err = e as Error;
       toast(err.message, { type: 'error' });
     }
 
-    setIsEditing(false);
     setIsSubmitting(false);
   };
 
@@ -131,6 +142,28 @@ export default function ProfilePage() {
               type="email"
               value={email}
               onChangeHandler={(e) => setEmail(e.target.value)}
+              disabled={!isEditing}
+            />
+          </div>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Password: </span>
+            </label>
+            <AuthInput
+              type="password"
+              value={password}
+              onChangeHandler={(e) => setPassword(e.target.value)}
+              disabled={!isEditing}
+            />
+          </div>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Confirm Password: </span>
+            </label>
+            <AuthInput
+              type="password"
+              value={confirmPassword}
+              onChangeHandler={(e) => setConfirmPassword(e.target.value)}
               disabled={!isEditing}
             />
           </div>
