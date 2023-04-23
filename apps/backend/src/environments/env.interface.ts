@@ -4,7 +4,14 @@ export interface IEnvironment {
   baseUrl: string;
   jwtSecret: string;
   globalApiPrefix: string;
+  frontendUrl: string;
+  mailer: IMailerConfig;
   database: IDatabaseEnvironment;
+}
+
+export interface IMailerConfig {
+  user: string;
+  pass: string;
 }
 
 export interface IDatabaseEnvironment {

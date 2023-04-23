@@ -61,6 +61,7 @@ export default function SignInPage() {
       <Head>
         <title>Sign In | Dializer</title>
       </Head>
+
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3">
         <AuthTitle>Sign In</AuthTitle>
         <AuthForm onSubmit={handleSignIn}>
@@ -70,6 +71,7 @@ export default function SignInPage() {
             placeholder="Email"
             value={email}
             onChangeHandler={(e) => setEmail(e.target.value)}
+            disabled={isSubmittingData}
           />
           <AuthInput
             type="password"
@@ -78,7 +80,14 @@ export default function SignInPage() {
             placeholder="Password"
             value={password}
             onChangeHandler={(e) => setPassword(e.target.value)}
+            disabled={isSubmittingData}
           />
+          <Link
+            href={`/forget-password${email ? '?email=' + email : ''}`}
+            className="w-fit text-xs mt-[-12px] transition hover:underline mb-2 ml-2 hover:text-secondary"
+          >
+            Forgot your password?
+          </Link>
           <AuthSubmitBtn
             isSubmitting={isSubmittingData}
             disabled={!email || !password || isSubmittingData}

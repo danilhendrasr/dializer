@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getEnvConfig } from '../environments/env-config';
 import { IEnvironment } from '../environments/env.interface';
 import { AuthModule } from './modules/auth/auth.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -14,6 +15,21 @@ import { AuthModule } from './modules/auth/auth.module';
       load: [getEnvConfig],
       isGlobal: true,
       cache: true,
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          transport: {
+            service: 'gmail',
+            auth: {
+              user: configService.get('mailer.user'),
+              pass: configService.get('mailer.pass'),
+            },
+          },
+        };
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
