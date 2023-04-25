@@ -12,22 +12,30 @@ import Head from 'next/head';
 
 export default function SignUpPage() {
   useAuthorizedProtection();
+
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmittingData, setIsSubmitting] = useState(false);
 
-  const isComplete = email && password && firstName;
+  const isComplete = email && password && name;
 
   const handleSignUp: FormEventHandler = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    if (password !== confirmPassword) {
+      toast('Password and password confirmation does not match.', {
+        type: 'error',
+      });
+      return;
+    }
 
     if (!isComplete) {
       toast('Please provide complete credentials', { type: 'error' });
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       const response = await fetch(
@@ -38,10 +46,9 @@ export default function SignUpPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            fullName: name,
             email,
             password,
-            firstName,
-            lastName,
           }),
         }
       );
@@ -56,7 +63,8 @@ export default function SignUpPage() {
 
       Router.replace('/workspaces');
     } catch (error) {
-      toast(error, { type: 'error' });
+      const err = error as Error;
+      toast(err.message, { type: 'error' });
       setIsSubmitting(false);
     }
   };
@@ -71,33 +79,27 @@ export default function SignUpPage() {
         <AuthTitle>Sign Up</AuthTitle>
         <AuthForm onSubmit={handleSignUp}>
           <AuthInput
-            id="firstName"
-            name="firstName"
-            placeholder="First Name"
-            value={firstName}
-            onChangeHandler={(e) => setFirstName(e.target.value)}
+            placeholder="Full Name"
+            value={name}
+            onChangeHandler={(e) => setName(e.target.value)}
           />
           <AuthInput
-            id="lastName"
-            name="lastName"
-            placeholder="Last Name"
-            value={lastName}
-            onChangeHandler={(e) => setLastName(e.target.value)}
-          />
-          <AuthInput
-            id="email"
-            name="email"
+            type="email"
             placeholder="Email"
             value={email}
             onChangeHandler={(e) => setEmail(e.target.value)}
           />
           <AuthInput
             type="password"
-            id="password"
-            name="password"
             placeholder="Password"
             value={password}
             onChangeHandler={(e) => setPassword(e.target.value)}
+          />
+          <AuthInput
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChangeHandler={(e) => setConfirmPassword(e.target.value)}
           />
           <AuthSubmitBtn
             isSubmitting={isSubmittingData}

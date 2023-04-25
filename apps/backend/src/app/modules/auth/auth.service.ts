@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
   Logger,
+  ConflictException,
 } from '@nestjs/common';
 import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
@@ -52,8 +53,16 @@ export class AuthService {
   }
 
   async register(userData: RegisterUserDTO) {
+    const userExists = await this.usersService.findOneByEmail(userData.email);
+
+    if (userExists) {
+      throw new ConflictException(
+        `Email ${userData.email} is already registered.`
+      );
+    }
+
     const user = this.usersRepository.create({
-      fullName: userData.firstName + ' ' + userData.lastName,
+      fullName: userData.fullName,
       email: userData.email,
       password: userData.password,
     });

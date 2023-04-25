@@ -68,6 +68,7 @@ export default function SignInPage() {
           <AuthInput
             id="email"
             name="email"
+            type="email"
             placeholder="Email"
             value={email}
             onChangeHandler={(e) => setEmail(e.target.value)}
