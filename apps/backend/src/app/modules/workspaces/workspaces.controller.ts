@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -67,5 +68,12 @@ export class WorkspacesController {
       workspaceId,
       nodes
     );
+  }
+
+  @ApiOperation({ summary: 'Delete a workspace' })
+  @Delete('/:id')
+  @UseGuards(JwtAuthGuard)
+  async deleteWorkspace(@Param('id') workspaceId: string) {
+    return await this.workspacesService.delete(workspaceId);
   }
 }

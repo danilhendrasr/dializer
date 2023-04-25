@@ -106,4 +106,8 @@ export class WorkspacesService {
       ...updatedWorkspace,
     };
   }
+
+  async delete(workspaceId: string) {
+    await this.workspaceRepo.delete(workspaceId);
+  }
 }

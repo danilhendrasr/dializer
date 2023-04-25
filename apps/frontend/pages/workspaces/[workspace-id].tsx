@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { MouseEventHandler, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useUnauthorizedProtection } from '../../hooks/use-unauthorized-protection.hook';
@@ -12,6 +12,7 @@ import {
   PlayerPause,
   PlayerPlay,
   Share,
+  Trash,
 } from 'tabler-icons-react';
 import Link from 'next/link';
 import useSWR from 'swr';
@@ -49,6 +50,7 @@ export default function Workbench() {
   );
 
   const [activeTab, setActiveTab] = useState(SideTab.Environment);
+  const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
 
   const terminalNodesOnly = useFlowchartStore(
     (s) => s.computed.flowchartOnlyHasTerminalNodes
@@ -61,8 +63,6 @@ export default function Workbench() {
   const stopAnimation = useFlowchartStore((s) => s.stopAnimation);
   const fetchNodes = useFlowchartStore((s) => s.fetchNodes);
   const saveNodes = useFlowchartStore((s) => s.saveNodes);
-
-  console.log('env', env);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -91,6 +91,45 @@ export default function Workbench() {
       `${process.env.NEXT_PUBLIC_APP_HOST}${router.asPath}`
     );
     toast('Link copied to clipboard.', { type: 'success' });
+  };
+
+  const handleWorkspaceDelete: MouseEventHandler = async (e) => {
+    setDeleteModalIsOpen(false);
+    e.preventDefault();
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${router.query['workspace-id']}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem(
+              LocalStorageItems.ACCESS_TOKEN
+            )}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        const jsonRes = await res.json();
+        throw new Error(jsonRes.message);
+      }
+
+      toast(
+        'Workspace successfully deleted, dismiss this alert to redirect to dashboard.',
+        { type: 'success' }
+      );
+
+      toast.onChange((toast) => {
+        if (toast.status === 'removed') {
+          router.push('/');
+        }
+      });
+    } catch (e) {
+      const err = e as Error;
+      toast(err.message, { type: 'error' });
+    }
   };
 
   return (
@@ -200,9 +239,47 @@ export default function Workbench() {
                 : 'pointer-events-none fill-base-100 text-base-300'
             }
           />
+
+          <label htmlFor="my-modal" onClick={() => setDeleteModalIsOpen(true)}>
+            <Trash
+              size={18}
+              cursor={'pointer'}
+              className="stroke-red-400 hover:stroke-red-600 hover:scale-110 active:scale-100 transition"
+            />
+          </label>
         </ControlPanel>
 
         <FlowchartCanvas />
+
+        <input
+          type="checkbox"
+          id="my-modal"
+          className="modal-toggle"
+          checked={deleteModalIsOpen}
+        />
+        <div className="modal" id="my-modal">
+          <div className="modal-box">
+            <p className="py-4">
+              Are you sure you want to delete this workspace?
+            </p>
+            <div className="modal-action">
+              <label
+                htmlFor="my-modal"
+                className="btn btn-outline"
+                onClick={() => setDeleteModalIsOpen(false)}
+              >
+                No
+              </label>
+              <label
+                htmlFor="my-modal"
+                className="btn"
+                onClick={handleWorkspaceDelete}
+              >
+                Yes
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
     </InterpreterContext.Provider>
   );
