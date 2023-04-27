@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus as PlusIcon, UserCircle } from 'tabler-icons-react';
+import { Plus as PlusIcon, Trash, UserCircle } from 'tabler-icons-react';
 import { useUnauthorizedProtection } from '../../hooks/use-unauthorized-protection.hook';
 import useSWR from 'swr';
 import { useUserId } from '../../hooks/use-user-id.hook';
@@ -11,12 +11,13 @@ import Router from 'next/router';
 import { Oval } from 'react-loader-spinner';
 import { useState } from 'react';
 import { LocalStorageItems } from 'apps/frontend/common/types';
+import { toast } from 'react-toastify';
 
 export default function Index() {
   useUnauthorizedProtection();
   const userId = useUserId();
   const [queryParams, setQueryParams] = useState('');
-  const { data, isLoading, error } = useSWR<WorkspaceEntity[]>(
+  const { data, isLoading, error, mutate } = useSWR<WorkspaceEntity[]>(
     userId
       ? `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/workspaces?${queryParams}`
       : null,
@@ -126,16 +127,60 @@ export default function Index() {
         ) : data && data.length > 0 ? (
           <div className="grid grid-cols-3 gap-5">
             {data.map((workspace, idx) => {
+              const handleWorkspaceDelete = async (e) => {
+                toast('Deleting 1 workspace...', {
+                  type: 'info',
+                  autoClose: 1000,
+                });
+
+                try {
+                  const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${workspace.id}`,
+                    {
+                      method: 'DELETE',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem(
+                          LocalStorageItems.ACCESS_TOKEN
+                        )}`,
+                      },
+                    }
+                  );
+
+                  if (!res.ok) {
+                    const jsonRes = await res.json();
+                    throw new Error(jsonRes.message);
+                  }
+
+                  toast.dismiss();
+                  toast('1 workspace deleted successfully.', {
+                    type: 'success',
+                  });
+                  mutate();
+                } catch (e) {
+                  const err = e as Error;
+                  toast(err.message, { type: 'error' });
+                }
+              };
+
               return (
-                <Link key={idx} href={`/workspaces/${workspace.id}`}>
-                  <div className="border border-base-300 hover:border-base-100 hover:bg-base-300 cursor-pointer px-5 py-3 box-border">
-                    <h2 className="font-bold">{workspace.title}</h2>
-                    <p>
-                      Last updated:{' '}
-                      {new Date(workspace.updatedAt).toLocaleString()}
-                    </p>
+                <div className="border border-base-300 hover:border-base-100 hover:bg-base-300 cursor-pointer px-5 py-3 box-border">
+                  <div className="flex justify-between items-center">
+                    <Link key={idx} href={`/workspaces/${workspace.id}`}>
+                      <h2 className="font-bold">{workspace.title}</h2>
+                    </Link>
+                    <Trash
+                      size={18}
+                      cursor={'pointer'}
+                      className="stroke-red-400 hover:stroke-red-600 hover:scale-110 active:scale-100 transition"
+                      onClick={handleWorkspaceDelete}
+                    />
                   </div>
-                </Link>
+                  <p>
+                    Last updated:{' '}
+                    {new Date(workspace.updatedAt).toLocaleString()}
+                  </p>
+                </div>
               );
             })}
           </div>
