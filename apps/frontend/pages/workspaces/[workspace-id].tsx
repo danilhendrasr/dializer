@@ -11,6 +11,7 @@ import {
   DeviceFloppy,
   PlayerPause,
   PlayerPlay,
+  Settings,
   Share,
   Trash,
 } from 'tabler-icons-react';
@@ -50,7 +51,8 @@ export default function Workbench() {
   );
 
   const [activeTab, setActiveTab] = useState(SideTab.Environment);
-  const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
+  const [deletionModalIsOpen, setDeletionModalIsOpen] = useState(false);
+  const [settingsModalIsOpen, setSettingsModalIsOpen] = useState(false);
 
   const terminalNodesOnly = useFlowchartStore(
     (s) => s.computed.flowchartOnlyHasTerminalNodes
@@ -63,6 +65,9 @@ export default function Workbench() {
   const stopAnimation = useFlowchartStore((s) => s.stopAnimation);
   const fetchNodes = useFlowchartStore((s) => s.fetchNodes);
   const saveNodes = useFlowchartStore((s) => s.saveNodes);
+
+  const deletionModalId = 'deletion-modal';
+  const settingsModalId = 'settings-modal';
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -94,7 +99,7 @@ export default function Workbench() {
   };
 
   const handleWorkspaceDelete: MouseEventHandler = async (e) => {
-    setDeleteModalIsOpen(false);
+    setDeletionModalIsOpen(false);
     e.preventDefault();
 
     try {
@@ -240,47 +245,125 @@ export default function Workbench() {
             }
           />
 
-          <label htmlFor="my-modal" onClick={() => setDeleteModalIsOpen(true)}>
+          <label
+            htmlFor={deletionModalId}
+            onClick={() => setDeletionModalIsOpen(true)}
+          >
             <Trash
               size={18}
               cursor={'pointer'}
               className="stroke-red-400 hover:stroke-red-600 hover:scale-110 active:scale-100 transition"
             />
           </label>
+
+          <label
+            htmlFor={settingsModalId}
+            onClick={() => setSettingsModalIsOpen(true)}
+          >
+            <Settings
+              size={18}
+              cursor="pointer"
+              className="hover:fill-black hover:scale-110 active:scale-100 transition"
+            />
+          </label>
         </ControlPanel>
 
         <FlowchartCanvas />
 
+        {/* This is the modal's trigger */}
         <input
           type="checkbox"
-          id="my-modal"
+          id={settingsModalId}
           className="modal-toggle"
-          checked={deleteModalIsOpen}
+          checked={settingsModalIsOpen}
+          readOnly
         />
-        <div className="modal" id="my-modal">
-          <div className="modal-box">
-            <p className="py-4">
-              Are you sure you want to delete this workspace?
-            </p>
-            <div className="modal-action">
-              <label
-                htmlFor="my-modal"
-                className="btn btn-outline"
-                onClick={() => setDeleteModalIsOpen(false)}
-              >
-                No
-              </label>
-              <label
-                htmlFor="my-modal"
-                className="btn"
-                onClick={handleWorkspaceDelete}
-              >
-                Yes
-              </label>
-            </div>
-          </div>
-        </div>
+        <SettingsModal
+          modalId={settingsModalId}
+          onCancel={() => setSettingsModalIsOpen(false)}
+          onSave={() => alert('Settings saved.')}
+        />
+
+        {/* This is the modal's trigger */}
+        <input
+          type="checkbox"
+          id={deletionModalId}
+          className="modal-toggle"
+          checked={deletionModalIsOpen}
+          readOnly
+        />
+        <DeletionModal
+          modalId={deletionModalId}
+          onCancel={() => setDeletionModalIsOpen(false)}
+          onConfirm={handleWorkspaceDelete}
+        />
       </div>
     </InterpreterContext.Provider>
   );
 }
+
+type SettingsModalProps = {
+  modalId: string;
+  onCancel: () => void;
+  onSave: () => void;
+};
+
+const SettingsModal: React.FC<SettingsModalProps> = (props) => {
+  const { modalId, onCancel, onSave } = props;
+
+  return (
+    <div className="modal" id={modalId}>
+      <div className="modal-box">
+        <h1 className="py-4 font-bold text-xl">Settings</h1>
+        <div>
+          <div className="flex items-center gap-2">
+            <label htmlFor="workspace-visibility">Visibility: </label>
+            <input type="checkbox" id="workspace-visibility" />
+          </div>
+        </div>
+        <div className="modal-action">
+          <label
+            htmlFor={modalId}
+            className="btn btn-outline"
+            onClick={onCancel}
+          >
+            Cancel
+          </label>
+          <label htmlFor={modalId} className="btn" onClick={onSave}>
+            Save
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+type DeletionModalProps = {
+  modalId: string;
+  onCancel: () => void;
+  onConfirm: React.MouseEventHandler;
+};
+
+const DeletionModal: React.FC<DeletionModalProps> = (props) => {
+  const { modalId, onCancel, onConfirm } = props;
+
+  return (
+    <div className="modal" id={modalId}>
+      <div className="modal-box">
+        <h1 className="py-4 font-bold text-xl">Settings</h1>
+        <div className="modal-action">
+          <label
+            htmlFor={modalId}
+            className="btn btn-outline"
+            onClick={onCancel}
+          >
+            Cancel
+          </label>
+          <label htmlFor={modalId} className="btn" onClick={onConfirm}>
+            Save
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+};
