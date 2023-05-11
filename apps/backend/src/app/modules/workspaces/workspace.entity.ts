@@ -9,9 +9,10 @@ import {
 } from 'typeorm';
 import { Node } from '../nodes/node.entity';
 import { User } from '../users/user.entity';
+import { WorkspaceEntity, WorkspaceVisibility } from '@dializer/types';
 
 @Entity()
-export class Workspace {
+export class Workspace implements WorkspaceEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -21,8 +22,12 @@ export class Workspace {
   @Column({ nullable: true })
   description?: string;
 
-  @Column({ default: false })
-  isPublic: boolean;
+  @Column({
+    type: 'enum',
+    enum: WorkspaceVisibility,
+    default: WorkspaceVisibility.PRIVATE,
+  })
+  visibility: WorkspaceVisibility;
 
   @ManyToOne(() => User, (user) => user.workspaces)
   owner: User;

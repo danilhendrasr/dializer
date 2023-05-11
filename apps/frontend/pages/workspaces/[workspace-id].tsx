@@ -4,7 +4,7 @@ import Head from 'next/head';
 import { useUnauthorizedProtection } from '../../hooks/use-unauthorized-protection.hook';
 import { useRouter } from 'next/router';
 import { useFlowchartStore } from '../../stores/flowchart';
-import { WorkspaceEntity } from '@dializer/types';
+import { WorkspaceEntity, WorkspaceVisibility } from '@dializer/types';
 import { ControlPanel } from '../../components/control-panel';
 import {
   ArrowLeft,
@@ -23,6 +23,7 @@ import { AnimationState, LocalStorageItems } from '../../common/types';
 import { InterpreterContext } from '../../contexts/expression-interpreter.context';
 import { envStore, useEnvStore } from '../../stores/environment';
 import { ExpressionInterpreter } from '@dializer/expression-interpreter';
+import { Oval } from 'react-loader-spinner';
 
 // Dynamically load the flowchart canvas component and disable ssr for it,
 // as it requires the presence of the "window" object.
@@ -43,7 +44,11 @@ export default function Workbench() {
   useUnauthorizedProtection();
   const router = useRouter();
 
-  const { data: workspace } = useSWR<WorkspaceEntity>(
+  const {
+    data: workspace,
+    isLoading,
+    mutate,
+  } = useSWR<WorkspaceEntity>(
     router.query['workspace-id']
       ? `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${router.query['workspace-id']}`
       : null,
@@ -137,6 +142,48 @@ export default function Workbench() {
     }
   };
 
+  const handleSettingsSave = async (settings: Partial<WorkspaceEntity>) => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${router.query['workspace-id']}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem(
+              LocalStorageItems.ACCESS_TOKEN
+            )}`,
+          },
+          body: JSON.stringify(settings),
+        }
+      );
+
+      if (!res.ok) {
+        const jsonRes = await res.json();
+        throw new Error(jsonRes.message);
+      }
+
+      mutate();
+      toast('Workspace settings successfully updated.', { type: 'success' });
+      setSettingsModalIsOpen(false);
+    } catch (e) {
+      const err = e as Error;
+      toast(err.message, { type: 'error' });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Oval
+        height={80}
+        width={80}
+        color="#570df8"
+        secondaryColor="#e5e6e6"
+        wrapperClass="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+      />
+    );
+  }
+
   return (
     <InterpreterContext.Provider value={new ExpressionInterpreter(envStore)}>
       <div className="flex h-full flex-row">
@@ -227,12 +274,14 @@ export default function Workbench() {
             }
           />
 
-          <Share
-            size={18}
-            cursor="pointer"
-            className="hover:fill-black hover:scale-110 active:scale-100 transition"
-            onClick={handleWorkspaceShare}
-          />
+          {workspace.visibility === WorkspaceVisibility.PRIVATE ? null : (
+            <Share
+              size={18}
+              cursor="pointer"
+              className="hover:fill-black hover:scale-110 active:scale-100 transition"
+              onClick={handleWorkspaceShare}
+            />
+          )}
 
           <DeviceFloppy
             size={18}
@@ -280,8 +329,9 @@ export default function Workbench() {
         />
         <SettingsModal
           modalId={settingsModalId}
+          workspaceData={workspace}
           onCancel={() => setSettingsModalIsOpen(false)}
-          onSave={() => alert('Settings saved.')}
+          onSave={(settings) => handleSettingsSave(settings)}
         />
 
         {/* This is the modal's trigger */}
@@ -304,12 +354,15 @@ export default function Workbench() {
 
 type SettingsModalProps = {
   modalId: string;
+  workspaceData: WorkspaceEntity;
   onCancel: () => void;
-  onSave: () => void;
+  onSave: (settings: Partial<WorkspaceEntity>) => void;
 };
 
 const SettingsModal: React.FC<SettingsModalProps> = (props) => {
-  const { modalId, onCancel, onSave } = props;
+  const { modalId, workspaceData, onCancel, onSave } = props;
+
+  const [visibility, setVisibility] = useState(workspaceData?.visibility);
 
   return (
     <div className="modal" id={modalId}>
@@ -317,8 +370,22 @@ const SettingsModal: React.FC<SettingsModalProps> = (props) => {
         <h1 className="py-4 font-bold text-xl">Settings</h1>
         <div>
           <div className="flex items-center gap-2">
-            <label htmlFor="workspace-visibility">Visibility: </label>
-            <input type="checkbox" id="workspace-visibility" />
+            <label htmlFor="workspace-visibility">Is Private: </label>
+            <input
+              id="workspace-visibility"
+              className="checkbox"
+              type="checkbox"
+              checked={
+                visibility === WorkspaceVisibility.PRIVATE ? true : false
+              }
+              onChange={(e) => {
+                const newVisibility = e.target.checked
+                  ? WorkspaceVisibility.PRIVATE
+                  : WorkspaceVisibility.PUBLIC;
+
+                setVisibility(newVisibility);
+              }}
+            />
           </div>
         </div>
         <div className="modal-action">
@@ -329,7 +396,11 @@ const SettingsModal: React.FC<SettingsModalProps> = (props) => {
           >
             Cancel
           </label>
-          <label htmlFor={modalId} className="btn" onClick={onSave}>
+          <label
+            htmlFor={modalId}
+            className="btn"
+            onClick={() => onSave({ visibility })}
+          >
             Save
           </label>
         </div>
