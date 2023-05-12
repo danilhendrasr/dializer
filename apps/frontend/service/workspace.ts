@@ -70,6 +70,27 @@ export class WorkspaceService extends ApiService {
     return jsonResponse as WorkspaceEntity;
   }
 
+  async updateMetadata(
+    id: string,
+    data: Partial<WorkspaceEntity>
+  ): Promise<WorkspaceEntity> {
+    const res = await fetch(`${this.apiUrl}/workspaces/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.accessToken}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    const jsonRes = await res.json();
+    if (!res.ok) {
+      throw new Error((jsonRes as ApiErrorResponse).message);
+    }
+
+    return jsonRes as WorkspaceEntity;
+  }
+
   async deleteById(id: string): Promise<void> {
     const response = await fetch(`${this.apiUrl}/workspaces/${id}`, {
       method: 'DELETE',
