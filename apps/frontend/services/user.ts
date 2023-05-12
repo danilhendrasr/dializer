@@ -57,8 +57,28 @@ export class UserService extends ApiService {
     });
 
     if (!res.ok) {
-      const jsonRes = await res.json();
+      const jsonRes: ApiErrorResponse = await res.json();
       throw new Error(jsonRes.message);
     }
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<UserEntity> {
+    const res = await fetch(`${this.apiUrl}/users/password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        token,
+        new: newPassword,
+      }),
+    });
+
+    const jsonRes = await res.json();
+    if (!res.ok) {
+      throw new Error((jsonRes as ApiErrorResponse).message);
+    }
+
+    return jsonRes as UserEntity;
   }
 }
