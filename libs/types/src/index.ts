@@ -29,3 +29,9 @@ export enum WorkspaceVisibility {
   PUBLIC = 'public',
   PRIVATE = 'private',
 }
+
+export type ApiErrorResponse = {
+  error: string;
+  message: string;
+  statusCode: number;
+};
