@@ -1,15 +1,6 @@
 import { ApiErrorResponse, WorkspaceEntity } from '@dializer/types';
 import { LocalStorageItems } from '../common/types';
-
-class ApiService {
-  protected accessToken: string;
-  protected apiUrl: string;
-
-  protected constructor() {
-    this.accessToken = localStorage.getItem(LocalStorageItems.ACCESS_TOKEN);
-    this.apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  }
-}
+import { ApiService } from './base';
 
 export class WorkspaceService extends ApiService {
   private static instance: WorkspaceService;
