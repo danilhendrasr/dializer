@@ -1,24 +1,23 @@
-import useSWR from 'swr';
+import Head from 'next/head';
+import Link from 'next/link';
 import { useUserId } from '../hooks/use-user-id.hook';
 import { FormEventHandler, useEffect, useState } from 'react';
-import Head from 'next/head';
-import { swrFetcher } from '../common/utils';
-import { UserEntity } from '@dializer/types';
 import { AuthForm } from '../components/auth-form';
 import { AuthInput } from '../components/auth-input';
 import { Oval } from 'react-loader-spinner';
 import { AuthSubmitBtn } from '../components/auth-submit';
 import { ArrowLeft, Edit, X } from 'tabler-icons-react';
-import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { LocalStorageItems } from '../common/types';
+import { UserService } from '../services/user';
+import { useQuery } from '@tanstack/react-query';
 
 export default function ProfilePage() {
   const userId = useUserId();
-  const { data, isLoading } = useSWR<UserEntity>(
-    userId ? `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}` : null,
-    swrFetcher
-  );
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: async () => await UserService.getInstance().getById(userId),
+  });
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,45 +37,26 @@ export default function ProfilePage() {
     setIsSubmitting(true);
 
     if (password !== confirmPassword) {
-      toast('Password and confirmed password does not match.', {
-        type: 'error',
-      });
+      toast.error('Password and confirmed password does not match.');
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`,
-        {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem(
-              LocalStorageItems.ACCESS_TOKEN
-            )}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            fullName: name,
-            email,
-            password,
-          }),
-        }
-      );
+      await UserService.getInstance().update(userId, {
+        fullName: name,
+        email,
+        password,
+      });
 
-      if (!res.ok) {
-        const jsonResp = (await res.json()) as { message: string };
-        throw new Error(jsonResp.message);
-      }
-
-      toast('Profile updated successfully.', { type: 'success' });
+      toast.success('Profile updated successfully.');
       setIsEditing(false);
     } catch (e) {
       const err = e as Error;
-      toast(err.message, { type: 'error' });
+      toast.error(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   if (!data || isLoading) {
