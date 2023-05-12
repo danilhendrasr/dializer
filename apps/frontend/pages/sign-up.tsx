@@ -9,7 +9,7 @@ import Router from 'next/router';
 import { useAuthorizedProtection } from '../hooks/use-authorized-protection.hook';
 import Link from 'next/link';
 import Head from 'next/head';
-import { AuthService } from '../service/auth';
+import { AuthService } from '../services/auth';
 
 export default function SignUpPage() {
   useAuthorizedProtection();

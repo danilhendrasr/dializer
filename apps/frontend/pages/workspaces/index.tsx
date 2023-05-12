@@ -9,7 +9,7 @@ import { Oval } from 'react-loader-spinner';
 import { useState } from 'react';
 import { LocalStorageItems } from '../../common/types';
 import { toast } from 'react-toastify';
-import { WorkspaceService } from '../../service/workspace';
+import { WorkspaceService } from '../../services/workspace';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { WorkspaceEntity } from '@dializer/types';
 

@@ -23,7 +23,7 @@ import { envStore, useEnvStore } from '../../stores/environment';
 import { ExpressionInterpreter } from '@dializer/expression-interpreter';
 import { Oval } from 'react-loader-spinner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { WorkspaceService } from 'apps/frontend/service/workspace';
+import { WorkspaceService } from 'apps/frontend/services/workspace';
 
 // Dynamically load the flowchart canvas component and disable ssr for it
 // because it requires the presence of the "window" object.

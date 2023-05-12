@@ -10,7 +10,7 @@ import { AuthTitle } from '../components/auth-title';
 import { AuthSubmitBtn } from '../components/auth-submit';
 import { useAuthorizedProtection } from '../hooks/use-authorized-protection.hook';
 import Link from 'next/link';
-import { AuthService } from '../service/auth';
+import { AuthService } from '../services/auth';
 
 export default function SignInPage() {
   useAuthorizedProtection();
