@@ -13,6 +13,22 @@ export class UserService extends ApiService {
     return this.instance;
   }
 
+  async getById(id: string): Promise<UserEntity> {
+    const res = await fetch(`${this.apiUrl}/users/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.accessToken}`,
+      },
+    });
+
+    const jsonResp = await res.json();
+    if (!res.ok) {
+      throw new Error((jsonResp as ApiErrorResponse).message);
+    }
+
+    return jsonResp as UserEntity;
+  }
+
   async update(id: string, data: Partial<UserEntity>): Promise<UserEntity> {
     const res = await fetch(`${this.apiUrl}/users/${id}`, {
       method: 'PUT',
