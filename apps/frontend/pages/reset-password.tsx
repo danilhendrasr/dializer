@@ -7,6 +7,7 @@ import { AuthSubmitBtn } from '../components/auth-submit';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import * as base64 from 'base-64';
+import { UserService } from '../services/user';
 
 type TokenPayload = { id: string; email: string } | null;
 
@@ -19,8 +20,6 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if (!router.isReady) return;
-    console.log('token', router.query['token']);
-
     const decodedToken = base64.decode(router.query['token'] as string);
 
     const tokenPayload = JSON.parse(decodedToken) as {
@@ -42,35 +41,20 @@ export default function ResetPasswordPage() {
 
     try {
       setIsSubmittingData(true);
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/password`,
-        {
-          method: 'PUT',
-          body: JSON.stringify({
-            token: router.query['token'],
-            new: newPassword,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
+      await UserService.getInstance().resetPassword(
+        router.query['token'] as string,
+        newPassword
       );
 
-      if (!res.ok) {
-        const jsonRes = await res.json();
-        throw new Error(jsonRes.message);
-      }
-
-      toast(
-        'Password changed successfully, you will be redirected to the login page, you can log in with your new password.',
-        { type: 'success' }
+      toast.success(
+        'Password changed successfully, you will be redirected to the login page, you can log in with your new password.'
       );
       setTimeout(() => {
         router.push('/');
       }, 1000);
     } catch (e) {
       const err = e as Error;
-      toast(err.message, { type: 'error' });
+      toast.error(err.message);
     } finally {
       setIsSubmittingData(false);
     }
