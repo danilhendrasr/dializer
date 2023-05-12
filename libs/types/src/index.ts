@@ -14,18 +14,24 @@ export interface WorkspaceEntity {
   visibility: WorkspaceVisibility;
   createdAt: Date;
   updatedAt: Date;
-};
+}
 
-export type UserEntity = {
+export interface UserEntity {
   id: string;
   fullName: string;
   email: string;
   password: string;
   createdAt: Date;
   updatedAt: Date;
-};
+}
 
 export enum WorkspaceVisibility {
   PUBLIC = 'public',
-  PRIVATE = 'private'
+  PRIVATE = 'private',
 }
+
+export type ApiErrorResponse = {
+  error: string;
+  message: string;
+  statusCode: number;
+};

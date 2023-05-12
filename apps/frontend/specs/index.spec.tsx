@@ -1,11 +1,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import Index from '../pages/workspaces/index';
+import UserDashboard from '../pages/workspaces/index';
 
 describe('Index', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<Index />);
+    const { baseElement } = render(<UserDashboard />);
     expect(baseElement).toBeTruthy();
   });
 });

@@ -8,9 +8,10 @@ import {
 } from 'typeorm';
 import { Workspace } from '../workspaces/workspace.entity';
 import { Exclude } from 'class-transformer';
+import { UserEntity } from '@dializer/types';
 
 @Entity()
-export class User {
+export class User implements UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

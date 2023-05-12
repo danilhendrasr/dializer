@@ -9,6 +9,7 @@ import Router from 'next/router';
 import { useAuthorizedProtection } from '../hooks/use-authorized-protection.hook';
 import Link from 'next/link';
 import Head from 'next/head';
+import { AuthService } from '../services/auth';
 
 export default function SignUpPage() {
   useAuthorizedProtection();
@@ -23,48 +24,31 @@ export default function SignUpPage() {
 
   const handleSignUp: FormEventHandler = async (e) => {
     e.preventDefault();
+
     if (password !== confirmPassword) {
-      toast('Password and password confirmation does not match.', {
-        type: 'error',
-      });
+      toast.error('Password and password confirmation does not match.');
       return;
     }
 
     if (!isComplete) {
-      toast('Please provide complete credentials', { type: 'error' });
+      toast.error('Please provide complete credentials');
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            fullName: name,
-            email,
-            password,
-          }),
-        }
+      setIsSubmitting(true);
+      const accessToken = await AuthService.getInstance().signUp(
+        name,
+        email,
+        password
       );
 
-      const jsonResponse = await response.json();
-      if (!response.ok) throw new Error(jsonResponse.message);
-
-      localStorage.setItem(
-        LocalStorageItems.ACCESS_TOKEN,
-        jsonResponse.access_token
-      );
-
+      localStorage.setItem(LocalStorageItems.ACCESS_TOKEN, accessToken);
       Router.replace('/workspaces');
     } catch (error) {
       const err = error as Error;
-      toast(err.message, { type: 'error' });
+      toast.error(err.message);
+    } finally {
       setIsSubmitting(false);
     }
   };
