@@ -14,6 +14,22 @@ export class WorkspaceService extends ApiService {
     return this.instance;
   }
 
+  async getById(id: string): Promise<WorkspaceEntity> {
+    const res = await fetch(`${this.apiUrl}/workspaces/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.accessToken}`,
+      },
+    });
+
+    const json = await res.json();
+    if (!res.ok) {
+      throw new Error((json as ApiErrorResponse).message);
+    }
+
+    return json as WorkspaceEntity;
+  }
+
   async getByUserId(
     userId: string,
     queryParams?: string
