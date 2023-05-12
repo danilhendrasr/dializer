@@ -6,6 +6,7 @@ import { FormEvent, useState } from 'react';
 import { AuthInput } from '../components/auth-input';
 import { AuthSubmitBtn } from '../components/auth-submit';
 import { toast } from 'react-toastify';
+import { UserService } from '../services/user';
 
 export default function ForgetPasswordPage() {
   const router = useRouter();
@@ -18,27 +19,12 @@ export default function ForgetPasswordPage() {
     setIsSubmittingData(true);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/password`,
-        {
-          method: 'PUT',
-          body: JSON.stringify({ email }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!res.ok) {
-        const jsonRes = await res.json();
-        throw new Error(jsonRes.message);
-      }
-
-      toast(`Email sent to ${email}`, { type: 'success' });
+      await UserService.getInstance().sendPasswordResetEmail(email);
+      toast.success(`Email sent to ${email}`);
       setEmail('');
     } catch (e) {
       const err = e as Error;
-      toast(err.message, { type: 'error' });
+      toast.error(err.message);
     }
 
     setIsSubmittingData(false);
