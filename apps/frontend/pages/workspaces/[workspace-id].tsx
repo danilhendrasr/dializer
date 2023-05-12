@@ -16,46 +16,45 @@ import {
   Trash,
 } from 'tabler-icons-react';
 import Link from 'next/link';
-import useSWR from 'swr';
-import { swrFetcher } from '../../common/utils';
 import { toast } from 'react-toastify';
-import { AnimationState, LocalStorageItems } from '../../common/types';
+import { AnimationState } from '../../common/types';
 import { InterpreterContext } from '../../contexts/expression-interpreter.context';
 import { envStore, useEnvStore } from '../../stores/environment';
 import { ExpressionInterpreter } from '@dializer/expression-interpreter';
 import { Oval } from 'react-loader-spinner';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { WorkspaceService } from 'apps/frontend/service/workspace';
 
-// Dynamically load the flowchart canvas component and disable ssr for it,
-// as it requires the presence of the "window" object.
+// Dynamically load the flowchart canvas component and disable ssr for it
+// because it requires the presence of the "window" object.
 const FlowchartCanvas = dynamic(
-  () =>
-    import('../../components/flowchart-canvas').then(
-      (mod) => mod.FlowchartCanvas
-    ),
+  async () => {
+    const mod = await import('../../components/flowchart-canvas');
+    return mod.FlowchartCanvas;
+  },
   { ssr: false }
 );
 
-enum SideTab {
+enum SideBarTab {
   Environment = 'Environment',
-  Nodes = 'Nodes',
+  Legend = 'Legend',
 }
 
 export default function Workbench() {
   useUnauthorizedProtection();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const {
-    data: workspace,
-    isLoading,
-    mutate,
-  } = useSWR<WorkspaceEntity>(
-    router.query['workspace-id']
-      ? `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${router.query['workspace-id']}`
-      : null,
-    swrFetcher
-  );
+  const { data: workspace, isLoading } = useQuery({
+    queryKey: ['workspace', router.query['workspace-id']],
+    queryFn: async () => {
+      return await WorkspaceService.getInstance().getById(
+        router.query['workspace-id'] as string
+      );
+    },
+  });
 
-  const [activeTab, setActiveTab] = useState(SideTab.Environment);
+  const [activeTab, setActiveTab] = useState(SideBarTab.Environment);
   const [deletionModalIsOpen, setDeletionModalIsOpen] = useState(false);
   const [settingsModalIsOpen, setSettingsModalIsOpen] = useState(false);
 
@@ -81,18 +80,9 @@ export default function Workbench() {
   }, [router, fetchNodes]);
 
   const handleTitleChange = async (e: React.FocusEvent<HTMLHeadingElement>) => {
-    await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${router.query['workspace-id']}`,
-      {
-        method: 'PATCH',
-        body: JSON.stringify({ title: e.target.innerText }),
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem(
-            LocalStorageItems.ACCESS_TOKEN
-          )}`,
-        },
-      }
+    await WorkspaceService.getInstance().updateMetadata(
+      router.query['workspace-id'] as string,
+      { title: e.target.innerText }
     );
   };
 
@@ -100,35 +90,20 @@ export default function Workbench() {
     navigator.clipboard.writeText(
       `${process.env.NEXT_PUBLIC_APP_HOST}${router.asPath}`
     );
-    toast('Link copied to clipboard.', { type: 'success' });
+    toast.success('Link copied to clipboard.');
   };
 
   const handleWorkspaceDelete: MouseEventHandler = async (e) => {
-    setDeletionModalIsOpen(false);
     e.preventDefault();
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${router.query['workspace-id']}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem(
-              LocalStorageItems.ACCESS_TOKEN
-            )}`,
-          },
-        }
+      setDeletionModalIsOpen(false);
+      await WorkspaceService.getInstance().deleteById(
+        router.query['workspace-id'] as string
       );
 
-      if (!res.ok) {
-        const jsonRes = await res.json();
-        throw new Error(jsonRes.message);
-      }
-
-      toast(
-        'Workspace successfully deleted, dismiss this alert to redirect to dashboard.',
-        { type: 'success' }
+      toast.error(
+        'Workspace successfully deleted, dismiss this alert to redirect to dashboard.'
       );
 
       toast.onChange((toast) => {
@@ -138,45 +113,34 @@ export default function Workbench() {
       });
     } catch (e) {
       const err = e as Error;
-      toast(err.message, { type: 'error' });
+      toast.error(err.message);
     }
   };
 
   const handleSettingsSave = async (settings: Partial<WorkspaceEntity>) => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${router.query['workspace-id']}`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem(
-              LocalStorageItems.ACCESS_TOKEN
-            )}`,
-          },
-          body: JSON.stringify(settings),
-        }
+      await WorkspaceService.getInstance().updateMetadata(
+        router.query['workspace-id'] as string,
+        settings
       );
 
-      if (!res.ok) {
-        const jsonRes = await res.json();
-        throw new Error(jsonRes.message);
-      }
-
-      mutate();
-      toast('Workspace settings successfully updated.', { type: 'success' });
+      queryClient.invalidateQueries([
+        'workspace',
+        router.query['workspace-id'],
+      ]);
+      toast.success('Workspace settings successfully updated.');
       setSettingsModalIsOpen(false);
     } catch (e) {
       const err = e as Error;
-      toast(err.message, { type: 'error' });
+      toast.error(err.message);
     }
   };
 
   if (isLoading) {
     return (
       <Oval
-        height={80}
-        width={80}
+        height={60}
+        width={60}
         color="#570df8"
         secondaryColor="#e5e6e6"
         wrapperClass="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
@@ -190,8 +154,9 @@ export default function Workbench() {
         <Head>
           <title>Flow Chart Editor | Dializer</title>
         </Head>
-
+        {/* Side bar */}
         <div className="absolute h-full w-1/4 bg-base-100 z-50 shadow-md">
+          {/* Tab header */}
           <div className="flex gap-1 items-center border-b border-base-200 px-5 py-3">
             <Link href="/">
               <ArrowLeft
@@ -208,11 +173,12 @@ export default function Workbench() {
               {workspace && workspace.title}
             </h1>
           </div>
+          {/* End of tab header */}
 
           {/* Tabs */}
           <div>
             <div className="tabs w-full py-1">
-              {Object.values(SideTab).map((tabName, idx) => {
+              {Object.values(SideBarTab).map((tabName, idx) => {
                 let className = 'tab tab-bordered flex-1';
                 if (tabName === activeTab) {
                   className += ' tab-active';
@@ -233,7 +199,7 @@ export default function Workbench() {
 
             {/* Tab contents */}
             <div>
-              {activeTab === SideTab.Environment ? (
+              {activeTab === SideBarTab.Environment ? (
                 <>
                   {Object.entries(env).map(([key, val], idx) => (
                     <p
@@ -245,11 +211,13 @@ export default function Workbench() {
                   ))}
                 </>
               ) : null}
-              {activeTab === SideTab.Nodes ? <h1>Nodes Tab</h1> : null}
+              {activeTab === SideBarTab.Legend ? <h1>Nodes Tab</h1> : null}
             </div>
             {/* End of tab contents */}
           </div>
+          {/* End of tabs */}
         </div>
+        {/* End of side bar */}
 
         <ControlPanel>
           <PlayerPlay
@@ -421,7 +389,7 @@ const DeletionModal: React.FC<DeletionModalProps> = (props) => {
   return (
     <div className="modal" id={modalId}>
       <div className="modal-box">
-        <h1 className="py-4 font-bold text-xl">Settings</h1>
+        <h1 className="py-4 font-bold text-xl">Delete this workspace?</h1>
         <div className="modal-action">
           <label
             htmlFor={modalId}
