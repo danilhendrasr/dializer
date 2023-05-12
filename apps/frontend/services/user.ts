@@ -46,4 +46,19 @@ export class UserService extends ApiService {
 
     return jsonResp as UserEntity;
   }
+
+  async sendPasswordResetEmail(targetEmail: string): Promise<void> {
+    const res = await fetch(`${this.apiUrl}/users/password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: targetEmail }),
+    });
+
+    if (!res.ok) {
+      const jsonRes = await res.json();
+      throw new Error(jsonRes.message);
+    }
+  }
 }
