@@ -65,25 +65,25 @@ export default function SignUpPage() {
           <AuthInput
             placeholder="Full Name"
             value={name}
-            onChangeHandler={(e) => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
           />
           <AuthInput
             type="email"
             placeholder="Email"
             value={email}
-            onChangeHandler={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <AuthInput
             type="password"
             placeholder="Password"
             value={password}
-            onChangeHandler={(e) => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <AuthInput
             type="password"
             placeholder="Confirm Password"
             value={confirmPassword}
-            onChangeHandler={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
           <AuthSubmitBtn
             isSubmitting={isSubmittingData}
