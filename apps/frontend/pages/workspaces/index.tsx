@@ -27,6 +27,7 @@ export default function UserDashboard() {
         queryParams
       );
     },
+    enabled: userId !== undefined,
   });
 
   const createNewWorkspace = async () => {

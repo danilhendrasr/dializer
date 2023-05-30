@@ -4,6 +4,7 @@ import { LocalStorageItems } from '../common/types';
 
 export const useUserId = () => {
   const [userId, setUserId] = useState<string>();
+
   useEffect(() => {
     const accessToken = localStorage.getItem(LocalStorageItems.ACCESS_TOKEN);
     if (!accessToken) return;

@@ -24,7 +24,7 @@ export default function SignInPage() {
     handleSubmit,
     watch,
     control,
-    formState: { isDirty, isValid, isSubmitting, errors },
+    formState: { isDirty, isValid, isSubmitting },
   } = useForm<SignInInputs>({
     mode: 'onChange',
     defaultValues: {
