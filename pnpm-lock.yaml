@@ -58,6 +58,9 @@ dependencies:
   class-validator:
     specifier: ^0.14.0
     version: 0.14.0
+  concurrently:
+    specifier: ^8.0.1
+    version: 8.0.1
   core-js:
     specifier: ^3.6.5
     version: 3.25.5
@@ -5458,6 +5461,22 @@ packages:
       source-map: 0.6.1
     dev: true
 
+  /concurrently@8.0.1:
+    resolution: {integrity: sha512-Sh8bGQMEL0TAmAm2meAXMjcASHZa7V0xXQVDBLknCPa9TPtkY9yYs+0cnGGgfdkW0SV1Mlg+hVGfXcoI8d3MJA==}
+    engines: {node: ^14.13.0 || >=16.0.0}
+    hasBin: true
+    dependencies:
+      chalk: 4.1.2
+      date-fns: 2.29.3
+      lodash: 4.17.21
+      rxjs: 7.8.1
+      shell-quote: 1.8.1
+      spawn-command: 0.0.2-1
+      supports-color: 8.1.1
+      tree-kill: 1.2.2
+      yargs: 17.7.2
+    dev: false
+
   /config-chain@1.1.13:
     resolution: {integrity: sha512-qj+f8APARXHrM0hraqXYb2/bOVSV4PvJQlNZ/DVj0QrmNM2q2euizkeuVckQ57J+W0mRH6Hvi+k50M4Jul2VRQ==}
     dependencies:
@@ -10033,7 +10052,7 @@ packages:
       tsconfig-paths: 3.14.1
       tslib: 2.4.0
       v8-compile-cache: 2.3.0
-      yargs: 17.6.2
+      yargs: 17.7.2
       yargs-parser: 21.1.1
     transitivePeerDependencies:
       - debug
@@ -11701,6 +11720,12 @@ packages:
     dependencies:
       tslib: 2.4.0
 
+  /rxjs@7.8.1:
+    resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
+    dependencies:
+      tslib: 2.4.0
+    dev: false
+
   /safe-buffer@5.1.2:
     resolution: {integrity: sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==}
 
@@ -11945,6 +11970,10 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
+  /shell-quote@1.8.1:
+    resolution: {integrity: sha512-6j1W9l1iAs/4xYBI1SYOVZyFcCis9b4KCLQ8fgAGG07QvzaRLVVRQvAy85yNmmZSjYjg4MWh4gNvlPujU/5LpA==}
+    dev: false
+
   /side-channel@1.0.4:
     resolution: {integrity: sha512-q5XPytqFEIKHkGdiMIrY10mvLRvnQh42/+GoBlFW3b2LXLE2xxJpZFdm94we0BaoV3RwJyGqg5wS7epxTv0Zvw==}
     dependencies:
@@ -12092,6 +12121,10 @@ packages:
 
   /sourcemap-codec@1.4.8:
     resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
+
+  /spawn-command@0.0.2-1:
+    resolution: {integrity: sha512-n98l9E2RMSJ9ON1AKisHzz7V42VDiBQGY6PB1BwRglz99wpVsSuGzQ+jOi6lFXBGVTCrRpltvjm+/XA+tpeJrg==}
+    dev: false
 
   /spdy-transport@3.0.0:
     resolution: {integrity: sha512-hsLVFE5SjA6TCisWeJXFKniGGOpBgMLmerfO2aCyCU5s7nJ/rpAepqmFifv/GCbSbueEeAJJnmSQ2rKC/g8Fcw==}
@@ -13686,6 +13719,18 @@ packages:
 
   /yargs@17.6.2:
     resolution: {integrity: sha512-1/9UrdHjDZc0eOU0HxOHoS78C69UD3JRMvzlJ7S79S2nTaWRA/whGCTV8o9e/N/1Va9YIV7Q4sOxD8VV4pCWOw==}
+    engines: {node: '>=12'}
+    dependencies:
+      cliui: 8.0.1
+      escalade: 3.1.1
+      get-caller-file: 2.0.5
+      require-directory: 2.1.1
+      string-width: 4.2.3
+      y18n: 5.0.8
+      yargs-parser: 21.1.1
+
+  /yargs@17.7.2:
+    resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==}
     engines: {node: '>=12'}
     dependencies:
       cliui: 8.0.1

@@ -6,7 +6,10 @@
   "scripts": {
     "start": "nx serve",
     "build": "nx build",
-    "test": "nx test"
+    "test": "nx test",
+    "watch:frontend": "nx serve frontend",
+    "watch:backend": "nx serve backend",
+    "dev": "concurrently -n frontend,backend \"pnpm run watch:frontend\" \"pnpm run watch:backend\""
   },
   "engines": {
     "node": ">=18.13.0"
@@ -32,6 +35,7 @@
     "base-64": "^1.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "concurrently": "^8.0.1",
     "core-js": "^3.6.5",
     "daisyui": "^2.51.5",
     "express": "^4.18.2",
