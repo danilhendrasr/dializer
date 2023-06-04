@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import { WorkspaceService } from '../../services/workspace';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { WorkspaceEntity } from '@dializer/types';
+import { format } from 'date-fns';
 
 export default function UserDashboard() {
   useUnauthorizedProtection();
@@ -185,7 +186,10 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = (props) => {
           onClick={handleDelete}
         />
       </div>
-      <p>Last updated: {new Date(workspace.updatedAt).toLocaleString()}</p>
+      <p className="text-xs">
+        Last updated:{' '}
+        {format(new Date(workspace.updatedAt), "dd MMMM yyyy 'at' HH:mm")}
+      </p>
     </div>
   );
 };
