@@ -13,6 +13,7 @@ import { WorkspaceService } from '../../services/workspace';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { WorkspaceEntity } from '@dializer/types';
 import { format } from 'date-fns';
+import { useDebounce } from 'use-debounce';
 
 export default function UserDashboard() {
   useUnauthorizedProtection();
@@ -20,8 +21,9 @@ export default function UserDashboard() {
   const queryClient = useQueryClient();
 
   const [queryParams, setQueryParams] = useState('');
+  const [queryParamsValue] = useDebounce(queryParams, 500);
   const { data, isLoading, error } = useQuery({
-    queryKey: ['workspaces', userId, queryParams],
+    queryKey: ['workspaces', userId, queryParamsValue],
     queryFn: async () => {
       return await WorkspaceService.getInstance().getByUserId(
         userId,
