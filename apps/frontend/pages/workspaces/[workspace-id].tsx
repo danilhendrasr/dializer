@@ -667,10 +667,10 @@ const DeletionModal: React.FC<DeletionModalProps> = (props) => {
             className="btn btn-outline"
             onClick={onCancel}
           >
-            Cancel
+            No
           </label>
           <label htmlFor={modalId} className="btn" onClick={onConfirm}>
-            Save
+            Yes
           </label>
         </div>
       </div>
