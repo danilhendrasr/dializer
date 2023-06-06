@@ -11,9 +11,10 @@ import { LocalStorageItems } from '../../common/types';
 import { toast } from 'react-toastify';
 import { WorkspaceService } from '../../services/workspace';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { WorkspaceEntity } from '@dializer/types';
+import { WorkspaceEntity, WorkspaceVisibility } from '@dializer/types';
 import { format } from 'date-fns';
 import { useDebounce } from 'use-debounce';
+import { useForm } from 'react-hook-form';
 
 export default function UserDashboard() {
   useUnauthorizedProtection();
@@ -33,9 +34,14 @@ export default function UserDashboard() {
     enabled: userId !== undefined,
   });
 
-  const createNewWorkspace = async () => {
+  const createNewWorkspace = async (data: WorkspaceCreationInputs) => {
     try {
-      const { id } = await WorkspaceService.getInstance().create();
+      const { id } = await WorkspaceService.getInstance().create({
+        ...data,
+        visibility: data.isPrivate
+          ? WorkspaceVisibility.PRIVATE
+          : WorkspaceVisibility.PUBLIC,
+      });
       Router.replace(`/workspaces/${id}`);
     } catch (e) {
       const err = e as Error;
@@ -96,15 +102,15 @@ export default function UserDashboard() {
           {/* End of search bar */}
 
           {/* New workspace button */}
-          <button
+          <label
+            htmlFor="my-modal-3"
             className="group btn btn-ghost btn-circle hover:bg-primary"
-            onClick={createNewWorkspace}
           >
             <PlusIcon
               className="text-black group-hover:text-base-100 transition-all"
               size={22}
             />
-          </button>
+          </label>
           {/* End of new workspace button */}
 
           <div className="mr-1"></div>
@@ -163,9 +169,100 @@ export default function UserDashboard() {
           </div>
         )}
       </div>
+
+      <WorkspaceCreationModal onSave={createNewWorkspace} />
+      {/* Put this part before </body> tag */}
     </>
   );
 }
+
+type WorkspaceCreationInputs = {
+  title: string;
+  isPrivate: boolean;
+  description: string;
+};
+
+type WorkspaceCreationModalProps = {
+  onSave: (args: WorkspaceCreationInputs) => Promise<void>;
+};
+
+const WorkspaceCreationModal: React.FC<WorkspaceCreationModalProps> = ({
+  onSave,
+}) => {
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm<WorkspaceCreationInputs>({
+    mode: 'onChange',
+    defaultValues: {
+      title: '',
+      isPrivate: true,
+    },
+  });
+
+  return (
+    <>
+      <input type="checkbox" id="my-modal-3" className="modal-toggle" />
+      <div className="modal">
+        <div className="modal-box relative">
+          <label
+            htmlFor="my-modal-3"
+            className="btn btn-sm btn-circle absolute right-2 top-2"
+          >
+            ✕
+          </label>
+          <h3 className="text-lg font-bold">Create new workspace</h3>
+          <form className="my-2 text-sm w-full" onSubmit={handleSubmit(onSave)}>
+            <div>
+              <label className="label">
+                <span className="label-text">Title: </span>
+              </label>
+              <input
+                type="text"
+                className="input input-bordered w-full"
+                placeholder="My New Workspace"
+                {...register('title', { required: true })}
+              />
+              {errors.title?.type === 'required' ? (
+                <label className="label">
+                  <span className="label-text-alt text-red-500">
+                    Title is required.
+                  </span>
+                </label>
+              ) : null}
+            </div>
+            <div className="my-1"></div>
+            <div>
+              <label className="label">
+                <span className="label-text">Description: </span>
+              </label>
+              <textarea
+                className="textarea textarea-bordered w-full"
+                placeholder="This workspace is awesome"
+                {...register('description')}
+              ></textarea>
+            </div>
+            <div className="w-fit">
+              <label className="label cursor-pointer">
+                <span className="label-text mr-3">Private: </span>
+                <input
+                  type="checkbox"
+                  className="toggle"
+                  placeholder="My New Workspace"
+                  {...register('isPrivate')}
+                />
+              </label>
+            </div>
+            <div className="modal-action">
+              <button className="btn mt-4 mb-1">Create</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </>
+  );
+};
 
 type WorkspaceItemProps = {
   workspaceData: WorkspaceEntity;

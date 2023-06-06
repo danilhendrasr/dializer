@@ -17,6 +17,7 @@ import { capitalize } from '../../utils';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdateWorkspaceNodesDTO } from './update-nodes.dto';
 import { WorkspacesService } from './workspaces.service';
+import { CreateWorkspaceDTO } from './create-workspace.dto';
 
 @Controller(ApiEndpoints.WORKSPACES)
 @ApiTags(capitalize(ApiEndpoints.WORKSPACES))
@@ -40,9 +41,9 @@ export class WorkspacesController {
   @ApiOperation({ summary: 'Create new workspace' })
   @Post()
   @UseGuards(JwtAuthGuard)
-  async create(@Req() req: Request) {
+  async create(@Body() payload: CreateWorkspaceDTO, @Req() req: Request) {
     const user = req.user as { id: string; email: string };
-    return await this.workspacesService.createNewWorkspace(user.id);
+    return await this.workspacesService.createNewWorkspace(user.id, payload);
   }
 
   @ApiOperation({ summary: "Update a workspace's metadata (title, etc.)" })

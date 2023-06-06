@@ -3,8 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { Workspace } from './workspace.entity';
 import { Node } from '../nodes/node.entity';
-import { NodeTypes } from '@dializer/types';
+import { NodeTypes, WorkspaceVisibility } from '@dializer/types';
 import { v4 as uuidv4 } from 'uuid';
+import { CreateWorkspaceDTO } from './create-workspace.dto';
 
 @Injectable()
 export class WorkspacesService {
@@ -45,9 +46,11 @@ export class WorkspacesService {
     return nodes;
   }
 
-  async createNewWorkspace(ownerId: string) {
+  async createNewWorkspace(ownerId: string, payload?: CreateWorkspaceDTO) {
     const workspace = this.workspaceRepo.create({
-      title: 'New workspace',
+      title: payload?.title ?? 'New workspace',
+      visibility: payload?.visibility ?? WorkspaceVisibility.PRIVATE,
+      description: payload?.description,
       owner: { id: ownerId },
       nodes: [
         {
