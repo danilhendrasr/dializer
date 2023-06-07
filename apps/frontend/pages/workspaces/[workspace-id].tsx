@@ -23,8 +23,9 @@ import { InterpreterContext } from '../../contexts/expression-interpreter.contex
 import { envStore, useEnvStore } from '../../stores/environment';
 import { ExpressionInterpreter } from '@dializer/expression-interpreter';
 import { Oval } from 'react-loader-spinner';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { WorkspaceService } from '../../services/workspace';
+import { useForm } from 'react-hook-form';
 
 // Dynamically load the flowchart canvas component and disable ssr for it
 // because it requires the presence of the "window" object.
@@ -53,6 +54,35 @@ export default function Workbench() {
       return await WorkspaceService.getInstance().getById(
         router.query['workspace-id'] as string
       );
+    },
+  });
+
+  const workspaceMutation = useMutation({
+    mutationFn: async (settings: SettingsModalInputs) => {
+      const data: Partial<WorkspaceEntity> = {
+        ...settings,
+        visibility: settings.isPrivate
+          ? WorkspaceVisibility.PRIVATE
+          : WorkspaceVisibility.PUBLIC,
+      };
+
+      await WorkspaceService.getInstance().updateMetadata(
+        router.query['workspace-id'] as string,
+        data
+      );
+
+      queryClient.invalidateQueries([
+        'workspace',
+        router.query['workspace-id'],
+      ]);
+    },
+    onSuccess: () => {
+      toast.success('Workspace settings successfully updated.');
+      setSettingsModalIsOpen(false);
+    },
+    onError: (e) => {
+      const err = e as Error;
+      toast.error(err.message);
     },
   });
 
@@ -112,25 +142,6 @@ export default function Workbench() {
     }
   };
 
-  const handleSettingsSave = async (settings: Partial<WorkspaceEntity>) => {
-    try {
-      await WorkspaceService.getInstance().updateMetadata(
-        router.query['workspace-id'] as string,
-        settings
-      );
-
-      queryClient.invalidateQueries([
-        'workspace',
-        router.query['workspace-id'],
-      ]);
-      toast.success('Workspace settings successfully updated.');
-      setSettingsModalIsOpen(false);
-    } catch (e) {
-      const err = e as Error;
-      toast.error(err.message);
-    }
-  };
-
   if (!workspace || isLoading) {
     return (
       <Oval
@@ -151,7 +162,7 @@ export default function Workbench() {
         </Head>
         {/* Side bar */}
         <div className="absolute h-full w-1/4 bg-base-100 z-50 shadow-md max-h-full overflow-hidden">
-          <div className="grid grid-cols-[25px_100%] gap-1 gap-x-3 items-center border-b border-base-200 px-5 py-5 box-border">
+          <div className="grid grid-cols-[25px_1fr] gap-1 gap-x-3 items-center border-b border-base-200 px-5 py-5 box-border">
             <Link href="/">
               <ArrowLeft
                 size={27}
@@ -293,7 +304,7 @@ export default function Workbench() {
           modalId={settingsModalId}
           workspaceData={workspace}
           onCancel={() => setSettingsModalIsOpen(false)}
-          onSave={(settings) => handleSettingsSave(settings)}
+          onSave={workspaceMutation.mutate}
         />
 
         {/* This is the modal's trigger */}
@@ -580,58 +591,98 @@ const InformationSidebarTab: React.FC = () => {
   );
 };
 
+type SettingsModalInputs = {
+  title: string;
+  isPrivate: boolean;
+  description: string;
+};
+
 type SettingsModalProps = {
   modalId: string;
   workspaceData: WorkspaceEntity;
   onCancel: () => void;
-  onSave: (settings: Partial<WorkspaceEntity>) => void;
+  onSave: (args: SettingsModalInputs) => void | Promise<void>;
 };
 
 const SettingsModal: React.FC<SettingsModalProps> = (props) => {
   const { modalId, workspaceData, onCancel, onSave } = props;
 
-  const [visibility, setVisibility] = useState(workspaceData?.visibility);
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm<SettingsModalInputs>({
+    mode: 'onChange',
+    defaultValues: {
+      title: workspaceData.title,
+      description: workspaceData.description,
+      isPrivate: workspaceData.visibility === WorkspaceVisibility.PRIVATE,
+    },
+  });
 
   return (
     <div className="modal" id={modalId}>
-      <div className="modal-box">
-        <h1 className="py-4 font-bold text-xl">Settings</h1>
-        <div>
-          <div className="flex items-center gap-2">
-            <label htmlFor="workspace-visibility">Is Private: </label>
+      <div className="modal-box relative">
+        <label
+          htmlFor={modalId}
+          className="btn btn-sm btn-circle absolute right-2 top-2"
+          onClick={onCancel}
+        >
+          ✕
+        </label>
+        <h3 className="text-lg font-bold">Workspace Settings</h3>
+        <form className="my-2 text-sm w-full" onSubmit={handleSubmit(onSave)}>
+          <div>
+            <label className="label">
+              <span className="label-text">Title: </span>
+            </label>
             <input
-              id="workspace-visibility"
-              className="checkbox"
-              type="checkbox"
-              checked={
-                visibility === WorkspaceVisibility.PRIVATE ? true : false
-              }
-              onChange={(e) => {
-                const newVisibility = e.target.checked
-                  ? WorkspaceVisibility.PRIVATE
-                  : WorkspaceVisibility.PUBLIC;
-
-                setVisibility(newVisibility);
-              }}
+              type="text"
+              className="input input-bordered w-full"
+              placeholder="My New Workspace"
+              {...register('title', { required: true })}
             />
+            {errors.title?.type === 'required' ? (
+              <label className="label">
+                <span className="label-text-alt text-red-500">
+                  Title is required.
+                </span>
+              </label>
+            ) : null}
           </div>
-        </div>
-        <div className="modal-action">
-          <label
-            htmlFor={modalId}
-            className="btn btn-outline"
-            onClick={onCancel}
-          >
-            Cancel
-          </label>
-          <label
-            htmlFor={modalId}
-            className="btn"
-            onClick={() => onSave({ visibility })}
-          >
-            Save
-          </label>
-        </div>
+          <div className="my-1"></div>
+          <div>
+            <label className="label">
+              <span className="label-text">Description: </span>
+            </label>
+            <textarea
+              className="textarea textarea-bordered w-full"
+              placeholder="This workspace is awesome"
+              {...register('description')}
+            ></textarea>
+          </div>
+          <div className="w-fit">
+            <label className="label cursor-pointer">
+              <span className="label-text mr-3">Private: </span>
+              <input
+                type="checkbox"
+                className="toggle"
+                placeholder="My New Workspace"
+                {...register('isPrivate')}
+              />
+            </label>
+          </div>
+          <div className="modal-action">
+            <label
+              htmlFor={modalId}
+              className="btn btn-outline"
+              onClick={onCancel}
+            >
+              Cancel
+            </label>
+            <button className="btn">Save</button>
+          </div>
+        </form>
       </div>
     </div>
   );
