@@ -81,13 +81,6 @@ export default function Workbench() {
     fetchNodes(workspaceId);
   }, [router, fetchNodes]);
 
-  const handleTitleChange = async (e: React.FocusEvent<HTMLHeadingElement>) => {
-    await WorkspaceService.getInstance().updateMetadata(
-      router.query['workspace-id'] as string,
-      { title: e.target.innerText }
-    );
-  };
-
   const handleWorkspaceShare = () => {
     navigator.clipboard.writeText(
       `${process.env.NEXT_PUBLIC_APP_HOST}${router.asPath}`
@@ -138,7 +131,7 @@ export default function Workbench() {
     }
   };
 
-  if (isLoading) {
+  if (!workspace || isLoading) {
     return (
       <Oval
         height={60}
@@ -158,24 +151,20 @@ export default function Workbench() {
         </Head>
         {/* Side bar */}
         <div className="absolute h-full w-1/4 bg-base-100 z-50 shadow-md max-h-full overflow-hidden">
-          {/* Tab header */}
-          <div className="flex gap-1 items-center border-b border-base-200 px-5 py-3">
+          <div className="grid grid-cols-[25px_100%] gap-1 gap-x-3 items-center border-b border-base-200 px-5 py-5 box-border">
             <Link href="/">
               <ArrowLeft
-                size={25}
-                className="hover:bg-base-200 cursor-pointer p-1 box-border"
+                size={27}
+                className="hover:bg-base-200 cursor-pointer p-1 box-border row-span-2"
               />
             </Link>
-            <h1
-              className="hover:bg-base-200 focus:bg-base-300 flex-1 box-border p-2"
-              contentEditable
-              onBlur={handleTitleChange}
-              suppressContentEditableWarning={true}
-            >
-              {workspace && workspace.title}
-            </h1>
+            <h1 className="py-2 font-bold">{workspace && workspace.title}</h1>
+            {workspace.description ? (
+              <p className="text-sm col-start-2 text-slate-500">
+                {workspace.description}
+              </p>
+            ) : null}
           </div>
-          {/* End of tab header */}
 
           {/* Tabs */}
           <div className="h-full">

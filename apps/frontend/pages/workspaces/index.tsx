@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 import { WorkspaceService } from '../../services/workspace';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { WorkspaceEntity, WorkspaceVisibility } from '@dializer/types';
-import { format } from 'date-fns';
+import { formatDistance } from 'date-fns';
 import { useDebounce } from 'use-debounce';
 import { useForm } from 'react-hook-form';
 
@@ -273,23 +273,31 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = (props) => {
   const { workspaceData: workspace, onDelete: handleDelete } = props;
 
   return (
-    <div className="border border-base-300 hover:border-base-100 hover:bg-base-300 cursor-pointer px-5 py-3 box-border">
-      <div className="flex justify-between items-center">
-        <Link href={`/workspaces/${workspace.id}`}>
-          <h2 className="font-bold">{workspace.title}</h2>
-        </Link>
-        <Trash
-          size={18}
-          cursor={'pointer'}
-          className="stroke-red-400 hover:stroke-red-600 hover:scale-110 active:scale-100 transition"
-          onClick={handleDelete}
-        />
+    <Link href={`/workspaces/${workspace.id}`}>
+      <div className="border border-base-300 hover:border-base-100 hover:bg-base-300 cursor-pointer px-5 py-3 box-border">
+        <div className="flex justify-between items-center border-b mb-2">
+          <h2 className="font-bold py-2">{workspace.title}</h2>
+          <object>
+            <Trash
+              size={18}
+              cursor={'pointer'}
+              className="stroke-red-400 hover:stroke-red-600 hover:scale-110 active:scale-100 transition"
+              onClick={handleDelete}
+            />
+          </object>
+        </div>
+        {workspace.description ? (
+          <p className="text-sm text-slate-500 my-1">
+            {workspace.description.length > 60
+              ? workspace.description.substring(0, 60) + '...'
+              : workspace.description}
+          </p>
+        ) : null}
+        <p className="text-xs text-slate-400">
+          Edited {formatDistance(new Date(), new Date(workspace.updatedAt))} ago
+        </p>
       </div>
-      <p className="text-xs">
-        Last updated:{' '}
-        {format(new Date(workspace.updatedAt), "dd MMMM yyyy 'at' HH:mm")}
-      </p>
-    </div>
+    </Link>
   );
 };
 
