@@ -212,7 +212,6 @@ export const FlowchartCanvas: React.FC = () => {
   );
 
   // Handle zooom-in and zoom-out of the flowchart canvas
-  // TODO: Figure out how to limit zoom so that users can't zoom in/zoom out infinitely
   function zoomStage(event: KonvaEventObject<WheelEvent>) {
     event.evt.preventDefault();
     if (stageRef.current === null) return;
@@ -226,6 +225,10 @@ export const FlowchartCanvas: React.FC = () => {
     };
     const newScale =
       event.evt.deltaY > 0 ? oldScale * SCALE_BY : oldScale / SCALE_BY;
+
+    // Limit the amount of zoom in and zoom out the user can do
+    if (newScale < 0.5 || newScale > 3) return;
+
     stage.scale({ x: newScale, y: newScale });
     const newPos = {
       x: pointerX - mousePointTo.x * newScale,
