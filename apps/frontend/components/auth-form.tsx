@@ -1,18 +1,21 @@
+import { MotionProps, motion } from 'framer-motion';
+
 type Props = {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   children: React.ReactNode;
-};
+} & MotionProps;
 
 const AuthForm: React.FC<Props> = (props) => {
-  const { onSubmit, children } = props;
+  const { onSubmit, children, ...motionProps } = props;
 
   return (
-    <form
-      className="flex flex-col p-10 border-solid shadow-lg rounded-md"
+    <motion.form
+      className="flex flex-col p-10 border-solid shadow-lg rounded-md bg-white"
       onSubmit={onSubmit}
+      {...motionProps}
     >
       {children}
-    </form>
+    </motion.form>
   );
 };
 

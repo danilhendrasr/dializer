@@ -1,8 +1,10 @@
+import { MotionProps, motion } from 'framer-motion';
+
 type AuthSubmitBtnProps = {
   disabled?: boolean;
   text: string;
   isSubmitting: boolean;
-};
+} & MotionProps;
 
 const AuthSubmitBtn: React.FC<AuthSubmitBtnProps> = (props) => {
   const { disabled, text, isSubmitting } = props;
@@ -19,9 +21,14 @@ const AuthSubmitBtn: React.FC<AuthSubmitBtnProps> = (props) => {
   }
 
   return (
-    <button disabled={disabled} value={text} className={className}>
+    <motion.button
+      disabled={disabled}
+      value={text}
+      className={className}
+      {...props}
+    >
       {text}
-    </button>
+    </motion.button>
   );
 };
 

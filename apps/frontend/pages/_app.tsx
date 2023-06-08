@@ -2,10 +2,15 @@ import { AppProps } from 'next/app';
 import { ToastContainer } from 'react-toastify';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Head from 'next/head';
+import { AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/router';
 import 'tailwindcss/tailwind.css';
 import 'react-toastify/dist/ReactToastify.css';
+import '../styles/global.css';
 
 function CustomApp({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+
   return (
     <>
       <Head>
@@ -17,7 +22,9 @@ function CustomApp({ Component, pageProps }: AppProps) {
       </Head>
       <QueryClientProvider client={new QueryClient()}>
         <main className="w-full h-screen box-border" data-theme="light">
-          <Component {...pageProps} />
+          <AnimatePresence mode="wait">
+            <Component {...pageProps} key={router.asPath} />
+          </AnimatePresence>
         </main>
       </QueryClientProvider>
       <ToastContainer position="bottom-center" className="text-sm" />
