@@ -280,7 +280,7 @@ devDependencies:
     specifier: 15.0.0
     version: 15.0.0
   prettier:
-    specifier: ^2.6.2
+    specifier: ^2.7.1
     version: 2.7.1
   react-test-renderer:
     specifier: 18.2.0
