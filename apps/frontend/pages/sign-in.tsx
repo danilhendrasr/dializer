@@ -61,7 +61,11 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="sign-in-page w-full h-full">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { duration: 0.5 } }}
+      className="sign-in-page w-full h-full"
+    >
       <Head>
         <title>Sign In | Dializer</title>
       </Head>
@@ -152,6 +156,6 @@ export default function SignInPage() {
           !
         </motion.p>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
