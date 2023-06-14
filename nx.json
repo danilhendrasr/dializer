@@ -3,9 +3,10 @@
   "npmScope": "dializer",
   "tasksRunnerOptions": {
     "default": {
-      "runner": "nx/tasks-runners/default",
+      "runner": "nx-cloud",
       "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e"]
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
+        "accessToken": "Yzg1NDNiM2QtOTNkMC00ZWEwLTk4NWQtNTY5ZDJkNzA3NzdifHJlYWQtd3JpdGU="
       }
     }
   },
@@ -36,17 +37,17 @@
     "sharedGlobals": ["{workspaceRoot}/babel.config.json"]
   },
   "generators": {
-    "@nrwl/react": {
+    "@nx/next": {
+      "application": {
+        "linter": "eslint"
+      }
+    },
+    "@nx/react": {
       "application": {
         "linter": "eslint",
         "babel": true
       },
       "library": {
-        "linter": "eslint"
-      }
-    },
-    "@nrwl/next": {
-      "application": {
         "linter": "eslint"
       }
     }
