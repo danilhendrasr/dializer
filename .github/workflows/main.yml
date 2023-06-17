@@ -83,10 +83,12 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script_stop: true
           script: |
+            export PATH="/home/danilhendrasr/.local/share/fnm:$PATH"
+            eval "`fnm env`"
             cd ~/dializer
-            git pull
-            pnpm exec nx run-many --target=deploy --projects=frontend,backend
+            git pull https://danilhendrasr:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/danilhendrasr/dializer
+            npx nx run-many --target=deploy --projects=frontend,backend
             docker compose down
             docker compose up -d
