@@ -73,3 +73,20 @@ jobs:
 
       - run: pnpm install
       - run: pnpm exec nx run-many --target=lint --all=true
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, lint]
+    steps:
+      - uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            cd ~/dializer
+            git pull
+            pnpm exec nx run-many --target=deploy --projects=frontend,backend
+            docker compose down
+            docker compose up -d
