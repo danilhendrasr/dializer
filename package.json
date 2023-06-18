@@ -9,7 +9,7 @@
     "test": "nx test",
     "watch:frontend": "nx serve frontend",
     "watch:backend": "nx serve backend",
-    "dev": "concurrently -n frontend,backend \"pnpm run watch:frontend\" \"pnpm run watch:backend\""
+    "dev": "concurrently -n frontend,backend \"npm run watch:frontend\" \"npm run watch:backend\""
   },
   "engines": {
     "node": ">=18.13.0"
