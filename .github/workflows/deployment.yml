@@ -1,0 +1,30 @@
+name: Deployment
+
+on:
+  workflow_run:
+    workflows:
+      - Main pipeline
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            export PATH="/home/danilhendrasr/.local/share/fnm:$PATH"
+            eval "`fnm env`"
+            cd ~/dializer
+            git pull https://danilhendrasr:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/danilhendrasr/dializer
+            npx nx run-many --target=deploy --projects=frontend,backend --skip-nx-cache
+            docker compose down
+            docker compose up -d
