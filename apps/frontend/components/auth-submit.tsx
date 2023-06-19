@@ -7,7 +7,7 @@ type AuthSubmitBtnProps = {
 } & MotionProps;
 
 const AuthSubmitBtn: React.FC<AuthSubmitBtnProps> = (props) => {
-  const { disabled, text, isSubmitting } = props;
+  const { disabled, text, isSubmitting, ...motionProps } = props;
 
   let className =
     'btn btn-primary my-2 py-2 w-full transition cursor-pointer active:scale-95';
@@ -25,7 +25,7 @@ const AuthSubmitBtn: React.FC<AuthSubmitBtnProps> = (props) => {
       disabled={disabled}
       value={text}
       className={className}
-      {...props}
+      {...motionProps}
     >
       {text}
     </motion.button>
