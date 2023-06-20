@@ -26,6 +26,7 @@ import { Oval } from 'react-loader-spinner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { WorkspaceService } from '../../services/workspace';
 import { useForm } from 'react-hook-form';
+import { Variants, motion } from 'framer-motion';
 
 // Dynamically load the flowchart canvas component and disable ssr for it
 // because it requires the presence of the "window" object.
@@ -41,6 +42,11 @@ enum SideBarTab {
   Environment = 'Environment',
   Information = 'Information',
 }
+
+const controlPanelIconVariants: Variants = {
+  visible: { opacity: 1, scale: 1, transition: { type: 'spring' } },
+  hidden: { opacity: 0, scale: 0.5 },
+};
 
 export default function Workbench() {
   useUnauthorizedProtection();
@@ -144,13 +150,15 @@ export default function Workbench() {
 
   if (!workspace || isLoading) {
     return (
-      <Oval
-        height={60}
-        width={60}
-        color="#570df8"
-        secondaryColor="#e5e6e6"
-        wrapperClass="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-      />
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <Oval
+          height={60}
+          width={60}
+          color="#570df8"
+          secondaryColor="#e5e6e6"
+          wrapperClass="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        />
+      </motion.div>
     );
   }
 
@@ -160,26 +168,71 @@ export default function Workbench() {
         <Head>
           <title>Flow Chart Editor | Dializer</title>
         </Head>
+
         {/* Side bar */}
-        <div className="absolute h-full w-1/4 bg-base-100 z-50 shadow-md max-h-full overflow-hidden">
-          <div className="grid grid-cols-[25px_1fr] gap-1 gap-x-3 items-center border-b border-base-200 px-5 py-5 box-border">
-            <Link href="/">
-              <ArrowLeft
-                size={27}
-                className="hover:bg-base-200 cursor-pointer p-1 box-border row-span-2"
-              />
-            </Link>
-            <h1 className="py-2 font-bold">{workspace && workspace.title}</h1>
+        <motion.div
+          className="absolute h-full w-1/4 bg-base-100 z-50 shadow-md max-h-full overflow-hidden"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            visible: {
+              opacity: 1,
+              x: 0,
+              transition: { duration: 0.3, when: 'beforeChildren' },
+            },
+            hidden: { opacity: 0, x: -20 },
+          }}
+        >
+          <motion.div
+            className="grid grid-cols-[25px_1fr] gap-1 gap-x-3 items-center border-b border-base-200 px-5 py-5 box-border"
+            variants={{
+              visible: {
+                transition: { staggerChildren: 0.1 },
+              },
+            }}
+          >
+            <motion.span
+              className="hover:bg-base-200 cursor-pointer p-1 box-border row-span-2"
+              variants={{
+                visible: { opacity: 1, x: 0, transition: { delay: 0.3 } },
+                hidden: { opacity: 0, x: -20 },
+              }}
+            >
+              <Link href="/">
+                <ArrowLeft size={27} />
+              </Link>
+            </motion.span>
+            <motion.h1
+              className="py-2 font-bold"
+              variants={{
+                visible: { opacity: 1, x: 0 },
+                hidden: { opacity: 0, x: -20 },
+              }}
+            >
+              {workspace && workspace.title}
+            </motion.h1>
             {workspace.description ? (
-              <p className="text-sm col-start-2 text-slate-500">
+              <motion.p
+                className="text-sm col-start-2 text-slate-500"
+                variants={{
+                  visible: { opacity: 1, x: 0 },
+                  hidden: { opacity: 0, x: -20 },
+                }}
+              >
                 {workspace.description}
-              </p>
+              </motion.p>
             ) : null}
-          </div>
+          </motion.div>
 
           {/* Tabs */}
           <div className="h-full">
-            <div className="tabs w-full py-1">
+            <motion.div
+              className="tabs w-full py-1"
+              variants={{
+                visible: { opacity: 1, y: 0, transition: { delay: 0.5 } },
+                hidden: { opacity: 0, y: -20 },
+              }}
+            >
               {Object.values(SideBarTab).map((tabName, idx) => {
                 let className = 'tab tab-bordered flex-1';
                 if (tabName === activeTab) {
@@ -187,16 +240,16 @@ export default function Workbench() {
                 }
 
                 return (
-                  <h2
+                  <motion.h2
                     key={idx}
                     className={className}
                     onClick={() => setActiveTab(tabName)}
                   >
                     {tabName}
-                  </h2>
+                  </motion.h2>
                 );
               })}
-            </div>
+            </motion.div>
             {/* End of tabs */}
 
             {/* Tab contents */}
@@ -221,73 +274,101 @@ export default function Workbench() {
             {/* End of tab contents */}
           </div>
           {/* End of tabs */}
-        </div>
+        </motion.div>
         {/* End of side bar */}
 
-        <ControlPanel>
-          <PlayerPlay
-            size={18}
-            onClick={startAnimation}
-            className={
-              animationState === AnimationState.Playing ||
-              animationState === AnimationState.TemporaryStopped ||
-              terminalNodesOnly
-                ? 'pointer-events-none fill-base-300 text-base-300'
-                : 'cursor-pointer hover:fill-success transition hover:scale-110 active:scale-100'
-            }
-          />
+        <ControlPanel
+          initial="hidden"
+          animate="visible"
+          variants={{
+            visible: {
+              opacity: 1,
+              y: 0,
+              transition: {
+                delay: 0.3,
+                duration: 0.3,
+                when: 'beforeChildren',
+                staggerChildren: 0.03,
+              },
+            },
+            hidden: { opacity: 0, y: -20 },
+          }}
+        >
+          <motion.span variants={controlPanelIconVariants}>
+            <PlayerPlay
+              size={18}
+              onClick={startAnimation}
+              className={
+                animationState === AnimationState.Playing ||
+                animationState === AnimationState.TemporaryStopped ||
+                terminalNodesOnly
+                  ? 'pointer-events-none fill-base-300 text-base-300'
+                  : 'cursor-pointer hover:fill-success transition hover:scale-110 active:scale-100'
+              }
+            />
+          </motion.span>
 
-          <PlayerPause
-            size={18}
-            onClick={stopAnimation}
-            className={
-              animationState !== AnimationState.Playing
-                ? 'pointer-events-none fill-base-300 text-base-300'
-                : 'cursor-pointer hover:fill-error transition hover:scale-110 active:scale-100'
-            }
-          />
+          <motion.span variants={controlPanelIconVariants}>
+            <PlayerPause
+              size={18}
+              onClick={stopAnimation}
+              className={
+                animationState !== AnimationState.Playing
+                  ? 'pointer-events-none fill-base-300 text-base-300'
+                  : 'cursor-pointer hover:fill-error transition hover:scale-110 active:scale-100'
+              }
+            />
+          </motion.span>
 
           {workspace.visibility === WorkspaceVisibility.PRIVATE ? null : (
-            <Share
-              size={18}
-              cursor="pointer"
-              className="hover:fill-black hover:scale-110 active:scale-100 transition"
-              onClick={handleWorkspaceShare}
-            />
+            <motion.span variants={controlPanelIconVariants}>
+              <Share
+                size={18}
+                cursor="pointer"
+                className="hover:fill-black hover:scale-110 active:scale-100 transition"
+                onClick={handleWorkspaceShare}
+              />
+            </motion.span>
           )}
 
-          <DeviceFloppy
-            size={18}
-            cursor="pointer"
-            onClick={() => saveNodes(workspace.id)}
-            className={
-              thereIsUnsavedChanges
-                ? 'hover:fill-blue-200 hover:scale-110 active:scale-100 transition'
-                : 'pointer-events-none fill-base-100 text-base-300'
-            }
-          />
-
-          <label
-            htmlFor={deletionModalId}
-            onClick={() => setDeletionModalIsOpen(true)}
-          >
-            <Trash
-              size={18}
-              cursor={'pointer'}
-              className="stroke-red-400 hover:stroke-red-600 hover:scale-110 active:scale-100 transition"
-            />
-          </label>
-
-          <label
-            htmlFor={settingsModalId}
-            onClick={() => setSettingsModalIsOpen(true)}
-          >
-            <Settings
+          <motion.span variants={controlPanelIconVariants}>
+            <DeviceFloppy
               size={18}
               cursor="pointer"
-              className="hover:fill-black hover:scale-110 active:scale-100 transition"
+              onClick={() => saveNodes(workspace.id)}
+              className={
+                thereIsUnsavedChanges
+                  ? 'hover:fill-blue-200 hover:scale-110 active:scale-100 transition'
+                  : 'pointer-events-none fill-base-100 text-base-300'
+              }
             />
-          </label>
+          </motion.span>
+
+          <motion.span variants={controlPanelIconVariants}>
+            <label
+              htmlFor={deletionModalId}
+              onClick={() => setDeletionModalIsOpen(true)}
+            >
+              <Trash
+                size={18}
+                cursor={'pointer'}
+                className="stroke-red-400 hover:stroke-red-600 hover:scale-110 active:scale-100 transition"
+              />
+            </label>
+          </motion.span>
+
+          <motion.span variants={controlPanelIconVariants}>
+            <label
+              htmlFor={settingsModalId}
+              onClick={() => setSettingsModalIsOpen(true)}
+            >
+              <Settings
+                size={18}
+                cursor="pointer"
+                className="hover:fill-black hover:scale-110 active:scale-100 transition"
+              />
+            </label>
+          </motion.span>
         </ControlPanel>
 
         <FlowchartCanvas />

@@ -1,9 +1,17 @@
+import { MotionProps, motion } from 'framer-motion';
 import { PropsWithChildren } from 'react';
 
-export const ControlPanel: React.FC<PropsWithChildren> = (props) => {
+type ControlPanelProps = PropsWithChildren<MotionProps>;
+
+export const ControlPanel: React.FC<ControlPanelProps> = (props) => {
+  const { children, ...motionProps } = props;
+
   return (
-    <div className="absolute flex top-4 left-1/2 translate-x-1/2 shadow-md px-5 py-2 gap-2 z-50 bg-base-100">
-      {props.children}
-    </div>
+    <motion.div
+      className="absolute flex top-4 left-1/2 translate-x-1/2 shadow-md px-5 py-2 gap-2 z-50 bg-base-100"
+      {...motionProps}
+    >
+      {children}
+    </motion.div>
   );
 };
