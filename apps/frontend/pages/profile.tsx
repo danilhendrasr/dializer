@@ -12,6 +12,7 @@ import { UserService } from '../services/user';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { UserEntity } from '@dializer/types';
+import { motion } from 'framer-motion';
 
 type ProfileInputs = {
   name: string;
@@ -69,37 +70,58 @@ export default function ProfilePage() {
       <div className="w-2/5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <div className="flex justify-between items-center my-2">
           <div className="flex items-center gap-3">
-            <Link href="/workspaces">
-              <ArrowLeft
-                className="cursor-pointer hover:bg-base-200 active:scale-95"
-                size={20}
-              />
-            </Link>
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
+            >
+              <Link href="/workspaces">
+                <ArrowLeft
+                  className="cursor-pointer hover:bg-base-200 active:scale-95"
+                  size={20}
+                />
+              </Link>
+            </motion.div>
             <h1 className="text-2xl">Personal Data</h1>
           </div>
 
           {/* Toggle edit mode button */}
           {isEditing ? (
-            <X
-              className="cursor-pointer hover:bg-base-200 active:scale-95"
-              size={20}
-              onClick={() => setIsEditing(false)}
-            />
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
+            >
+              <X
+                className="cursor-pointer hover:bg-base-200 active:scale-95"
+                size={20}
+                onClick={() => setIsEditing(false)}
+              />
+            </motion.div>
           ) : (
-            <Edit
-              className="cursor-pointer hover:bg-base-200 active:scale-95"
-              size={20}
-              onClick={() => setIsEditing(true)}
-            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                transition: { delay: 0.5, duration: 0.2, type: 'spring' },
+              }}
+            >
+              <Edit
+                className="cursor-pointer hover:bg-base-200 active:scale-95"
+                size={20}
+                onClick={() => setIsEditing(true)}
+              />
+            </motion.div>
           )}
         </div>
         {/* End toggle edit mode button */}
 
-        <PersonalDataForm
-          isInEditMode={isEditing}
-          data={data}
-          onSubmit={mutate}
-        />
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <PersonalDataForm
+            isInEditMode={isEditing}
+            data={data}
+            onSubmit={mutate}
+          />
+        </motion.div>
       </div>
     </>
   );
