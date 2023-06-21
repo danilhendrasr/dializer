@@ -15,6 +15,7 @@ import { WorkspaceEntity, WorkspaceVisibility } from '@dializer/types';
 import { formatDistance } from 'date-fns';
 import { useDebounce } from 'use-debounce';
 import { useForm } from 'react-hook-form';
+import { MotionProps, Variants, motion } from 'framer-motion';
 
 export default function UserDashboard() {
   useUnauthorizedProtection();
@@ -77,7 +78,11 @@ export default function UserDashboard() {
       </Head>
 
       {/* Header */}
-      <div className="navbar bg-base-100 px-5 shadow-sm">
+      <motion.div
+        initial={{ y: -50 }}
+        animate={{ y: 0, transition: { duration: 0.5 } }}
+        className="navbar bg-base-100 px-5 shadow-sm"
+      >
         <div className="flex-1">
           <Image
             src={'/dializer-logo.svg'}
@@ -141,11 +146,11 @@ export default function UserDashboard() {
             </div>
           </button>
         </div>
-      </div>
+      </motion.div>
       {/* End of header */}
 
-      <div className="w-full p-10">
-        {isLoading ? (
+      {isLoading ? (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <Oval
             height={60}
             width={60}
@@ -153,22 +158,59 @@ export default function UserDashboard() {
             secondaryColor="#e5e6e6"
             wrapperClass="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           />
-        ) : !data || data.length === 0 ? (
-          <WorkspaceNotFoundPlaceholder />
-        ) : (
-          <div className="grid grid-cols-3 gap-5">
+        </motion.div>
+      ) : !data || data.length === 0 ? (
+        <WorkspaceNotFoundPlaceholder />
+      ) : (
+        <div className="w-full p-10">
+          <motion.div
+            className="grid grid-cols-3 gap-5"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: {
+                opacity: 1,
+                transition: {
+                  when: 'beforeChildren',
+                  staggerChildren: 0.1,
+                },
+              },
+              hidden: {
+                opacity: 0,
+                transition: {
+                  when: 'afterChildren',
+                },
+              },
+            }}
+          >
             {data.map((workspace, idx) => {
               return (
                 <WorkspaceItem
                   key={idx}
+                  variants={{
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: {
+                        type: 'spring',
+                        stiffness: 300,
+                        damping: 24,
+                      },
+                    },
+                    hidden: {
+                      opacity: 0,
+                      y: 20,
+                      transition: { duration: 0.2 },
+                    },
+                  }}
                   workspaceData={workspace}
                   onDelete={() => handleWorkspaceDelete(workspace.id)}
                 />
               );
             })}
-          </div>
-        )}
-      </div>
+          </motion.div>
+        </div>
+      )}
 
       <WorkspaceCreationModal onSave={createNewWorkspace} />
       {/* Put this part before </body> tag */}
@@ -267,14 +309,21 @@ const WorkspaceCreationModal: React.FC<WorkspaceCreationModalProps> = ({
 type WorkspaceItemProps = {
   workspaceData: WorkspaceEntity;
   onDelete: () => void;
-};
+} & MotionProps;
 
 const WorkspaceItem: React.FC<WorkspaceItemProps> = (props) => {
-  const { workspaceData: workspace, onDelete: handleDelete } = props;
+  const {
+    workspaceData: workspace,
+    onDelete: handleDelete,
+    ...motionProps
+  } = props;
 
   return (
-    <Link href={`/workspaces/${workspace.id}`}>
-      <div className="border border-base-300 hover:border-base-100 hover:bg-base-300 cursor-pointer px-5 py-3 box-border">
+    <motion.div
+      className="border border-base-300 hover:border-base-100 hover:bg-base-300 cursor-pointer px-5 py-3 box-border"
+      {...motionProps}
+    >
+      <Link href={`/workspaces/${workspace.id}`}>
         <div className="flex justify-between items-center border-b mb-2">
           <h2 className="font-bold py-2">{workspace.title}</h2>
           <object>
@@ -296,14 +345,28 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = (props) => {
         <p className="text-xs text-slate-400">
           Edited {formatDistance(new Date(), new Date(workspace.updatedAt))} ago
         </p>
-      </div>
-    </Link>
+      </Link>
+    </motion.div>
   );
 };
 
 const WorkspaceNotFoundPlaceholder: React.FC = () => {
+  const variant: Variants = {
+    hidden: { opacity: 0, transform: 'translate(-50%, -50%) scale(0.95)' },
+    visible: {
+      opacity: 1,
+      transform: 'translate(-50%, -50%) scale(1)',
+      transition: { duration: 0.8 },
+    },
+  };
+
   return (
-    <div className="flex flex-col items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={variant}
+      className="flex flex-col items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+    >
       <Image
         src="/not-found.svg"
         alt="No data decorative image."
@@ -312,10 +375,16 @@ const WorkspaceNotFoundPlaceholder: React.FC = () => {
         priority={true}
         style={{ margin: 15 }}
       />
-      <p className="text-sm text-center leading-relaxed text-base-content my-5 font-sans">
+      <motion.p
+        variants={{
+          hidden: { opacity: 0 },
+          visible: { opacity: 1 },
+        }}
+        className="text-sm text-center leading-relaxed text-base-content my-5 font-sans"
+      >
         Could not find any workspaces. <br /> Create one by clicking the plus
         icon above.
-      </p>
-    </div>
+      </motion.p>
+    </motion.div>
   );
 };

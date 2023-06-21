@@ -10,6 +10,16 @@ import { LocalStorageItems } from '../common/types';
 import { useAuthorizedProtection } from '../hooks/use-authorized-protection.hook';
 import { AuthService } from '../services/auth';
 import { useForm, Controller } from 'react-hook-form';
+import { motion, Variants } from 'framer-motion';
+
+const pageChildrenVariants: Variants = {
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring', stiffness: 300, damping: 24 },
+  },
+  hidden: { opacity: 0, y: -20, transition: { duration: 0.2 } },
+};
 
 type SignUpInputs = {
   name: string;
@@ -49,14 +59,40 @@ export default function SignUpPage() {
   };
 
   return (
-    <>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { duration: 0.5 } }}
+      className="sign-up-page w-full h-full"
+    >
       <Head>
         <title>Sign Up | Dializer</title>
       </Head>
 
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3">
-        <AuthTitle>Sign Up</AuthTitle>
-        <AuthForm onSubmit={handleSubmit(handleSignUp)}>
+      <motion.div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: {
+            opacity: 1,
+            transition: {
+              when: 'beforeChildren',
+              staggerChildren: 0.05,
+            },
+          },
+          hidden: {
+            opacity: 0,
+            transition: {
+              when: 'afterChildren',
+            },
+          },
+        }}
+      >
+        <AuthTitle variants={pageChildrenVariants}>Sign Up</AuthTitle>
+        <AuthForm
+          variants={pageChildrenVariants}
+          onSubmit={handleSubmit(handleSignUp)}
+        >
           <Controller
             control={control}
             name="name"
@@ -107,7 +143,10 @@ export default function SignUpPage() {
             text={isSubmitting ? 'Signing Up...' : 'Sign up'}
           />
         </AuthForm>
-        <p className="text-sm text-center my-5 text-accent2">
+        <motion.p
+          variants={pageChildrenVariants}
+          className="text-sm text-center my-5 text-accent2"
+        >
           Or{' '}
           <Link
             href="/sign-in"
@@ -116,8 +155,8 @@ export default function SignUpPage() {
             sign in
           </Link>{' '}
           instead.
-        </p>
-      </div>
-    </>
+        </motion.p>
+      </motion.div>
+    </motion.div>
   );
 }
