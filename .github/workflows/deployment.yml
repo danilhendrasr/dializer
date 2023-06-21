@@ -25,6 +25,7 @@ jobs:
             eval "`fnm env`"
             cd ~/dializer
             git pull https://danilhendrasr:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/danilhendrasr/dializer
+            npm i
             npx nx run-many --target=deploy --projects=frontend,backend --skip-nx-cache
             docker compose down
             docker compose up -d
