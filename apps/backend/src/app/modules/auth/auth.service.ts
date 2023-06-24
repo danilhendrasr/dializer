@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterUserDTO } from './dto/register.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -34,7 +35,8 @@ export class AuthService {
       });
     }
 
-    if (user.password !== pass) {
+    const passwordMatches = await bcrypt.compare(pass, user.password);
+    if (!passwordMatches) {
       throw new UnauthorizedException({
         message: 'Invalid credentials.',
       });

@@ -12,6 +12,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPasswordDTO } from './dto/reset-password.dto';
 import * as base64 from 'base-64';
 import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -45,6 +46,9 @@ export class UsersService {
   }
 
   async create(user: User) {
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(user.password, saltRounds);
+    user.password = passwordHash;
     return await this.userRepo.save(user);
   }
 
