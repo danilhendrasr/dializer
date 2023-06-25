@@ -20,7 +20,7 @@ jobs:
           node-version: '18.x'
 
       - run: npm install
-      - run: npx nx run-many --target=build --all=true
+      - run: npx nx run-many --target=build --all=true --skip-nx-cache
 
   lint:
     runs-on: ubuntu-latest
@@ -33,4 +33,4 @@ jobs:
           node-version: '18.x'
 
       - run: npm install
-      - run: npx nx run-many --target=lint --all=true
+      - run: npx nx run-many --target=lint --all=true --skip-nx-cache
