@@ -20,6 +20,7 @@ jobs:
           node-version: '18.x'
 
       - run: npm install
+      - run: cp apps/backend/.env.example apps/backend/.env
       - run: npx nx run-many --target=build --all=true --skip-nx-cache
 
   lint:
