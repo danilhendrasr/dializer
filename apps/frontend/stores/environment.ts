@@ -1,5 +1,5 @@
 import { useStore } from 'zustand';
-import createStore from 'zustand/vanilla';
+import { createStore } from 'zustand/vanilla';
 
 export type EnvironmentState = {
   variables: Record<string, unknown>;
