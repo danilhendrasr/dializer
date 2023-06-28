@@ -39,7 +39,7 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
         (node) =>
           node.type !== NodeTypes.START &&
           node.type !== NodeTypes.END &&
-          node.content === undefined
+          !node.content
       );
     },
     get flowchartOnlyHasTerminalNodes() {
@@ -49,7 +49,14 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
     },
   },
   unsavedChangesExist: false,
-  startAnimation: () => set({ animationState: AnimationState.Playing }),
+  startAnimation: () => {
+    if (get().computed.emptyNodeExists) {
+      toast.error("Cannot play flowchart while there's an empty node(s).");
+      return;
+    }
+
+    set({ animationState: AnimationState.Playing });
+  },
   stopAnimation: () => {
     set({ animationState: AnimationState.Stopped });
     envStore.setState({ variables: {} });
