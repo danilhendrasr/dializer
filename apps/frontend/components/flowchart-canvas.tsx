@@ -157,7 +157,7 @@ export const FlowchartCanvas: React.FC = () => {
           setOutputModal({
             x: curNode.x + (25 / 100) * window.innerWidth,
             y: curNode.y,
-            text: interpretResult as string,
+            text: String(interpretResult),
           });
         } catch (e) {
           const err = e as Error;
