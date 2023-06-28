@@ -336,7 +336,10 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = (props) => {
               size={18}
               cursor={'pointer'}
               className="stroke-red-400 hover:stroke-red-600 hover:scale-110 active:scale-100 transition"
-              onClick={handleDelete}
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
             />
           </object>
         </div>
