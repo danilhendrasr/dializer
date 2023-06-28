@@ -294,7 +294,10 @@ export default function Workbench() {
             hidden: { opacity: 0, y: -20 },
           }}
         >
-          <motion.span variants={controlPanelIconVariants}>
+          <motion.span
+            variants={controlPanelIconVariants}
+            title="Play animation"
+          >
             <PlayerPlay
               size={18}
               onClick={startAnimation}
@@ -308,7 +311,10 @@ export default function Workbench() {
             />
           </motion.span>
 
-          <motion.span variants={controlPanelIconVariants}>
+          <motion.span
+            variants={controlPanelIconVariants}
+            title="Pause animation"
+          >
             <PlayerPause
               size={18}
               onClick={stopAnimation}
@@ -321,7 +327,10 @@ export default function Workbench() {
           </motion.span>
 
           {workspace.visibility === WorkspaceVisibility.PRIVATE ? null : (
-            <motion.span variants={controlPanelIconVariants}>
+            <motion.span
+              variants={controlPanelIconVariants}
+              title="Copy workspace link to clipboard"
+            >
               <Share
                 size={18}
                 cursor="pointer"
@@ -331,7 +340,10 @@ export default function Workbench() {
             </motion.span>
           )}
 
-          <motion.span variants={controlPanelIconVariants}>
+          <motion.span
+            variants={controlPanelIconVariants}
+            title="Save workspace"
+          >
             <DeviceFloppy
               size={18}
               cursor="pointer"
@@ -344,7 +356,10 @@ export default function Workbench() {
             />
           </motion.span>
 
-          <motion.span variants={controlPanelIconVariants}>
+          <motion.span
+            variants={controlPanelIconVariants}
+            title="Delete workspace"
+          >
             <label
               htmlFor={deletionModalId}
               onClick={() => setDeletionModalIsOpen(true)}
@@ -357,7 +372,10 @@ export default function Workbench() {
             </label>
           </motion.span>
 
-          <motion.span variants={controlPanelIconVariants}>
+          <motion.span
+            variants={controlPanelIconVariants}
+            title="Open workspace settings"
+          >
             <label
               htmlFor={settingsModalId}
               onClick={() => setSettingsModalIsOpen(true)}

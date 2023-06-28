@@ -110,6 +110,7 @@ export default function UserDashboard() {
           <label
             htmlFor="my-modal-3"
             className="group btn btn-ghost btn-circle hover:bg-primary"
+            title="Create new workspace"
           >
             <PlusIcon
               className="text-black group-hover:text-base-100 transition-all"
@@ -123,7 +124,11 @@ export default function UserDashboard() {
           <button className="rounded-full group hover:bg-base-200 transition-all">
             <div className="dropdown dropdown-end p-0">
               {/* Profile button */}
-              <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+              <label
+                tabIndex={0}
+                className="btn btn-ghost btn-circle avatar"
+                title="User profile"
+              >
                 <div className="rounded-full">
                   <UserCircle className="transition-all" size={22} />
                 </div>
@@ -326,7 +331,7 @@ const WorkspaceItem: React.FC<WorkspaceItemProps> = (props) => {
       <Link href={`/workspaces/${workspace.id}`}>
         <div className="flex justify-between items-center border-b mb-2">
           <h2 className="font-bold py-2">{workspace.title}</h2>
-          <object>
+          <object title="Delete workspace">
             <Trash
               size={18}
               cursor={'pointer'}
