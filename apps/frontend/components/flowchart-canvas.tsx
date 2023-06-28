@@ -111,7 +111,7 @@ export const FlowchartCanvas: React.FC = () => {
   useInterval(
     () => {
       const curNode = nodes[curNodeIdx.current];
-      const nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
+      let nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
 
       if (prevNodeIdx.current >= 0) {
         nodesDispatch({
@@ -127,7 +127,10 @@ export const FlowchartCanvas: React.FC = () => {
 
       if (curNode.type === NodeTypes.PROCESS || curNode.type === NodeTypes.IF) {
         try {
-          interpreter.interpret(curNode.content);
+          const result = interpreter.interpret(curNode.content);
+          if (curNode.type === NodeTypes.IF && result === false) {
+            nextNodeIdx = curNode.nextIdxIfFalse;
+          }
         } catch (e) {
           const err = e as Error;
           toast(`Error: ${err.message}`, { type: 'error' });
