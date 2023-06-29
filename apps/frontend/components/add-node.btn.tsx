@@ -35,7 +35,7 @@ export const AddNodeBtn: React.FC<Props> = (props) => {
           fill={circleFill}
           strokeWidth={0.5}
         />
-        <PlusIcon x={x} y={y} size={2.5} color={plusIconFill} />
+        <PlusIcon x={x} y={y} size={4} color={plusIconFill} />
       </Group>
     </Portal>
   );

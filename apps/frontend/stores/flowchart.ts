@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { envStore } from './environment';
 
 type NodesState = {
+  viewOnlyMode: boolean;
   animationState: AnimationState;
   nodes: FlowChartNode[] | null;
   computed: {
@@ -18,6 +19,7 @@ type NodesState = {
     flowchartOnlyHasTerminalNodes: boolean;
   };
   unsavedChangesExist: boolean;
+  toggleViewOnlyMode: () => void;
   startAnimation: () => void;
   stopAnimation: () => void;
   stopAnimationTemporarily: () => void;
@@ -29,6 +31,8 @@ type NodesState = {
 };
 
 export const useFlowchartStore = create<NodesState>()((set, get) => ({
+  viewOnlyMode: true,
+  toggleViewOnlyMode: () => set({ viewOnlyMode: !get().viewOnlyMode }),
   animationState: AnimationState.Stopped,
   nodes: null,
   computed: {

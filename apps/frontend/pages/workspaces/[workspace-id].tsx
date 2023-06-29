@@ -2,7 +2,6 @@ import React, { MouseEventHandler, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import Image from 'next/image';
-import { useUnauthorizedProtection } from '../../hooks/use-unauthorized-protection.hook';
 import { useRouter } from 'next/router';
 import { useFlowchartStore } from '../../stores/flowchart';
 import { WorkspaceEntity, WorkspaceVisibility } from '@dializer/types';
@@ -18,7 +17,7 @@ import {
 } from 'tabler-icons-react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { AnimationState } from '../../common/types';
+import { AnimationState, LocalStorageItems } from '../../common/types';
 import { InterpreterContext } from '../../contexts/expression-interpreter.context';
 import { envStore, useEnvStore } from '../../stores/environment';
 import { ExpressionInterpreter } from '@dializer/expression-interpreter';
@@ -27,6 +26,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { WorkspaceService } from '../../services/workspace';
 import { useForm } from 'react-hook-form';
 import { Variants, motion } from 'framer-motion';
+import NextError from 'next/error';
 
 // Dynamically load the flowchart canvas component and disable ssr for it
 // because it requires the presence of the "window" object.
@@ -49,11 +49,14 @@ const controlPanelIconVariants: Variants = {
 };
 
 export default function Workbench() {
-  useUnauthorizedProtection();
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data: workspace, isLoading } = useQuery({
+  const {
+    data: workspace,
+    isLoading,
+    error,
+  } = useQuery({
     enabled: router.query['workspace-id'] !== undefined,
     queryKey: ['workspace', router.query['workspace-id']],
     queryFn: async () => {
@@ -103,13 +106,22 @@ export default function Workbench() {
   const env = useEnvStore((s) => s.variables);
   const thereIsUnsavedChanges = useFlowchartStore((s) => s.unsavedChangesExist);
   const animationState = useFlowchartStore((s) => s.animationState);
+  const viewOnlyMode = useFlowchartStore((s) => s.viewOnlyMode);
   const startAnimation = useFlowchartStore((s) => s.startAnimation);
   const stopAnimation = useFlowchartStore((s) => s.stopAnimation);
   const fetchNodes = useFlowchartStore((s) => s.fetchNodes);
   const saveNodes = useFlowchartStore((s) => s.saveNodes);
+  const toggleViewOnlyMode = useFlowchartStore((s) => s.toggleViewOnlyMode);
 
   const deletionModalId = 'deletion-modal';
   const settingsModalId = 'settings-modal';
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!localStorage.getItem(LocalStorageItems.ACCESS_TOKEN)) return;
+
+    toggleViewOnlyMode();
+  }, []);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -147,6 +159,10 @@ export default function Workbench() {
       toast.error(err.message);
     }
   };
+
+  if (error) {
+    return <NextError statusCode={404} />;
+  }
 
   if (!workspace || isLoading) {
     return (
@@ -340,53 +356,59 @@ export default function Workbench() {
             </motion.span>
           )}
 
-          <motion.span
-            variants={controlPanelIconVariants}
-            title="Save workspace"
-          >
-            <DeviceFloppy
-              size={18}
-              cursor="pointer"
-              onClick={() => saveNodes(workspace.id)}
-              className={
-                thereIsUnsavedChanges
-                  ? 'hover:fill-blue-200 hover:scale-110 active:scale-100 transition'
-                  : 'pointer-events-none fill-base-100 text-base-300'
-              }
-            />
-          </motion.span>
-
-          <motion.span
-            variants={controlPanelIconVariants}
-            title="Delete workspace"
-          >
-            <label
-              htmlFor={deletionModalId}
-              onClick={() => setDeletionModalIsOpen(true)}
+          {viewOnlyMode ? null : (
+            <motion.span
+              variants={controlPanelIconVariants}
+              title="Save workspace"
             >
-              <Trash
-                size={18}
-                cursor={'pointer'}
-                className="stroke-red-400 hover:stroke-red-600 hover:scale-110 active:scale-100 transition"
-              />
-            </label>
-          </motion.span>
-
-          <motion.span
-            variants={controlPanelIconVariants}
-            title="Open workspace settings"
-          >
-            <label
-              htmlFor={settingsModalId}
-              onClick={() => setSettingsModalIsOpen(true)}
-            >
-              <Settings
+              <DeviceFloppy
                 size={18}
                 cursor="pointer"
-                className="hover:fill-black hover:scale-110 active:scale-100 transition"
+                onClick={() => saveNodes(workspace.id)}
+                className={
+                  thereIsUnsavedChanges
+                    ? 'hover:fill-blue-200 hover:scale-110 active:scale-100 transition'
+                    : 'pointer-events-none fill-base-100 text-base-300'
+                }
               />
-            </label>
-          </motion.span>
+            </motion.span>
+          )}
+
+          {viewOnlyMode ? null : (
+            <motion.span
+              variants={controlPanelIconVariants}
+              title="Delete workspace"
+            >
+              <label
+                htmlFor={deletionModalId}
+                onClick={() => setDeletionModalIsOpen(true)}
+              >
+                <Trash
+                  size={18}
+                  cursor={'pointer'}
+                  className="stroke-red-400 hover:stroke-red-600 hover:scale-110 active:scale-100 transition"
+                />
+              </label>
+            </motion.span>
+          )}
+
+          {viewOnlyMode ? null : (
+            <motion.span
+              variants={controlPanelIconVariants}
+              title="Open workspace settings"
+            >
+              <label
+                htmlFor={settingsModalId}
+                onClick={() => setSettingsModalIsOpen(true)}
+              >
+                <Settings
+                  size={18}
+                  cursor="pointer"
+                  className="hover:fill-black hover:scale-110 active:scale-100 transition"
+                />
+              </label>
+            </motion.span>
+          )}
         </ControlPanel>
 
         <FlowchartCanvas />
@@ -426,7 +448,7 @@ export default function Workbench() {
 
 const InformationSidebarTab: React.FC = () => {
   return (
-    <div className="pb-28">
+    <div className="pb-40">
       <div className="mb-7">
         <h2 className="text-xl border-b-slate-300 border-b py-2 mb-3">
           Node Types

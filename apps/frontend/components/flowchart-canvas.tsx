@@ -81,6 +81,7 @@ export const FlowchartCanvas: React.FC = () => {
 
   const nodes = useFlowchartStore((s) => s.nodes);
   const animationState = useFlowchartStore((s) => s.animationState);
+  const viewOnlyMode = useFlowchartStore((s) => s.viewOnlyMode);
   const stopAnimation = useFlowchartStore((s) => s.stopAnimation);
   const stopAnimationTemporarily = useFlowchartStore(
     (s) => s.stopAnimationTemporarily
@@ -283,7 +284,7 @@ export const FlowchartCanvas: React.FC = () => {
                 };
               }
 
-              const AddNewNodeBtn = (
+              const AddNewNodeBtn = viewOnlyMode ? null : (
                 <AddNodeBtn
                   x={node.x + node.width / 2}
                   y={node.y + node.height}
@@ -330,6 +331,7 @@ export const FlowchartCanvas: React.FC = () => {
               }
 
               const handleDblClick = () => {
+                if (viewOnlyMode) return;
                 const pointerPos = getPointerPositions();
                 if (node.type === NodeTypes.INPUT) {
                   setInputModal({
@@ -347,6 +349,7 @@ export const FlowchartCanvas: React.FC = () => {
               };
 
               const handleRightClick = () => {
+                if (viewOnlyMode) return;
                 const pointerPos = getPointerPositions();
                 setContextMenu({
                   x: pointerPos.x,

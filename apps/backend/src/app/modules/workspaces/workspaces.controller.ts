@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -18,6 +19,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdateWorkspaceNodesDTO } from './update-nodes.dto';
 import { WorkspacesService } from './workspaces.service';
 import { CreateWorkspaceDTO } from './create-workspace.dto';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
+import { WorkspaceVisibility } from '@dializer/types';
 
 @Controller(ApiEndpoints.WORKSPACES)
 @ApiTags(capitalize(ApiEndpoints.WORKSPACES))
@@ -26,15 +29,21 @@ export class WorkspacesController {
 
   @ApiOperation({ summary: 'Get one workspace by id' })
   @Get('/:id')
-  @UseGuards(JwtAuthGuard)
-  async getOne(@Param('id') workspaceId: string) {
-    return await this.workspacesService.getOne(workspaceId);
+  @UseGuards(OptionalJwtAuthGuard)
+  async getOne(@Param('id') workspaceId: string, @Req() req: Request) {
+    const user = req.user as { id: string; email: string };
+    const workspace = await this.workspacesService.getOne(workspaceId);
+    if (!user && workspace.visibility === WorkspaceVisibility.PRIVATE) {
+      throw new NotFoundException('Cannot find this public workspace.');
+    }
+
+    return workspace;
   }
 
   @ApiOperation({ summary: 'Get nodes of a workspace' })
   @Get('/:id/nodes')
-  @UseGuards(JwtAuthGuard)
-  async getNodes(@Param('id') workspaceId: string) {
+  @UseGuards(OptionalJwtAuthGuard)
+  async getNodes(@Param('id') workspaceId: string, @Req() req: Request) {
     return await this.workspacesService.getWorkspaceNodes(workspaceId);
   }
 
