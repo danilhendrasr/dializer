@@ -1,4 +1,5 @@
 import { KonvaEventObject } from 'konva/lib/Node';
+import { useState } from 'react';
 import { Arrow, Group, Shape, Text } from 'react-konva';
 import { FlowChartNode } from '../../common/types';
 
@@ -18,7 +19,7 @@ type Props = {
   onRightClick?: () => void;
 };
 
-const IfNode: React.FC<Props> = (props) => {
+const LoopNode: React.FC<Props> = (props) => {
   const {
     x,
     y,
@@ -27,9 +28,11 @@ const IfNode: React.FC<Props> = (props) => {
     width = 100,
     height = 70,
     next,
+    addNewNodeBtn,
     onDblClick,
     onRightClick,
   } = props;
+  const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
   const handleRightClick = (e: KonvaEventObject<PointerEvent>) => {
     if (!onRightClick) return;
@@ -38,7 +41,12 @@ const IfNode: React.FC<Props> = (props) => {
   };
 
   return (
-    <Group onDblClick={onDblClick} onContextMenu={handleRightClick}>
+    <Group
+      onMouseEnter={() => setDisplayAddNodeBtn(true)}
+      onMouseLeave={() => setDisplayAddNodeBtn(false)}
+      onDblClick={onDblClick}
+      onContextMenu={handleRightClick}
+    >
       <Group x={x} y={y}>
         <Shape
           sceneFunc={(context, shape) => {
@@ -62,16 +70,15 @@ const IfNode: React.FC<Props> = (props) => {
           text={text}
         />
         <Text text="False" x={width + 5} y={height / 2 - 20} />
-        <Text text="True" x={-30} y={height / 2 - 20} />
+        <Text text="True" x={width / 2 + 5} y={height + 10} />
+        {displayAddNodeBtn && addNewNodeBtn ? addNewNodeBtn : null}
       </Group>
       {next ? (
         <>
           <Arrow
             points={[
-              x,
-              y + height / 2,
-              x - 50,
-              y + height / 2,
+              x + width / 2,
+              y + height,
               next.true.x + next.true.width / 2,
               next.true.y - 5,
             ]}
@@ -81,10 +88,12 @@ const IfNode: React.FC<Props> = (props) => {
             points={[
               x + width,
               y + height / 2,
-              x + width + 50,
+              x + width + 100,
               y + height / 2,
-              next.false.x + next.false.width / 2,
-              next.false.y - 5,
+              next.false.x + 200,
+              next.false.y + next.false.height / 2,
+              next.false.x + 105,
+              next.false.y + next.false.height / 2,
             ]}
             stroke="grey"
           />
@@ -94,4 +103,4 @@ const IfNode: React.FC<Props> = (props) => {
   );
 };
 
-export { IfNode };
+export { LoopNode };

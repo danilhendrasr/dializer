@@ -10,7 +10,6 @@ import {
   Coordinate,
   FlowChartNode,
   NodeActions,
-  NodeTypes,
 } from '../common/types';
 import { AddNodeBtn } from './add-node.btn';
 import { ExpressionModal as ExprModal } from './expression-modal';
@@ -26,6 +25,8 @@ import { InterpreterContext } from '../contexts/expression-interpreter.context';
 import { toast } from 'react-toastify';
 import { OutputModal } from './output-modal';
 import { InputModal } from './input-modal';
+import { LoopNode } from './nodes/loop-node';
+import { NodeTypes } from '@dializer/types';
 
 // Constant used to determine how much to zoom-in and out on wheel movement
 const SCALE_BY = 1.2;
@@ -43,7 +44,7 @@ type AddNodeModalState =
 type ExprModalState =
   | (Coordinate & {
       // The index of the node that was double-clicked
-      nodeIdx: number;
+      targetId: string;
     })
   | null;
 
@@ -52,21 +53,21 @@ type OutputModalState = (Coordinate & { text: string }) | null;
 type InputModalState =
   | (Coordinate & {
       // The index of the node that was double-clicked
-      nodeIdx: number;
+      targetId: string;
     })
   | null;
 
 type RuntimeInputModalState =
   | (Coordinate & {
       // The index of the node that was double-clicked
-      nodeIdx: number;
+      targetId: string;
     })
   | null;
 
 type ContextMenuState =
   | (Coordinate & {
       // The index of the node that was right-clicked
-      nodeIdx: number;
+      targetId: string;
     })
   | null;
 
@@ -75,9 +76,9 @@ export const FlowchartCanvas: React.FC = () => {
   const stageRef = useRef<StageClass | null>(null);
 
   // Currently to-be-actived node
-  const curNodeIdx = useRef<number>(0);
+  const curNode = useRef<FlowChartNode>(null);
   // Previously activated node
-  const prevNodeIdx = useRef<number>(-1);
+  const prevNode = useRef<FlowChartNode>(null);
 
   const nodes = useFlowchartStore((s) => s.nodes);
   const animationState = useFlowchartStore((s) => s.animationState);
@@ -111,105 +112,124 @@ export const FlowchartCanvas: React.FC = () => {
   // Function to play the animation
   useInterval(
     () => {
-      const curNode = nodes[curNodeIdx.current];
-      let nextNodeIdx = curNode.nextIdx ?? curNode.nextIdxIfTrue;
+      if (curNode.current === null) {
+        curNode.current = nodes[0];
+      }
 
-      if (prevNodeIdx.current >= 0) {
+      if (prevNode.current) {
         nodesDispatch({
           type: NodeActions.DEACTIVATE,
-          atIdx: prevNodeIdx.current,
+          targetId: prevNode.current.id,
         });
       }
 
       nodesDispatch({
         type: NodeActions.ACTIVATE,
-        atIdx: curNodeIdx.current,
+        targetId: curNode.current.id,
       });
 
-      if (curNode.type === NodeTypes.PROCESS || curNode.type === NodeTypes.IF) {
-        try {
-          const result = interpreter.interpret(curNode.content);
-          if (curNode.type === NodeTypes.IF && result === false) {
-            nextNodeIdx = curNode.nextIdxIfFalse;
+      switch (curNode.current.type) {
+        case NodeTypes.PROCESS:
+        case NodeTypes.LOOP:
+        case NodeTypes.BRANCHING:
+          {
+            try {
+              const result = interpreter.interpret(curNode.current.content);
+              if (
+                (curNode.current.type === NodeTypes.LOOP ||
+                  curNode.current.type === NodeTypes.BRANCHING) &&
+                result === false
+              ) {
+                prevNode.current = curNode.current;
+                curNode.current = nodes.find(
+                  (node) => node.id === curNode.current.nextIfFalse
+                );
+                return;
+              }
+            } catch (e) {
+              const err = e as Error;
+              toast(`Error: ${err.message}`, { type: 'error' });
+              stopAnimation();
+
+              // Deactivate error node after a delay
+              // TODO: Find a better way to do this
+              setTimeout(() => {
+                nodesDispatch({
+                  type: NodeActions.DEACTIVATE,
+                  targetId: curNode.current.id,
+                });
+
+                // Reset the pointers
+                curNode.current = nodes[0];
+                prevNode.current = null;
+              }, 2000);
+            }
           }
-        } catch (e) {
-          const err = e as Error;
-          toast(`Error: ${err.message}`, { type: 'error' });
-          stopAnimation();
+          break;
 
-          // Deactivate error node after a delay
-          // TODO: Find a better way to do this
-          setTimeout(() => {
-            nodesDispatch({
-              type: NodeActions.DEACTIVATE,
-              atIdx: curNodeIdx.current,
-            });
+        case NodeTypes.OUTPUT:
+          {
+            try {
+              const interpretResult = interpreter.interpret(
+                curNode.current.content
+              );
+              stopAnimationTemporarily();
+              setOutputModal({
+                x: curNode.current.x + (25 / 100) * window.innerWidth,
+                y: curNode.current.y,
+                text: String(interpretResult),
+              });
+            } catch (e) {
+              const err = e as Error;
+              toast(`Error: ${err.message}`, { type: 'error' });
+              stopAnimation();
 
-            // Reset the pointers
-            curNodeIdx.current = 0;
-            prevNodeIdx.current = -1;
-          }, 2000);
+              // Deactivate error node after a delay
+              // TODO: Find a better way to do this
+              setTimeout(() => {
+                nodesDispatch({
+                  type: NodeActions.DEACTIVATE,
+                  targetId: curNode.current.id,
+                });
 
-          return;
-        }
-      }
+                // Reset the pointers
+                curNode.current = nodes[0];
+                prevNode.current = null;
+              }, 2000);
+            }
+          }
+          break;
 
-      if (curNode.type === NodeTypes.OUTPUT) {
-        try {
-          const interpretResult = interpreter.interpret(curNode.content);
+        case NodeTypes.INPUT: {
           stopAnimationTemporarily();
-          setOutputModal({
-            x: curNode.x + (25 / 100) * window.innerWidth,
-            y: curNode.y,
-            text: String(interpretResult),
+          setRuntimeInputModal({
+            x: curNode.current.x + (25 / 100) * window.innerWidth,
+            y: curNode.current.y,
+            targetId: curNode.current.id,
           });
-        } catch (e) {
-          const err = e as Error;
-          toast(`Error: ${err.message}`, { type: 'error' });
-          stopAnimation();
-
-          // Deactivate error node after a delay
-          // TODO: Find a better way to do this
-          setTimeout(() => {
-            nodesDispatch({
-              type: NodeActions.DEACTIVATE,
-              atIdx: curNodeIdx.current,
-            });
-
-            // Reset the pointers
-            curNodeIdx.current = 0;
-            prevNodeIdx.current = -1;
-          }, 2000);
-
-          return;
         }
-      } else if (curNode.type === NodeTypes.INPUT) {
-        stopAnimationTemporarily();
-        setRuntimeInputModal({
-          x: curNode.x + (25 / 100) * window.innerWidth,
-          y: curNode.y,
-          nodeIdx: curNodeIdx.current,
-        });
       }
 
-      if (curNode === null || nextNodeIdx === null) {
+      if (!curNode.current.next) {
         // One last deactivation of the current node
         // needs to be put in a setTimeout because
         // we have to conform to the animation pause.
         setTimeout(() => {
           nodesDispatch({
             type: NodeActions.DEACTIVATE,
-            atIdx: curNodeIdx.current,
+            targetId: curNode.current.id,
           });
 
-          curNodeIdx.current = 0;
-          prevNodeIdx.current = -1;
+          curNode.current = nodes[0];
+          prevNode.current = null;
         }, ANIMATION_PAUSE);
 
         stopAnimation();
       } else {
-        prevNodeIdx.current = curNodeIdx.current;
-        curNodeIdx.current = nextNodeIdx;
+        prevNode.current = curNode.current;
+        curNode.current = nodes.find(
+          (node) => node.id === curNode.current.next
+        );
       }
     },
     animationState === AnimationState.Playing ? ANIMATION_PAUSE : null
@@ -275,12 +295,15 @@ export const FlowchartCanvas: React.FC = () => {
             nodes.map((node, idx) => {
               let next: FlowChartNode | ConditionalNodeNextNodes | undefined =
                 undefined;
-              if (node.nextIdx) {
-                next = nodes[node.nextIdx];
-              } else if (node.nextIdxIfTrue && node.nextIdxIfFalse) {
+
+              if (!node.nextIfFalse) {
+                next = nodes.find((nextNode) => nextNode.id === node.next);
+              } else {
                 next = {
-                  true: nodes[node.nextIdxIfTrue],
-                  false: nodes[node.nextIdxIfFalse],
+                  true: nodes.find((nextNode) => nextNode.id === node.next),
+                  false: nodes.find(
+                    (nextNode) => nextNode.id === node.nextIfFalse
+                  ),
                 };
               }
 
@@ -296,8 +319,8 @@ export const FlowchartCanvas: React.FC = () => {
                       onSelect: (nodeType: NodeTypes) => {
                         // Add new node after the current node (idx + 1)
                         nodesDispatch({
-                          type: NodeActions.ADD_NEW,
-                          atIdx: idx + 1,
+                          type: NodeActions.ADD_NEW_AFTER,
+                          targetId: node.id,
                           nodeType: nodeType,
                         });
 
@@ -337,13 +360,13 @@ export const FlowchartCanvas: React.FC = () => {
                   setInputModal({
                     x: pointerPos.x,
                     y: pointerPos.y,
-                    nodeIdx: idx,
+                    targetId: node.id,
                   });
                 } else {
                   setExprModal({
                     x: pointerPos.x,
                     y: pointerPos.y,
-                    nodeIdx: idx,
+                    targetId: node.id,
                   });
                 }
               };
@@ -354,7 +377,7 @@ export const FlowchartCanvas: React.FC = () => {
                 setContextMenu({
                   x: pointerPos.x,
                   y: pointerPos.y,
-                  nodeIdx: idx,
+                  targetId: node.id,
                 });
               };
 
@@ -410,7 +433,24 @@ export const FlowchartCanvas: React.FC = () => {
                     />
                   );
 
-                case NodeTypes.IF:
+                case NodeTypes.LOOP:
+                  return (
+                    <LoopNode
+                      key={idx}
+                      x={node.x}
+                      y={node.y}
+                      width={node.width}
+                      height={node.height}
+                      text={node.content}
+                      isActive={node.active}
+                      next={next as ConditionalNodeNextNodes}
+                      addNewNodeBtn={AddNewNodeBtn}
+                      onDblClick={handleDblClick}
+                      onRightClick={handleRightClick}
+                    />
+                  );
+
+                case NodeTypes.BRANCHING:
                   return (
                     <IfNode
                       key={idx}
@@ -467,7 +507,7 @@ export const FlowchartCanvas: React.FC = () => {
             nodesDispatch({
               type: NodeActions.CHANGE_CONTENT,
               content: variableName,
-              atIdx: inputModal.nodeIdx,
+              targetId: inputModal.targetId,
             });
 
             setInputModal(null);
@@ -483,7 +523,9 @@ export const FlowchartCanvas: React.FC = () => {
           onClose={() => setRuntimeInputModal(null)}
           onSubmit={(expression) => {
             try {
-              const existingContent = nodes[runtimeInputModal.nodeIdx].content;
+              const existingContent = nodes.find(
+                (node) => node.id === runtimeInputModal.targetId
+              ).content;
               interpreter.parse(expression);
               startAnimation();
               const fullExpr = `${existingContent} = ${expression}`;
@@ -498,12 +540,12 @@ export const FlowchartCanvas: React.FC = () => {
               setTimeout(() => {
                 nodesDispatch({
                   type: NodeActions.DEACTIVATE,
-                  atIdx: curNodeIdx.current,
+                  targetId: curNode.current.id,
                 });
 
                 // Reset the pointers
-                curNodeIdx.current = 0;
-                prevNodeIdx.current = -1;
+                curNode.current = nodes[0];
+                prevNode.current = null;
               }, 2000);
             }
             setRuntimeInputModal(null);
@@ -515,11 +557,13 @@ export const FlowchartCanvas: React.FC = () => {
         <ExprModal
           x={exprModal.x}
           y={exprModal.y}
-          initialValue={nodes[exprModal.nodeIdx].content}
+          initialValue={
+            nodes.find((node) => node.id === exprModal.targetId).content
+          }
           onClose={() => setExprModal(null)}
           onSubmit={(expressionText) => {
             nodesDispatch({
-              atIdx: exprModal.nodeIdx,
+              targetId: exprModal.targetId,
               type: NodeActions.CHANGE_CONTENT,
               content: expressionText,
             });
@@ -536,10 +580,10 @@ export const FlowchartCanvas: React.FC = () => {
           onClose={() => setContextMenu(null)}
         >
           <button
-            className="btn btn-error btn-sm"
+            className="btn btn-error btn-sm my-1"
             onClick={() => {
               nodesDispatch({
-                atIdx: contextMenu.nodeIdx,
+                targetId: contextMenu.targetId,
                 type: NodeActions.DELETE,
               });
 
@@ -548,6 +592,28 @@ export const FlowchartCanvas: React.FC = () => {
           >
             Delete
           </button>
+          {nodes.find((node) => node.id === contextMenu.targetId).type !==
+          NodeTypes.LOOP ? (
+            <button
+              className="btn btn-warning btn-sm my-1"
+              onClick={() => {
+                setContextMenu(null);
+                setAddNodeModal({
+                  x: contextMenu.x,
+                  y: contextMenu.y,
+                  onSelect: (nodeType) => {
+                    nodesDispatch({
+                      targetId: contextMenu.targetId,
+                      type: NodeActions.TURN_INTO,
+                      nodeType: nodeType,
+                    });
+                  },
+                });
+              }}
+            >
+              Turn Into
+            </button>
+          ) : null}
         </ContextMenu>
       )}
     </>

@@ -27,6 +27,7 @@ export const NewNodeModal: React.FC<NewNodeModalProps> = (props) => {
           alt=""
           width={70}
           height={60}
+          title="Add new process node"
           onClick={() => onSelect(NodeTypes.PROCESS)}
         />
         <Image
@@ -35,6 +36,7 @@ export const NewNodeModal: React.FC<NewNodeModalProps> = (props) => {
           alt=""
           width={85}
           height={60}
+          title="Add new input node"
           onClick={() => onSelect(NodeTypes.INPUT)}
         />
         <Image
@@ -43,15 +45,26 @@ export const NewNodeModal: React.FC<NewNodeModalProps> = (props) => {
           alt=""
           width={90}
           height={60}
+          title="Add new output node"
           onClick={() => onSelect(NodeTypes.OUTPUT)}
         />
         <Image
           className="cursor-pointer hover:bg-base-200 p-2"
-          src="/if-node.svg"
+          src="/loop-node.svg"
           alt=""
-          width={55}
+          width={60}
           height={60}
-          onClick={() => onSelect(NodeTypes.IF)}
+          title="Add new loop node"
+          onClick={() => onSelect(NodeTypes.LOOP)}
+        />
+        <Image
+          className="cursor-pointer hover:bg-base-200 p-2"
+          src="/branching-node.svg"
+          alt=""
+          width={90}
+          height={90}
+          title="Add new branching node"
+          onClick={() => onSelect(NodeTypes.BRANCHING)}
         />
       </div>
     </WorkbenchModal>

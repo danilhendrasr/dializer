@@ -70,7 +70,6 @@ export class WorkspacesController {
     @Body() payload: UpdateWorkspaceNodesDTO
   ) {
     const nodes = payload.nodes.map((node, idx) => {
-      node.index = idx;
       return node;
     });
 

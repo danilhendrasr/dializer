@@ -35,9 +35,6 @@ export class WorkspacesService {
       where: {
         workspace: { id: workspaceId },
       },
-      order: {
-        index: 'ASC',
-      },
       loadRelationIds: {
         relations: ['next', 'nextIfTrue', 'nextIfFalse'],
       },
@@ -47,6 +44,7 @@ export class WorkspacesService {
   }
 
   async createNewWorkspace(ownerId: string, payload?: CreateWorkspaceDTO) {
+    const endNodeUUID = uuidv4();
     const workspace = this.workspaceRepo.create({
       title: payload?.title ?? 'New workspace',
       visibility: payload?.visibility ?? WorkspaceVisibility.PRIVATE,
@@ -60,17 +58,15 @@ export class WorkspacesService {
           y: 100,
           height: 40,
           width: 100,
-          index: 0,
-          nextIdx: 1,
+          next: endNodeUUID,
         },
         {
-          id: uuidv4(),
+          id: endNodeUUID,
           type: NodeTypes.END,
           x: 300,
           y: 200,
           height: 40,
           width: 100,
-          index: 1,
         },
       ],
     });

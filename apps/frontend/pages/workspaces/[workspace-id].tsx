@@ -561,6 +561,38 @@ export default function Workbench() {
 const InformationSidebarTab: React.FC = () => {
   return (
     <div className="pb-40">
+      <div className="mb-7 max-w-full">
+        <h2 className="text-xl border-b-slate-300 border-b py-2 mb-3">
+          Operations
+        </h2>
+        <table className="table table-zebra w-[80px]">
+          <thead>
+            <tr>
+              <th>Operation</th>
+              <th>How-to</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Insert new node</td>
+              <td>
+                Hover mouse on one of the nodes and click the plus button.
+              </td>
+            </tr>
+            <tr>
+              <td>Delete a node</td>
+              <td>
+                Right click on one of the nodes and click the delete button.
+              </td>
+            </tr>
+            <tr>
+              <td>Enter programming expressions into nodes</td>
+              <td>Double click on the node</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <div className="mb-7">
         <h2 className="text-xl border-b-slate-300 border-b py-2 mb-3">
           Node Types
@@ -576,9 +608,18 @@ const InformationSidebarTab: React.FC = () => {
             />
           </li>
           <li className="text-center flex flex-col items-center">
-            <span className="my-1">Conditional</span>
+            <span className="my-1">Branching</span>
             <Image
-              src="/if-node.svg"
+              src="/branching-node.svg"
+              alt="Conditional Node"
+              width={100}
+              height={100}
+            />
+          </li>
+          <li className="text-center flex flex-col items-center">
+            <span className="my-1">Loop</span>
+            <Image
+              src="/loop-node.svg"
               alt="Conditional Node"
               width={60}
               height={60}

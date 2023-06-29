@@ -1,23 +1,18 @@
+import { NodeTypes } from '@dializer/types';
+
 export enum EnvironmentActions {
   ADD_NEW = 'add_new',
   INCREMENT = 'increment',
   DECREMENT = 'decrement',
 }
+
 export enum NodeActions {
-  ADD_NEW = 'add_new',
+  ADD_NEW_AFTER = 'add_new_after',
   DELETE = 'delete',
   ACTIVATE = 'activate',
   DEACTIVATE = 'deactivate',
   CHANGE_CONTENT = 'change_content',
-}
-
-export enum NodeTypes {
-  START = 'start',
-  END = 'end',
-  INPUT = 'input',
-  OUTPUT = 'output',
-  PROCESS = 'process',
-  IF = 'if',
+  TURN_INTO = 'turn_into',
 }
 
 export type Coordinate = { x: number; y: number };
@@ -33,16 +28,20 @@ export interface FlowChartNode {
   height: number;
 
   content?: string;
-  // If node is of non-branching type, it refers to the next
-  // node through this proeprty.
-  nextIdx?: number;
 
-  // If node is of branching type, it refers to the next
-  // node through this proeprty.
-  nextIdxIfTrue?: number;
-  // If node is of branching type, it refers to the next
-  // node through this proeprty.
-  nextIdxIfFalse?: number;
+  /**
+   * Next node's ID.
+   * This property is also used for branching nodes and looping nodes to refer
+   * to the next node if true.
+   */
+  next?: string;
+
+  /**
+   * Next node's ID if false.
+   * Used by branching and looping nodes to refer to the next node that should be visited
+   * if the expression in the node evaluates to false.
+   */
+  nextIfFalse?: string;
 
   workspaceId: string;
 }

@@ -14,7 +14,7 @@ export const AddNodeBtn: React.FC<Props> = (props) => {
   const { x, y, onClick } = props;
   const [hovered, setHovered] = useState(false);
 
-  const radius = hovered ? 5 : 7;
+  const radius = 10;
   const opacity = hovered ? 1 : 0.8;
   const circleFill = hovered ? 'black' : 'white';
   const plusIconFill = hovered ? 'white' : 'black';

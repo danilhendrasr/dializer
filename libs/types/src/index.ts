@@ -4,7 +4,8 @@ export enum NodeTypes {
   INPUT = 'input',
   OUTPUT = 'output',
   PROCESS = 'process',
-  IF = 'if',
+  LOOP = 'loop',
+  BRANCHING = 'branching',
 }
 
 export interface WorkspaceEntity {
