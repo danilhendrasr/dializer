@@ -6,7 +6,7 @@ import { Plus as PlusIcon, Trash, UserCircle } from 'tabler-icons-react';
 import { useUnauthorizedProtection } from '../../hooks/use-unauthorized-protection.hook';
 import { useUserId } from '../../hooks/use-user-id.hook';
 import { Oval } from 'react-loader-spinner';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LocalStorageItems } from '../../common/types';
 import { toast } from 'react-toastify';
 import { WorkspaceService } from '../../services/workspace';
@@ -16,12 +16,53 @@ import { formatDistance } from 'date-fns';
 import { useDebounce } from 'use-debounce';
 import { useForm } from 'react-hook-form';
 import { MotionProps, Variants, motion } from 'framer-motion';
+import { STATUS, Step } from 'react-joyride';
+import dynamic from 'next/dynamic';
+import NextError from 'next/error';
+
+const tourSteps: Step[] = [
+  {
+    content: (
+      <div className="flex items-center flex-col">
+        <Image
+          src={'/dializer-logo.svg'}
+          alt="Dializer logo"
+          width={70}
+          height={70}
+        />
+        <h2 className="text-xl font-bold my-2">Welcome to Dializer!</h2>
+        <p>Let's start our journey!</p>
+      </div>
+    ),
+    locale: { skip: <strong aria-label="skip">SKIP</strong> },
+    placement: 'center',
+    target: 'body',
+  },
+  {
+    target: '.create-workspace-button',
+    content: 'You can create a new workspace by clicking this icon.',
+    disableBeacon: true,
+  },
+  {
+    target: '.profile-button',
+    content: 'You can edit your profile or logout here.',
+    disableBeacon: true,
+  },
+  {
+    target: '.search-bar',
+    content: 'Or you can search your workspaces here.',
+    disableBeacon: true,
+  },
+];
+
+const Joyride = dynamic(() => import('react-joyride'), { ssr: false });
 
 export default function UserDashboard() {
   useUnauthorizedProtection();
   const userId = useUserId();
   const queryClient = useQueryClient();
 
+  const [runTour, setRunTour] = useState(false);
   const [queryParams, setQueryParams] = useState('');
   const [queryParamsValue] = useDebounce(queryParams, 500);
   const { data, isLoading, error } = useQuery({
@@ -69,7 +110,18 @@ export default function UserDashboard() {
     Router.replace('/sign-in');
   };
 
-  if (error) return <h1>There&apos;s an error occuring</h1>;
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (
+      !Boolean(localStorage.getItem(LocalStorageItems.DASHBOARD_TOUR_PASSED))
+    ) {
+      setTimeout(() => {
+        setRunTour(true);
+      }, 500);
+    }
+  }, []);
+
+  if (error) return <NextError statusCode={500} />;
 
   return (
     <>
@@ -83,6 +135,24 @@ export default function UserDashboard() {
         animate={{ y: 0, transition: { duration: 0.5 } }}
         className="navbar bg-base-100 px-5 shadow-sm"
       >
+        <Joyride
+          run={runTour}
+          steps={tourSteps}
+          continuous={true}
+          callback={({ status }) => {
+            if (status === STATUS.FINISHED) {
+              localStorage.setItem(
+                LocalStorageItems.DASHBOARD_TOUR_PASSED,
+                'true'
+              );
+            }
+          }}
+          styles={{
+            options: {
+              primaryColor: '#570df8',
+            },
+          }}
+        />
         <div className="flex-1">
           <Image
             src={'/dializer-logo.svg'}
@@ -96,7 +166,7 @@ export default function UserDashboard() {
 
         <div>
           {/* Search bar */}
-          <div className="form-control mx-3">
+          <div className="form-control mx-3 search-bar">
             <input
               type="text"
               placeholder="Search workspace"
@@ -109,7 +179,7 @@ export default function UserDashboard() {
           {/* New workspace button */}
           <label
             htmlFor="my-modal-3"
-            className="group btn btn-ghost btn-circle hover:bg-primary"
+            className="group btn btn-ghost btn-circle hover:bg-primary create-workspace-button"
             title="Create new workspace"
           >
             <PlusIcon
@@ -126,7 +196,7 @@ export default function UserDashboard() {
               {/* Profile button */}
               <label
                 tabIndex={0}
-                className="btn btn-ghost btn-circle avatar"
+                className="btn btn-ghost btn-circle avatar profile-button"
                 title="User profile"
               >
                 <div className="rounded-full">
