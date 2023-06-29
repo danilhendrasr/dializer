@@ -40,7 +40,7 @@ const tourSteps: Step[] = [
           height={150}
         />
         <h2 className="text-xl font-bold my-2">Congratulations!</h2>
-        <p>You've created your first workspace.</p>
+        <p>You&apos;ve created your first workspace.</p>
       </div>
     ),
     locale: { skip: <strong aria-label="skip">SKIP</strong> },
@@ -93,7 +93,7 @@ const tourSteps: Step[] = [
   {
     content: (
       <div className="flex items-center flex-col">
-        <h2 className="text-xl font-bold my-2">That's it!</h2>
+        <h2 className="text-xl font-bold my-2">That&apos;s it!</h2>
         <p>
           Move your cursor to the start node and click the plus icon to add a
           new node.{' '}
@@ -205,7 +205,7 @@ export default function Workbench() {
 
     if (typeof window === 'undefined') return;
     const accessToken = localStorage.getItem(LocalStorageItems.ACCESS_TOKEN);
-    if (!Boolean(accessToken)) return;
+    if (!accessToken) return;
 
     toggleViewOnlyMode();
 

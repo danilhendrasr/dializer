@@ -31,7 +31,7 @@ const tourSteps: Step[] = [
           height={70}
         />
         <h2 className="text-xl font-bold my-2">Welcome to Dializer!</h2>
-        <p>Let's start our journey!</p>
+        <p>Let&apos;s start our journey!</p>
       </div>
     ),
     locale: { skip: <strong aria-label="skip">SKIP</strong> },
@@ -116,7 +116,7 @@ export default function UserDashboard() {
       LocalStorageItems.DASHBOARD_TOUR_PASSED
     );
 
-    if (!Boolean(dashboardTourPassed)) {
+    if (!dashboardTourPassed) {
       setTimeout(() => {
         setRunTour(true);
       }, 500);
