@@ -57,6 +57,7 @@
     "react-draggable": "^4.4.5",
     "react-hook-form": "^7.43.9",
     "react-is": "18.2.0",
+    "react-joyride": "^2.5.4",
     "react-konva": "18.2.3",
     "react-konva-utils": "^0.3.0",
     "react-loader-spinner": "^5.3.4",
