@@ -112,9 +112,11 @@ export default function UserDashboard() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (
-      !Boolean(localStorage.getItem(LocalStorageItems.DASHBOARD_TOUR_PASSED))
-    ) {
+    const dashboardTourPassed = localStorage.getItem(
+      LocalStorageItems.DASHBOARD_TOUR_PASSED
+    );
+
+    if (!Boolean(dashboardTourPassed)) {
       setTimeout(() => {
         setRunTour(true);
       }, 500);

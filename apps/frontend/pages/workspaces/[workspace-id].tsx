@@ -27,6 +27,85 @@ import { WorkspaceService } from '../../services/workspace';
 import { useForm } from 'react-hook-form';
 import { Variants, motion } from 'framer-motion';
 import NextError from 'next/error';
+import { STATUS, Step } from 'react-joyride';
+
+const tourSteps: Step[] = [
+  {
+    content: (
+      <div className="flex items-center flex-col">
+        <Image
+          src={'/party_illustration.svg'}
+          alt="Dializer logo"
+          width={150}
+          height={150}
+        />
+        <h2 className="text-xl font-bold my-2">Congratulations!</h2>
+        <p>You've created your first workspace.</p>
+      </div>
+    ),
+    locale: { skip: <strong aria-label="skip">SKIP</strong> },
+    placement: 'center',
+    target: 'body',
+  },
+  {
+    target: '.play-button',
+    content: 'You can play your flowchart here.',
+    disableBeacon: true,
+  },
+  {
+    target: '.pause-button',
+    content: "Or pause your flowchart when it's animating.",
+    disableBeacon: true,
+  },
+  {
+    target: '.share-button',
+    content: "You can share this workspace's link by clicking this button.",
+    disableBeacon: true,
+  },
+  {
+    target: '.save-button',
+    content:
+      "Sadly there's no auto-save at the moment :( so don't forget to save your changes here.",
+    disableBeacon: true,
+  },
+  {
+    target: '.delete-button',
+    content: 'Oh, and you can also delete your workspace.',
+    disableBeacon: true,
+  },
+  {
+    target: '.settings-button',
+    content: "Or change it's title, description, and visibility.",
+    disableBeacon: true,
+  },
+  {
+    target: '.sidebar-tab-environment',
+    content:
+      "In this tab you'll see your flowchart variables being displayed with their values when you play the flowchart.",
+    disableBeacon: true,
+  },
+  {
+    target: '.sidebar-tab-information',
+    content:
+      'Lastly, if you ever get confused, check out this tab to get some information.',
+    disableBeacon: true,
+  },
+  {
+    content: (
+      <div className="flex items-center flex-col">
+        <h2 className="text-xl font-bold my-2">That's it!</h2>
+        <p>
+          Move your cursor to the start node and click the plus icon to add a
+          new node.{' '}
+        </p>
+        <p className="my-2">Happy flowing!</p>
+      </div>
+    ),
+    locale: { skip: <strong aria-label="skip">SKIP</strong> },
+    placement: 'center',
+    target: 'body',
+  },
+];
 
 // Dynamically load the flowchart canvas component and disable ssr for it
 // because it requires the presence of the "window" object.
@@ -37,6 +116,8 @@ const FlowchartCanvas = dynamic(
   },
   { ssr: false }
 );
+
+const Joyride = dynamic(() => import('react-joyride'), { ssr: false });
 
 enum SideBarTab {
   Environment = 'Environment',
@@ -95,6 +176,7 @@ export default function Workbench() {
     },
   });
 
+  const [runTour, setRunTour] = useState(false);
   const [activeTab, setActiveTab] = useState(SideBarTab.Environment);
   const [deletionModalIsOpen, setDeletionModalIsOpen] = useState(false);
   const [settingsModalIsOpen, setSettingsModalIsOpen] = useState(false);
@@ -117,17 +199,26 @@ export default function Workbench() {
   const settingsModalId = 'settings-modal';
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!localStorage.getItem(LocalStorageItems.ACCESS_TOKEN)) return;
-
-    toggleViewOnlyMode();
-  }, []);
-
-  useEffect(() => {
     if (!router.isReady) return;
     const workspaceId = router.query['workspace-id'] as string;
     fetchNodes(workspaceId);
-  }, [router, fetchNodes]);
+
+    if (typeof window === 'undefined') return;
+    const accessToken = localStorage.getItem(LocalStorageItems.ACCESS_TOKEN);
+    if (!Boolean(accessToken)) return;
+
+    toggleViewOnlyMode();
+
+    const firstWorkspaceTourPassed = Boolean(
+      localStorage.getItem(LocalStorageItems.FIRST_WORKSPACE_TOUR_PASSED)
+    );
+
+    if (!firstWorkspaceTourPassed) {
+      setTimeout(() => {
+        setRunTour(true);
+      }, 500);
+    }
+  }, []);
 
   const handleWorkspaceShare = () => {
     navigator.clipboard.writeText(
@@ -184,6 +275,25 @@ export default function Workbench() {
         <Head>
           <title>Flow Chart Editor | Dializer</title>
         </Head>
+
+        <Joyride
+          run={runTour}
+          steps={tourSteps}
+          continuous={true}
+          callback={({ status }) => {
+            if (status === STATUS.FINISHED) {
+              localStorage.setItem(
+                LocalStorageItems.FIRST_WORKSPACE_TOUR_PASSED,
+                'true'
+              );
+            }
+          }}
+          styles={{
+            options: {
+              primaryColor: '#570df8',
+            },
+          }}
+        />
 
         {/* Side bar */}
         <motion.div
@@ -250,7 +360,7 @@ export default function Workbench() {
               }}
             >
               {Object.values(SideBarTab).map((tabName, idx) => {
-                let className = 'tab tab-bordered flex-1';
+                let className = `tab tab-bordered flex-1 sidebar-tab-${tabName.toLocaleLowerCase()}`;
                 if (tabName === activeTab) {
                   className += ' tab-active';
                 }
@@ -321,8 +431,8 @@ export default function Workbench() {
                 animationState === AnimationState.Playing ||
                 animationState === AnimationState.TemporaryStopped ||
                 terminalNodesOnly
-                  ? 'pointer-events-none fill-base-300 text-base-300'
-                  : 'cursor-pointer hover:fill-success transition hover:scale-110 active:scale-100'
+                  ? 'pointer-events-none fill-base-300 text-base-300 play-button'
+                  : 'cursor-pointer hover:fill-success transition hover:scale-110 active:scale-100 play-button'
               }
             />
           </motion.span>
@@ -336,8 +446,8 @@ export default function Workbench() {
               onClick={stopAnimation}
               className={
                 animationState !== AnimationState.Playing
-                  ? 'pointer-events-none fill-base-300 text-base-300'
-                  : 'cursor-pointer hover:fill-error transition hover:scale-110 active:scale-100'
+                  ? 'pointer-events-none fill-base-300 text-base-300 pause-button'
+                  : 'cursor-pointer hover:fill-error transition hover:scale-110 active:scale-100 pause-button'
               }
             />
           </motion.span>
@@ -350,7 +460,7 @@ export default function Workbench() {
               <Share
                 size={18}
                 cursor="pointer"
-                className="hover:fill-black hover:scale-110 active:scale-100 transition"
+                className="hover:fill-black hover:scale-110 active:scale-100 transition share-button"
                 onClick={handleWorkspaceShare}
               />
             </motion.span>
@@ -367,8 +477,8 @@ export default function Workbench() {
                 onClick={() => saveNodes(workspace.id)}
                 className={
                   thereIsUnsavedChanges
-                    ? 'hover:fill-blue-200 hover:scale-110 active:scale-100 transition'
-                    : 'pointer-events-none fill-base-100 text-base-300'
+                    ? 'hover:fill-blue-200 hover:scale-110 active:scale-100 transition save-button'
+                    : 'pointer-events-none fill-base-100 text-base-300 save-button'
                 }
               />
             </motion.span>
@@ -382,6 +492,7 @@ export default function Workbench() {
               <label
                 htmlFor={deletionModalId}
                 onClick={() => setDeletionModalIsOpen(true)}
+                className="delete-button"
               >
                 <Trash
                   size={18}
@@ -400,6 +511,7 @@ export default function Workbench() {
               <label
                 htmlFor={settingsModalId}
                 onClick={() => setSettingsModalIsOpen(true)}
+                className="settings-button"
               >
                 <Settings
                   size={18}
