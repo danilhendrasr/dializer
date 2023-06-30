@@ -531,28 +531,38 @@ export function nodesReducer(
 }
 
 function readjustNodesPositions(nodes: FlowChartNode[]): FlowChartNode[] {
-  for (let i = 0; i < nodes.length; i++) {
-    const curNode = nodes[i];
-    if (curNode.type === NodeTypes.START) {
+  const queue = [nodes.find((n) => n.type === NodeTypes.START)];
+  while (queue.length > 0) {
+    const head = queue.shift();
+    if (head.type === NodeTypes.START) {
+      queue.push(nodes.find((n) => n.id === head.next));
       continue;
     }
 
-    const prevNodesOfCurNode = nodes.filter(
+    const precedingNodes = nodes.filter(
       (n) =>
-        n.next === curNode.id ||
-        (n.type === NodeTypes.BRANCHING && n.nextIfFalse === curNode.id)
+        n.next === head.id ||
+        (n.type === NodeTypes.BRANCHING && n.nextIfFalse === head.id)
     );
 
-    if (prevNodesOfCurNode.length === 1) {
-      curNode.y = prevNodesOfCurNode[0].y + prevNodesOfCurNode[0].height + 50;
+    if (precedingNodes.length === 1) {
+      head.y = precedingNodes[0].y + precedingNodes[0].height + 50;
     } else {
       // The bottom-most node in the flowchart before current node
-      let lowestNode = prevNodesOfCurNode[0];
-      prevNodesOfCurNode.forEach((n) => {
+      let lowestNode = precedingNodes[0];
+      precedingNodes.forEach((n) => {
         if (n.y > lowestNode.y) lowestNode = n;
       });
 
-      curNode.y = lowestNode.y + lowestNode.height + 50;
+      head.y = lowestNode.y + lowestNode.height + 50;
+    }
+
+    if (head.next) {
+      queue.push(nodes.find((n) => n.id === head.next));
+    }
+
+    if (head.type === NodeTypes.BRANCHING) {
+      queue.push(nodes.find((n) => n.id === head.nextIfFalse));
     }
   }
 
