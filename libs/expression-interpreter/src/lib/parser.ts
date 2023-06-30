@@ -99,8 +99,10 @@ export class Parser {
 
       if (expr instanceof Literal && rightExpr instanceof Literal) {
         if (
-          expr.type !== TokenType.INTEGER ||
-          rightExpr.type !== TokenType.INTEGER
+          (expr.type !== TokenType.INTEGER &&
+            expr.type !== TokenType.IDENTIFIER) ||
+          (rightExpr.type !== TokenType.INTEGER &&
+            expr.type !== TokenType.IDENTIFIER)
         ) {
           throw new Error('Can only do arithmetic operations on numbers.');
         }
