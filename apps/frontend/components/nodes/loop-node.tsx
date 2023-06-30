@@ -2,6 +2,7 @@ import { KonvaEventObject } from 'konva/lib/Node';
 import { useState } from 'react';
 import { Arrow, Group, Shape, Text } from 'react-konva';
 import { FlowChartNode } from '../../common/types';
+import { AddNodeBtn } from '../add-node.btn';
 
 type Props = {
   x: number;
@@ -12,11 +13,11 @@ type Props = {
     true: FlowChartNode;
     false: FlowChartNode;
   };
-  addNewNodeBtn?: JSX.Element;
   width?: number;
   height?: number;
   onDblClick?: () => void;
   onRightClick?: () => void;
+  addNewNodeHandler: () => void;
 };
 
 const LoopNode: React.FC<Props> = (props) => {
@@ -28,9 +29,9 @@ const LoopNode: React.FC<Props> = (props) => {
     width = 100,
     height = 70,
     next,
-    addNewNodeBtn,
     onDblClick,
     onRightClick,
+    addNewNodeHandler,
   } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
@@ -43,7 +44,11 @@ const LoopNode: React.FC<Props> = (props) => {
   return (
     <Group
       onMouseEnter={() => setDisplayAddNodeBtn(true)}
-      onMouseLeave={() => setDisplayAddNodeBtn(false)}
+      onMouseLeave={() => {
+        setTimeout(() => {
+          setDisplayAddNodeBtn(false);
+        }, 200);
+      }}
       onDblClick={onDblClick}
       onContextMenu={handleRightClick}
     >
@@ -71,7 +76,6 @@ const LoopNode: React.FC<Props> = (props) => {
         />
         <Text text="False" x={width + 5} y={height / 2 - 20} />
         <Text text="True" x={width / 2 + 5} y={height + 10} />
-        {displayAddNodeBtn && addNewNodeBtn ? addNewNodeBtn : null}
       </Group>
       {next ? (
         <>
@@ -98,6 +102,13 @@ const LoopNode: React.FC<Props> = (props) => {
             stroke="grey"
           />
         </>
+      ) : null}
+      {displayAddNodeBtn ? (
+        <AddNodeBtn
+          x={x + width / 2}
+          y={y + height}
+          onClick={addNewNodeHandler}
+        />
       ) : null}
     </Group>
   );

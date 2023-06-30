@@ -307,29 +307,23 @@ export const FlowchartCanvas: React.FC = () => {
                 };
               }
 
-              const AddNewNodeBtn = viewOnlyMode ? null : (
-                <AddNodeBtn
-                  x={node.x + node.width / 2}
-                  y={node.y + node.height}
-                  onClick={() => {
-                    const pointerPos = getPointerPositions();
-                    setAddNodeModal({
-                      x: pointerPos.x,
-                      y: pointerPos.y,
-                      onSelect: (nodeType: NodeTypes) => {
-                        // Add new node after the current node (idx + 1)
-                        nodesDispatch({
-                          type: NodeActions.ADD_NEW_AFTER,
-                          targetId: node.id,
-                          nodeType: nodeType,
-                        });
-
-                        setAddNodeModal(null);
-                      },
+              const handleAddNewNode = () => {
+                const pointerPos = getPointerPositions();
+                setAddNodeModal({
+                  x: pointerPos.x,
+                  y: pointerPos.y,
+                  onSelect: (nodeType: NodeTypes) => {
+                    // Add new node after the current node (idx + 1)
+                    nodesDispatch({
+                      type: NodeActions.ADD_NEW_AFTER,
+                      targetId: node.id,
+                      nodeType: nodeType,
                     });
-                  }}
-                />
-              );
+
+                    setAddNodeModal(null);
+                  },
+                });
+              };
 
               // Return early if the node is a terminal node
               // This is done for no particular reason, it's just easier to reason
@@ -348,7 +342,7 @@ export const FlowchartCanvas: React.FC = () => {
                     isActive={node.active}
                     type={node.type}
                     next={next as FlowChartNode}
-                    addNewNodeBtn={AddNewNodeBtn}
+                    addNewNodeHandler={handleAddNewNode}
                   />
                 );
               }
@@ -393,7 +387,7 @@ export const FlowchartCanvas: React.FC = () => {
                       text={node.content}
                       isActive={node.active}
                       next={next as FlowChartNode}
-                      addNewNodeBtn={AddNewNodeBtn}
+                      addNewNodeHandler={handleAddNewNode}
                       onDblClick={handleDblClick}
                       onRightClick={handleRightClick}
                     />
@@ -410,7 +404,7 @@ export const FlowchartCanvas: React.FC = () => {
                       text={node.content}
                       isActive={node.active}
                       next={next as FlowChartNode}
-                      addNewNodeBtn={AddNewNodeBtn}
+                      addNewNodeHandler={handleAddNewNode}
                       onDblClick={handleDblClick}
                       onRightClick={handleRightClick}
                     />
@@ -427,7 +421,7 @@ export const FlowchartCanvas: React.FC = () => {
                       text={node.content}
                       isActive={node.active}
                       next={next as FlowChartNode}
-                      addNewNodeBtn={AddNewNodeBtn}
+                      addNewNodeHandler={handleAddNewNode}
                       onDblClick={handleDblClick}
                       onRightClick={handleRightClick}
                     />
@@ -444,9 +438,9 @@ export const FlowchartCanvas: React.FC = () => {
                       text={node.content}
                       isActive={node.active}
                       next={next as ConditionalNodeNextNodes}
-                      addNewNodeBtn={AddNewNodeBtn}
                       onDblClick={handleDblClick}
                       onRightClick={handleRightClick}
+                      addNewNodeHandler={handleAddNewNode}
                     />
                   );
 
@@ -461,7 +455,6 @@ export const FlowchartCanvas: React.FC = () => {
                       text={node.content}
                       isActive={node.active}
                       next={next as ConditionalNodeNextNodes}
-                      addNewNodeBtn={AddNewNodeBtn}
                       onDblClick={handleDblClick}
                       onRightClick={handleRightClick}
                     />

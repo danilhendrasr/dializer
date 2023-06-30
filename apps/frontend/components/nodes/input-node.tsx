@@ -2,18 +2,19 @@ import { KonvaEventObject } from 'konva/lib/Node';
 import { useState } from 'react';
 import { Shape, Arrow, Group, Text } from 'react-konva';
 import { FlowChartNode } from '../../common/types';
+import { AddNodeBtn } from '../add-node.btn';
 
 type Props = {
   x: number;
   y: number;
   isActive: boolean;
   text?: string;
-  addNewNodeBtn?: JSX.Element;
   width?: number;
   height?: number;
   next?: FlowChartNode;
   onDblClick?: () => void;
   onRightClick?: () => void;
+  addNewNodeHandler: () => void;
 };
 
 const InputNode: React.FC<Props> = (props) => {
@@ -25,9 +26,9 @@ const InputNode: React.FC<Props> = (props) => {
     width = 100,
     height = 50,
     next,
-    addNewNodeBtn,
     onDblClick,
     onRightClick,
+    addNewNodeHandler,
   } = props;
   const [displayAddNodeBtn, setDisplayAddNodeBtn] = useState(false);
 
@@ -73,7 +74,6 @@ const InputNode: React.FC<Props> = (props) => {
             text={text}
           />
         </Group>
-        {displayAddNodeBtn ? addNewNodeBtn : null}
       </Group>
       {next ? (
         <Arrow
@@ -84,6 +84,13 @@ const InputNode: React.FC<Props> = (props) => {
             next.y - 5,
           ]}
           stroke="grey"
+        />
+      ) : null}
+      {displayAddNodeBtn ? (
+        <AddNodeBtn
+          x={x + width / 2}
+          y={y + height}
+          onClick={addNewNodeHandler}
         />
       ) : null}
     </Group>

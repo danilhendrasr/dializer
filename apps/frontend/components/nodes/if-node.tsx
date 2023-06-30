@@ -11,7 +11,6 @@ type Props = {
     true: FlowChartNode;
     false: FlowChartNode;
   };
-  addNewNodeBtn?: JSX.Element;
   width?: number;
   height?: number;
   onDblClick?: () => void;
