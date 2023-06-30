@@ -220,6 +220,17 @@ export default function Workbench() {
     }
   }, []);
 
+  useEffect(() => {
+    if (
+      animationState === AnimationState.Playing ||
+      animationState === AnimationState.TemporaryStopped
+    ) {
+      setActiveTab(SideBarTab.Environment);
+    } else {
+      setActiveTab(SideBarTab.Information);
+    }
+  }, [animationState]);
+
   const handleWorkspaceShare = () => {
     navigator.clipboard.writeText(
       `${process.env.NEXT_PUBLIC_APP_HOST}${router.asPath}`
