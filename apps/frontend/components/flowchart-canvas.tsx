@@ -592,28 +592,27 @@ export const FlowchartCanvas: React.FC = () => {
           >
             Delete
           </button>
-          {nodes.find((node) => node.id === contextMenu.targetId).type !==
-          NodeTypes.LOOP ? (
-            <button
-              className="btn btn-warning btn-sm my-1"
-              onClick={() => {
-                setContextMenu(null);
-                setAddNodeModal({
-                  x: contextMenu.x,
-                  y: contextMenu.y,
-                  onSelect: (nodeType) => {
-                    nodesDispatch({
-                      targetId: contextMenu.targetId,
-                      type: NodeActions.TURN_INTO,
-                      nodeType: nodeType,
-                    });
-                  },
-                });
-              }}
-            >
-              Turn Into
-            </button>
-          ) : null}
+          <button
+            className="btn btn-warning btn-sm my-1"
+            onClick={() => {
+              setContextMenu(null);
+              setAddNodeModal({
+                x: contextMenu.x,
+                y: contextMenu.y,
+                onSelect: (nodeType) => {
+                  nodesDispatch({
+                    targetId: contextMenu.targetId,
+                    type: NodeActions.CONVERT,
+                    nodeType: nodeType,
+                  });
+
+                  setAddNodeModal(null);
+                },
+              });
+            }}
+          >
+            Convert
+          </button>
         </ContextMenu>
       )}
     </>

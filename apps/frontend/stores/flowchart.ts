@@ -83,23 +83,6 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
     );
 
     const nodes: FlowChartNode[] = await data.json();
-    // const sortedNodes = [nodes.find((node) => node.type === NodeTypes.START)];
-    // while (sortedNodes[sortedNodes.length - 1].next) {
-    //   const latestSortedNodeItem = sortedNodes[sortedNodes.length - 1];
-    //   sortedNodes.push(
-    //     nodes.find((node) => node.id === latestSortedNodeItem.next)
-    //   );
-
-    //   // For if node we append the false branch too
-    //   if (latestSortedNodeItem.type === NodeTypes.BRANCHING) {
-    //     const foundNode = nodes.find(
-    //       (node) => node.id === latestSortedNodeItem.nextIfFalse
-    //     );
-
-    //     sortedNodes.push(foundNode);
-    //   }
-    // }
-
     set({ nodes: nodes });
   },
   saveNodes: async (workspaceId) => {
@@ -285,8 +268,16 @@ export function nodesReducer(
 
       const targetNode = nodes.find((node) => node.id === action.targetId);
       const prevNodeOfTarget = nodes.find(
-        (node) => node.next === targetNode.id
+        (n) =>
+          n.next === targetNode.id ||
+          (n.type === NodeTypes.BRANCHING && n.nextIfFalse === targetNode.id)
       );
+
+      if (prevNodeOfTarget.type === NodeTypes.BRANCHING) {
+        throw new Error(
+          'Cannot delete handler of a branching node, convert this node instead.'
+        );
+      }
 
       const isTargetHandlingFalsePath = nodes.find(
         (node) => node.nextIfFalse === targetNode.id
@@ -371,6 +362,168 @@ export function nodesReducer(
 
       return readjustNodesPositions(nodes);
     }
+
+    case NodeActions.CONVERT:
+      {
+        const targetNode = nodes.find((node) => node.id === action.targetId);
+        if (
+          targetNode.type !== NodeTypes.BRANCHING &&
+          action.nodeType !== NodeTypes.BRANCHING
+        ) {
+          targetNode.nextIfFalse = undefined;
+          if (action.nodeType === NodeTypes.LOOP) {
+            const prevNode = nodes.find(
+              (n) =>
+                n.next === targetNode.id ||
+                (n.type === NodeTypes.BRANCHING &&
+                  n.nextIfFalse === targetNode.id)
+            );
+
+            if (prevNode.type === NodeTypes.START) {
+              throw new Error('Cannot insert loop node after start node.');
+            }
+
+            targetNode.nextIfFalse = prevNode.id;
+          }
+
+          targetNode.type = action.nodeType;
+          targetNode.content = '';
+          return nodes;
+        }
+
+        if (
+          targetNode.type !== NodeTypes.BRANCHING &&
+          action.nodeType === NodeTypes.BRANCHING
+        ) {
+          targetNode.type = action.nodeType;
+          targetNode.content = '';
+          const newNodes: FlowChartNode[] = [];
+
+          const trueHandler: FlowChartNode = {
+            id: uuidv4(),
+            type: NodeTypes.PROCESS,
+            x: targetNode.x - 100,
+            y: targetNode.y + targetNode.height + 50,
+            active: false,
+            height: 100,
+            width: 100,
+            next: targetNode.next,
+            workspaceId: nodes[0].workspaceId,
+          };
+
+          const falseHandler: FlowChartNode = {
+            id: uuidv4(),
+            type: NodeTypes.PROCESS,
+            x: targetNode.x + 100,
+            y: targetNode.y + targetNode.height + 50,
+            active: false,
+            height: 100,
+            width: 100,
+            next: targetNode.next,
+            workspaceId: nodes[0].workspaceId,
+          };
+
+          targetNode.next = trueHandler.id;
+          targetNode.nextIfFalse = falseHandler.id;
+          newNodes.push(trueHandler);
+          newNodes.push(falseHandler);
+          nodes.push(...newNodes);
+
+          return readjustNodesPositions(nodes);
+        }
+
+        if (action.nodeType !== NodeTypes.BRANCHING) {
+          const prevNodeOfTarget = nodes.find((n) => n.next === targetNode.id);
+
+          const isTargetHandlingFalsePath = nodes.find(
+            (node) => node.nextIfFalse === targetNode.id
+          );
+
+          if (
+            isTargetHandlingFalsePath &&
+            isTargetHandlingFalsePath.type === NodeTypes.LOOP
+          ) {
+            const loopNodeThatConnectsToTarget = isTargetHandlingFalsePath;
+
+            if (
+              // If x is directly connected to the loop node that references it and x's previous
+              // node is the start node, we cannot delete it.
+              targetNode.next === loopNodeThatConnectsToTarget.id &&
+              prevNodeOfTarget.type === NodeTypes.START
+            ) {
+              throw new Error(
+                'Cannot delete this node because branching node must not have any connection with the start node, delete the loop node first.'
+              );
+            } else {
+              // If x has a previous node and it's not the start node, we move the loop's
+              // false path to x's previous node.
+              if (prevNodeOfTarget) {
+                loopNodeThatConnectsToTarget.nextIfFalse = prevNodeOfTarget.id;
+              } else {
+                // Otherwise we move the false path to x's next node.
+                loopNodeThatConnectsToTarget.nextIfFalse = targetNode.next;
+              }
+            }
+          }
+
+          let convergingNode = nodes.find((n) => n.id === targetNode.next);
+
+          // Get all nodes in the true path
+          const truePathNodes: FlowChartNode[] = [];
+          let curTruePathNode = nodes.find(
+            (node) => node.id === targetNode.next
+          );
+
+          while (curTruePathNode.type !== NodeTypes.END) {
+            truePathNodes.push(curTruePathNode);
+            curTruePathNode = nodes.find(
+              (node) => node.id === curTruePathNode.next
+            );
+          }
+
+          // Get all nodes in the false path
+          const falsePathNodes: FlowChartNode[] = [];
+          let curFalsePathNode = nodes.find(
+            (node) => node.id === targetNode.nextIfFalse
+          );
+
+          while (curFalsePathNode.type !== NodeTypes.END) {
+            if (truePathNodes.find((n) => n.id === curFalsePathNode.id)) {
+              convergingNode = curFalsePathNode;
+              break;
+            }
+
+            falsePathNodes.push(curFalsePathNode);
+            curFalsePathNode = nodes.find(
+              (n) => n.id === curFalsePathNode.next
+            );
+          }
+
+          targetNode.content = '';
+          targetNode.type = action.nodeType;
+          targetNode.next = convergingNode.id;
+          targetNode.nextIfFalse = undefined;
+
+          const nodesToBeDeleted: FlowChartNode[] = [];
+          nodesToBeDeleted.push(
+            ...truePathNodes.slice(
+              0,
+              truePathNodes.findIndex((n) => n.id === convergingNode.id)
+            )
+          );
+          nodesToBeDeleted.push(...falsePathNodes);
+
+          for (const node of nodesToBeDeleted) {
+            nodes.splice(
+              nodes.findIndex((n) => n.id === node.id),
+              1
+            );
+          }
+
+          return readjustNodesPositions(nodes);
+        }
+      }
+      break;
 
     default:
       throw new Error(`Unhandled reducer action: ${action.type}`);

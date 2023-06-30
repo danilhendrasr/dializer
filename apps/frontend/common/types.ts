@@ -12,7 +12,7 @@ export enum NodeActions {
   ACTIVATE = 'activate',
   DEACTIVATE = 'deactivate',
   CHANGE_CONTENT = 'change_content',
-  TURN_INTO = 'turn_into',
+  CONVERT = 'convert',
 }
 
 export type Coordinate = { x: number; y: number };

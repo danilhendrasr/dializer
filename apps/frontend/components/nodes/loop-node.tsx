@@ -90,7 +90,7 @@ const LoopNode: React.FC<Props> = (props) => {
               y + height / 2,
               x + width + 100,
               y + height / 2,
-              next.false.x + 200,
+              x + width + 100,
               next.false.y + next.false.height / 2,
               next.false.x + 105,
               next.false.y + next.false.height / 2,
