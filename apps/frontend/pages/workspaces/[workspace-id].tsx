@@ -565,32 +565,45 @@ const InformationSidebarTab: React.FC = () => {
         <h2 className="text-xl border-b-slate-300 border-b py-2 mb-3">
           Operations
         </h2>
-        <table className="table table-zebra w-[80px]">
-          <thead>
-            <tr>
-              <th>Operation</th>
-              <th>How-to</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Insert new node</td>
-              <td>
-                Hover mouse on one of the nodes and click the plus button.
-              </td>
-            </tr>
-            <tr>
-              <td>Delete a node</td>
-              <td>
-                Right click on one of the nodes and click the delete button.
-              </td>
-            </tr>
-            <tr>
-              <td>Enter programming expressions into nodes</td>
-              <td>Double click on the node</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="my-4">
+          <h4 className="font-bold text-lg my-1">Inserting new node</h4>
+          <p className="text-sm">
+            Move your cursor to one of the nodes and click the plus icon that
+            appears then select which node do you want to insert.
+          </p>
+        </div>
+        <div className="my-4">
+          <h4 className="font-bold text-lg my-1">Deleting a node</h4>
+          <p className="text-sm">
+            Move your cursor to one of the nodes and right click the node, then
+            click the delete button.
+          </p>
+        </div>
+        <div className="my-4">
+          <h4 className="font-bold text-lg my-1">Filling a node with a text</h4>
+          <p className="text-sm">
+            Dializer&apos;s nodes can be filled with programming expressions
+            that will get evlauated when the animation starts playing. To fill
+            the node, double click on one of the nodes.
+          </p>
+        </div>
+        <div className="my-4">
+          <h4 className="font-bold text-lg my-1">Converting a node</h4>
+          <p className="text-sm">
+            You can convert a node from one type to another type by right
+            clicking the node, click the convert button, then choose the type
+            you want the node to be converted to.
+          </p>
+        </div>
+        <div className="my-4">
+          <h4 className="font-bold text-lg my-1">Sharing a node</h4>
+          <p className="text-sm">
+            You can share a public workspace by clicking on the share icon in
+            the control panel above the canvas. Then you can send the link to
+            your friend and they&apos;ll be able to open the workspace
+            instantly.
+          </p>
+        </div>
       </div>
 
       <div className="mb-7">
@@ -647,7 +660,7 @@ const InformationSidebarTab: React.FC = () => {
       </div>
 
       <h2 className="text-xl border-b-slate-300 border-b py-2 mb-3">
-        Expressions
+        Programming Expressions
       </h2>
       <p className="text-sm">
         For input, conditional, and process nodes, users can type in
