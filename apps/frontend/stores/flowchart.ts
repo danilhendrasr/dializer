@@ -311,43 +311,20 @@ export function nodesReducer(
       }
 
       if (targetNode.type === NodeTypes.BRANCHING) {
-        let convergingNode = nodes.find((node) => node.id === targetNode.next);
+        try {
+          const { deletedNodes, convergingNode } = deleteNodesAfterIf(
+            nodes,
+            targetNode
+          );
 
-        const truePathNodes: FlowChartNode[] = [];
-        let curTruePathNode = nodes.find((node) => node.id === targetNode.next);
-        while (curTruePathNode.type !== NodeTypes.END) {
-          truePathNodes.push(curTruePathNode);
-          curTruePathNode = nodes.find(
-            (node) => node.id === curTruePathNode.next
+          deletedNodes.unshift(targetNode);
+          prevNodeOfTarget.next = convergingNode.id;
+          nodesToBeDeleted.push(...deletedNodes);
+        } catch (e) {
+          throw new Error(
+            "This branching node's branches contains too many branching node, please delete any branching nodes in the branches of this node first."
           );
         }
-
-        const falsePathNodes: FlowChartNode[] = [];
-        let curFalsePathNode = nodes.find(
-          (node) => node.id === targetNode.nextIfFalse
-        );
-        while (curFalsePathNode.type !== NodeTypes.END) {
-          if (truePathNodes.find((n) => n.id === curFalsePathNode.id)) {
-            convergingNode = curFalsePathNode;
-            break;
-          }
-
-          falsePathNodes.push(curFalsePathNode);
-          curFalsePathNode = nodes.find(
-            (node) => node.id === curFalsePathNode.next
-          );
-        }
-
-        const combinedNodesToBeDeleted: FlowChartNode[] = [targetNode];
-        combinedNodesToBeDeleted.push(
-          ...truePathNodes.slice(
-            0,
-            truePathNodes.findIndex((n) => n.id === convergingNode.id)
-          )
-        );
-        combinedNodesToBeDeleted.push(...falsePathNodes);
-        prevNodeOfTarget.next = convergingNode.id;
-        nodesToBeDeleted.push(...combinedNodesToBeDeleted);
       } else {
         prevNodeOfTarget.next = targetNode.next;
         nodesToBeDeleted.push(targetNode);
@@ -466,54 +443,20 @@ export function nodesReducer(
             }
           }
 
-          let convergingNode = nodes.find((n) => n.id === targetNode.next);
-
-          // Get all nodes in the true path
-          const truePathNodes: FlowChartNode[] = [];
-          let curTruePathNode = nodes.find(
-            (node) => node.id === targetNode.next
+          const convertToLoop = action.nodeType === NodeTypes.LOOP;
+          const { deletedNodes, convergingNode } = deleteNodesAfterIf(
+            nodes,
+            targetNode
           );
-
-          while (curTruePathNode.type !== NodeTypes.END) {
-            truePathNodes.push(curTruePathNode);
-            curTruePathNode = nodes.find(
-              (node) => node.id === curTruePathNode.next
-            );
-          }
-
-          // Get all nodes in the false path
-          const falsePathNodes: FlowChartNode[] = [];
-          let curFalsePathNode = nodes.find(
-            (node) => node.id === targetNode.nextIfFalse
-          );
-
-          while (curFalsePathNode.type !== NodeTypes.END) {
-            if (truePathNodes.find((n) => n.id === curFalsePathNode.id)) {
-              convergingNode = curFalsePathNode;
-              break;
-            }
-
-            falsePathNodes.push(curFalsePathNode);
-            curFalsePathNode = nodes.find(
-              (n) => n.id === curFalsePathNode.next
-            );
-          }
 
           targetNode.content = '';
           targetNode.type = action.nodeType;
           targetNode.next = convergingNode.id;
-          targetNode.nextIfFalse = undefined;
+          targetNode.nextIfFalse = convertToLoop
+            ? prevNodeOfTarget.id
+            : undefined;
 
-          const nodesToBeDeleted: FlowChartNode[] = [];
-          nodesToBeDeleted.push(
-            ...truePathNodes.slice(
-              0,
-              truePathNodes.findIndex((n) => n.id === convergingNode.id)
-            )
-          );
-          nodesToBeDeleted.push(...falsePathNodes);
-
-          for (const node of nodesToBeDeleted) {
+          for (const node of deletedNodes) {
             nodes.splice(
               nodes.findIndex((n) => n.id === node.id),
               1
@@ -528,6 +471,72 @@ export function nodesReducer(
     default:
       throw new Error(`Unhandled reducer action: ${action.type}`);
   }
+}
+
+/**
+ * Function to be used to delete nodes after an if node
+ */
+function deleteNodesAfterIf(
+  nodes: FlowChartNode[],
+  targetNode: FlowChartNode
+): { deletedNodes: FlowChartNode[]; convergingNode: FlowChartNode } {
+  let convergingNode: FlowChartNode;
+  let dump: FlowChartNode[] = [];
+  const queue: FlowChartNode[] = [];
+  queue.push(nodes.find((n) => n.id === targetNode.next));
+  queue.push(nodes.find((n) => n.id === targetNode.nextIfFalse));
+
+  while (queue.length > 0) {
+    const head = queue.shift();
+
+    if (head.type === NodeTypes.BRANCHING) {
+      dump.push(head);
+      const { deletedNodes, convergingNode: ifConvergingNode } =
+        deleteNodesAfterIf(nodes, head);
+      dump.push(...deletedNodes);
+
+      const nodeAlreadyInQueue = queue.find(
+        (n) => n.id === ifConvergingNode.id
+      );
+      if (nodeAlreadyInQueue) {
+        convergingNode = nodeAlreadyInQueue;
+        break;
+      }
+
+      queue.push(ifConvergingNode);
+      continue;
+    }
+
+    dump.push(head);
+
+    const nodeInDumpIdx = dump.findIndex((n) => n.id === head.next);
+    const nodeAlreadyInDump = nodeInDumpIdx !== -1;
+    if (nodeAlreadyInDump) {
+      convergingNode = dump[nodeInDumpIdx];
+      dump = dump.slice(0, nodeInDumpIdx);
+      dump.push(head);
+      break;
+    }
+
+    const nodeAlreadyInQueue = queue.find((n) => n.id === head.next);
+    if (nodeAlreadyInQueue) {
+      convergingNode = nodeAlreadyInQueue;
+      break;
+    }
+
+    if (head.next) {
+      queue.push(nodes.find((n) => n.id === head.next));
+    }
+
+    if (head.nextIfFalse) {
+      queue.push(nodes.find((n) => n.id === head.nextIfFalse));
+    }
+  }
+
+  return {
+    deletedNodes: dump,
+    convergingNode,
+  };
 }
 
 function readjustNodesPositions(nodes: FlowChartNode[]): FlowChartNode[] {
