@@ -11,7 +11,6 @@ import {
   FlowChartNode,
   NodeActions,
 } from '../common/types';
-import { AddNodeBtn } from './add-node.btn';
 import { ExpressionModal as ExprModal } from './expression-modal';
 import { ContextMenu } from './node-context-menu';
 import { useInterval } from 'usehooks-ts';
