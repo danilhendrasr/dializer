@@ -133,6 +133,8 @@ export class Binary extends Expr {
         return (leftExpr as number) - (rightExpr as number);
       case TokenType.DIVIDE:
         return (leftExpr as number) / (rightExpr as number);
+      case TokenType.MODULO:
+        return (leftExpr as number) % (rightExpr as number);
       case TokenType.MULTIPLY:
         return (leftExpr as number) * (rightExpr as number);
       default:

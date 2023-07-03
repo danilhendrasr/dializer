@@ -93,7 +93,7 @@ export class Parser {
   private factor(): Expr {
     let expr = this.unary();
 
-    while (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
+    while (this.match(TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.MODULO)) {
       const operator = this.prevToken();
       const rightExpr = this.unary();
 
