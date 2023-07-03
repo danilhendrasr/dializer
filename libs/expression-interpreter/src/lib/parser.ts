@@ -1,5 +1,5 @@
 import { StoreApi } from 'zustand';
-import { Assignment, Stmt, Token, TokenType } from './types';
+import { Assignment, Stmt, Token, TokenType, UnaryStmt } from './types';
 import { Expr, Binary, Unary, Grouping, Literal } from './types';
 
 /** Class to parse a string of tokens. */
@@ -12,12 +12,37 @@ export class Parser {
   ) {}
 
   public parse(): Stmt {
-    if (
-      this.curToken().type === TokenType.IDENTIFIER &&
-      this.nextToken() &&
-      this.nextToken().type === TokenType.MATCH
-    ) {
+    const isIdentifier = this.curToken().type === TokenType.IDENTIFIER;
+    const isIncrement = this.curToken().type === TokenType.INCREMENT;
+    const isDecrement = this.curToken().type === TokenType.DECREMENT;
+
+    const matchIsNext =
+      this.nextToken() && this.nextToken().type === TokenType.MATCH;
+
+    const decrementIsNext =
+      this.nextToken() && this.nextToken().type === TokenType.DECREMENT;
+
+    const incrementIsNext =
+      this.nextToken() && this.nextToken().type === TokenType.INCREMENT;
+
+    const identifierIsNext =
+      this.nextToken() && this.nextToken().type === TokenType.INCREMENT;
+
+    const isVariableAssignment = isIdentifier && matchIsNext;
+    const isPostIncrement = isIdentifier && incrementIsNext;
+    const isPostDecrement = isIdentifier && decrementIsNext;
+    const isPreIncrement = isIncrement && identifierIsNext;
+    const isPreDecrement = isDecrement && identifierIsNext;
+
+    if (isVariableAssignment) {
       return this.assignmentStatement();
+    } else if (
+      isPostIncrement ||
+      isPostDecrement ||
+      isPreIncrement ||
+      isPreDecrement
+    ) {
+      return this.unaryStatement();
     }
 
     return this.expression();
@@ -29,6 +54,50 @@ export class Parser {
     this.match(TokenType.MATCH);
     const value = this.expression();
     return new Assignment(identifier, value, this.envStore);
+  }
+
+  private unaryStatement(): UnaryStmt {
+    if (this.match(TokenType.INCREMENT, TokenType.DECREMENT)) {
+      const operator = this.prevToken();
+      const states = this.envStore.getState();
+
+      if (this.match(TokenType.IDENTIFIER)) {
+        const identifier = this.prevToken();
+
+        let newValue = (states.variables[identifier.text] as number) + 1;
+        if (operator.type === TokenType.DECREMENT) {
+          newValue = (states.variables[identifier.text] as number) - 1;
+        }
+
+        return new UnaryStmt(
+          identifier,
+          new Literal(newValue, TokenType.INTEGER),
+          this.envStore
+        );
+      } else {
+        throw new Error(
+          'Can only do increment and decrement operations on a variable'
+        );
+      }
+    } else {
+      this.match(TokenType.IDENTIFIER);
+      const identifier = this.prevToken();
+
+      this.match(TokenType.DECREMENT, TokenType.INCREMENT);
+      const operator = this.prevToken();
+
+      const states = this.envStore.getState();
+      let newValue = (states.variables[identifier.text] as number) + 1;
+      if (operator.type === TokenType.DECREMENT) {
+        newValue = (states.variables[identifier.text] as number) - 1;
+      }
+
+      return new UnaryStmt(
+        identifier,
+        new Literal(newValue, TokenType.INTEGER),
+        this.envStore
+      );
+    }
   }
 
   private expression(): Expr {

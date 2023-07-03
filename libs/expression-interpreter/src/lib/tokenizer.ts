@@ -34,10 +34,20 @@ export class Tokenizer {
 
     switch (char) {
       case '+':
-        this.addToken(TokenType.PLUS);
+        if (this.code[this.currentPosition] === '+') {
+          this.currentPosition++;
+          this.addToken(TokenType.INCREMENT);
+        } else {
+          this.addToken(TokenType.PLUS);
+        }
         break;
       case '-':
-        this.addToken(TokenType.MINUS);
+        if (this.code[this.currentPosition] === '-') {
+          this.currentPosition++;
+          this.addToken(TokenType.DECREMENT);
+        } else {
+          this.addToken(TokenType.MINUS);
+        }
         break;
       case '*':
         this.addToken(TokenType.MULTIPLY);

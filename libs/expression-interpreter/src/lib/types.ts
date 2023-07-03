@@ -23,6 +23,8 @@ export enum TokenType {
   CLOSE_PARENTHESIS = 'close paren',
   TRUE = 'true',
   FALSE = 'false',
+  INCREMENT = 'increment',
+  DECREMENT = 'decrement',
 }
 
 export class Stmt {
@@ -32,6 +34,27 @@ export class Stmt {
 }
 
 export class Assignment extends Stmt {
+  constructor(
+    public identifier: Token,
+    public value: Expr,
+    private envStore: StoreApi<{ variables: Record<string, unknown> }>
+  ) {
+    super();
+  }
+
+  public override evaluate() {
+    const value = this.value.evaluate();
+
+    this.envStore.setState({
+      variables: {
+        ...this.envStore.getState().variables,
+        [this.identifier.text]: value,
+      },
+    });
+  }
+}
+
+export class UnaryStmt extends Stmt {
   constructor(
     public identifier: Token,
     public value: Expr,
@@ -92,6 +115,10 @@ export class Unary extends Expr {
         return !rightExpr;
       case TokenType.MINUS:
         return -parseInt(rightExpr as string);
+      case TokenType.INCREMENT:
+        return (rightExpr as number) + 1;
+      case TokenType.DECREMENT:
+        return (rightExpr as number) - 1;
       default:
         throw new Error('Cannot evaluate unary expression.');
     }
