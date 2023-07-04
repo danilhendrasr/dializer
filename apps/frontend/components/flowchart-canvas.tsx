@@ -483,6 +483,7 @@ export const FlowchartCanvas: React.FC = () => {
           x={outputModal.x}
           y={outputModal.y}
           text={outputModal.text}
+          show={Boolean(outputModal)}
           onClose={() => {
             setOutputModal(null);
             startAnimation();
