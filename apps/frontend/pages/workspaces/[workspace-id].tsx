@@ -34,7 +34,7 @@ const tourSteps: Step[] = [
     content: (
       <div className="flex items-center flex-col">
         <Image
-          src={'/party_illustration.svg'}
+          src={'/party.svg'}
           alt="Dializer logo"
           width={150}
           height={150}
