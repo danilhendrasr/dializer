@@ -7,7 +7,7 @@ import { AuthSubmitBtn } from '../components/auth-submit';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import * as base64 from 'base-64';
-import { UserService } from '../services/user';
+import * as userClient from '../services/user';
 import { useForm, Controller } from 'react-hook-form';
 
 type TokenPayload = { id: string; email: string } | null;
@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
     const { newPassword } = values;
 
     try {
-      await UserService.getInstance().resetPassword(
+      await userClient.resetPassword(
         router.query['token'] as string,
         newPassword
       );

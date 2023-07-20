@@ -8,7 +8,7 @@ import { Oval } from 'react-loader-spinner';
 import { AuthSubmitBtn } from '../components/auth-submit';
 import { ArrowLeft, Edit, X } from 'tabler-icons-react';
 import { toast } from 'react-toastify';
-import { UserService } from '../services/user';
+import * as userClient from '../services/user';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { UserEntity } from '@dializer/types';
@@ -26,13 +26,13 @@ export default function ProfilePage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['user', userId],
-    queryFn: async () => await UserService.getInstance().getById(userId),
+    queryFn: async () => await userClient.getById(userId),
   });
 
   const { mutate } = useMutation({
     mutationFn: async (values: ProfileInputs) => {
       const { name, email, password } = values;
-      await UserService.getInstance().update(userId, {
+      await userClient.update(userId, {
         fullName: name,
         email,
         password,

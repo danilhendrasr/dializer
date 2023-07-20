@@ -5,7 +5,7 @@ import { AuthForm } from '../components/auth-form';
 import { AuthInput } from '../components/auth-input';
 import { AuthSubmitBtn } from '../components/auth-submit';
 import { toast } from 'react-toastify';
-import { UserService } from '../services/user';
+import * as userClient from '../services/user';
 import { useForm, Controller } from 'react-hook-form';
 
 type ForgetPasswordInputs = {
@@ -30,7 +30,7 @@ export default function ForgetPasswordPage() {
     const { email } = values;
 
     try {
-      await UserService.getInstance().sendPasswordResetEmail(email);
+      await userClient.sendPasswordResetEmail(email);
       toast.success(`Email sent to ${email}`);
     } catch (e) {
       const err = e as Error;

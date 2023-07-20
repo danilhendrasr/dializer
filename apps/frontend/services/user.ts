@@ -1,84 +1,74 @@
 import { ApiErrorResponse, UserEntity } from '@dializer/types';
-import { ApiService } from './base';
+import { API_URL } from '../common/constants';
+import { getCommonRequestHeaders } from '../common/utils';
 
-export class UserService extends ApiService {
-  private static instance: UserService;
+export async function getById(id: string): Promise<UserEntity> {
+  const res = await fetch(`${API_URL}/users/${id}`, {
+    headers: getCommonRequestHeaders(),
+  });
 
-  static getInstance() {
-    if (this.instance) {
-      return this.instance;
-    }
-
-    this.instance = new UserService();
-    return this.instance;
+  const jsonResp = await res.json();
+  if (!res.ok) {
+    throw new Error((jsonResp as ApiErrorResponse).message);
   }
 
-  async getById(id: string): Promise<UserEntity> {
-    const res = await fetch(`${this.apiUrl}/users/${id}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.accessToken}`,
-      },
-    });
+  return jsonResp as UserEntity;
+}
 
-    const jsonResp = await res.json();
-    if (!res.ok) {
-      throw new Error((jsonResp as ApiErrorResponse).message);
-    }
+export async function update(
+  id: string,
+  data: Partial<UserEntity>
+): Promise<UserEntity> {
+  const res = await fetch(`${API_URL}/users/${id}`, {
+    method: 'PUT',
+    headers: getCommonRequestHeaders(),
+    body: JSON.stringify(data),
+  });
 
-    return jsonResp as UserEntity;
+  const jsonResp = await res.json();
+  if (!res.ok) {
+    throw new Error((jsonResp as ApiErrorResponse).message);
   }
 
-  async update(id: string, data: Partial<UserEntity>): Promise<UserEntity> {
-    const res = await fetch(`${this.apiUrl}/users/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.accessToken}`,
-      },
-      body: JSON.stringify(data),
-    });
+  return jsonResp as UserEntity;
+}
 
-    const jsonResp = await res.json();
-    if (!res.ok) {
-      throw new Error((jsonResp as ApiErrorResponse).message);
-    }
+export async function sendPasswordResetEmail(
+  targetEmail: string
+): Promise<void> {
+  const res = await fetch(`${this.apiUrl}/users/password`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email: targetEmail }),
+  });
 
-    return jsonResp as UserEntity;
+  if (!res.ok) {
+    const jsonRes: ApiErrorResponse = await res.json();
+    throw new Error(jsonRes.message);
+  }
+}
+
+export async function resetPassword(
+  token: string,
+  newPassword: string
+): Promise<UserEntity> {
+  const res = await fetch(`${this.apiUrl}/users/password`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      token,
+      new: newPassword,
+    }),
+  });
+
+  const jsonRes = await res.json();
+  if (!res.ok) {
+    throw new Error((jsonRes as ApiErrorResponse).message);
   }
 
-  async sendPasswordResetEmail(targetEmail: string): Promise<void> {
-    const res = await fetch(`${this.apiUrl}/users/password`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email: targetEmail }),
-    });
-
-    if (!res.ok) {
-      const jsonRes: ApiErrorResponse = await res.json();
-      throw new Error(jsonRes.message);
-    }
-  }
-
-  async resetPassword(token: string, newPassword: string): Promise<UserEntity> {
-    const res = await fetch(`${this.apiUrl}/users/password`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        token,
-        new: newPassword,
-      }),
-    });
-
-    const jsonRes = await res.json();
-    if (!res.ok) {
-      throw new Error((jsonRes as ApiErrorResponse).message);
-    }
-
-    return jsonRes as UserEntity;
-  }
+  return jsonRes as UserEntity;
 }
