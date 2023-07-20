@@ -1,117 +1,118 @@
 import { ApiErrorResponse, WorkspaceEntity } from '@dializer/types';
-import { LocalStorageItems } from '../common/types';
-import { ApiService } from './base';
+import { FlowChartNode, HTTP_METHOD } from '../common/types';
+import { API_URL } from '../common/constants';
+import { getCommonRequestHeaders } from '../common/utils';
 
-export class WorkspaceService extends ApiService {
-  private static instance: WorkspaceService;
+export async function getById(id: string): Promise<WorkspaceEntity> {
+  const res = await fetch(`${API_URL}/workspaces/${id}`, {
+    headers: getCommonRequestHeaders(),
+  });
 
-  static getInstance() {
-    if (this.instance) {
-      return this.instance;
-    }
-
-    this.instance = new WorkspaceService();
-    return this.instance;
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error((json as ApiErrorResponse).message);
   }
 
-  async getById(id: string): Promise<WorkspaceEntity> {
-    const res = await fetch(`${this.apiUrl}/workspaces/${id}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.accessToken}`,
-      },
-    });
+  return json as WorkspaceEntity;
+}
 
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error((json as ApiErrorResponse).message);
-    }
+export async function getByUserId(
+  userId: string,
+  queryParams?: string
+): Promise<WorkspaceEntity[]> {
+  const finalQueryParams = queryParams ? `?${queryParams}` : '';
+  const response = await fetch(
+    `${API_URL}/users/${userId}/workspaces${finalQueryParams}`,
+    { headers: getCommonRequestHeaders() }
+  );
 
-    return json as WorkspaceEntity;
+  if (!response.ok) {
+    throw new Error(response.statusText);
   }
 
-  async getByUserId(
-    userId: string,
-    queryParams?: string
-  ): Promise<WorkspaceEntity[]> {
-    const finalQueryParams = queryParams ? `?${queryParams}` : '';
-    const response = await fetch(
-      `${this.apiUrl}/users/${userId}/workspaces${finalQueryParams}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem(
-            LocalStorageItems.ACCESS_TOKEN
-          )}`,
-        },
-      }
-    );
+  return await response.json();
+}
 
-    if (!response.ok) {
-      throw new Error(response.statusText);
-    }
+/**
+ * Create new workspace. Workspace data is optional, if no data is given,
+ * new workspace will be created using the default settings:
+ * Title: "New Workspace"
+ * Visibility: Private
+ * Description: None
+ */
+export async function create(
+  args?: Partial<WorkspaceEntity>
+): Promise<WorkspaceEntity> {
+  const response = await fetch(`${API_URL}/workspaces`, {
+    method: HTTP_METHOD.POST,
+    headers: getCommonRequestHeaders(),
+    body: JSON.stringify(args),
+  });
 
-    return await response.json();
+  const jsonResponse = await response.json();
+
+  if (!response.ok) {
+    throw new Error((jsonResponse as ApiErrorResponse).message);
   }
 
-  /**
-   * Create new workspace. Workspace data is optional, if no data is given,
-   * new workspace will be created using the default settings:
-   * Title: "New Workspace"
-   * Visibility: Private
-   * Description: None
-   */
-  async create(args?: Partial<WorkspaceEntity>): Promise<WorkspaceEntity> {
-    const response = await fetch(`${this.apiUrl}/workspaces`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(args),
-    });
+  return jsonResponse as WorkspaceEntity;
+}
 
-    const jsonResponse = await response.json();
+export async function updateMetadata(
+  id: string,
+  data: Partial<WorkspaceEntity>
+): Promise<WorkspaceEntity> {
+  const res = await fetch(`${API_URL}/workspaces/${id}`, {
+    method: HTTP_METHOD.PATCH,
+    headers: getCommonRequestHeaders(),
+    body: JSON.stringify(data),
+  });
 
-    if (!response.ok) {
-      throw new Error((jsonResponse as ApiErrorResponse).message);
-    }
-
-    return jsonResponse as WorkspaceEntity;
+  const jsonRes = await res.json();
+  if (!res.ok) {
+    throw new Error((jsonRes as ApiErrorResponse).message);
   }
 
-  async updateMetadata(
-    id: string,
-    data: Partial<WorkspaceEntity>
-  ): Promise<WorkspaceEntity> {
-    const res = await fetch(`${this.apiUrl}/workspaces/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.accessToken}`,
-      },
-      body: JSON.stringify(data),
-    });
+  return jsonRes as WorkspaceEntity;
+}
 
-    const jsonRes = await res.json();
-    if (!res.ok) {
-      throw new Error((jsonRes as ApiErrorResponse).message);
-    }
+export async function deleteById(id: string): Promise<void> {
+  const response = await fetch(`${API_URL}/workspaces/${id}`, {
+    method: HTTP_METHOD.DELETE,
+    headers: this.commonHeaders,
+  });
 
-    return jsonRes as WorkspaceEntity;
+  if (!response.ok) {
+    const jsonResponse: ApiErrorResponse = await response.json();
+    throw new Error(jsonResponse.message);
+  }
+}
+
+export async function getNodes(workspaceId: string): Promise<FlowChartNode[]> {
+  const res = await fetch(`${API_URL}/workspaces/${workspaceId}/nodes`, {
+    headers: getCommonRequestHeaders(),
+  });
+
+  const jsonRes = await res.json();
+  if (!res.ok) {
+    throw new Error((jsonRes as ApiErrorResponse).message);
   }
 
-  async deleteById(id: string): Promise<void> {
-    const response = await fetch(`${this.apiUrl}/workspaces/${id}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
+  return jsonRes as FlowChartNode[];
+}
 
-    if (!response.ok) {
-      const jsonResponse: ApiErrorResponse = await response.json();
-      throw new Error(jsonResponse.message);
-    }
+export async function saveNodes(
+  workspaceId: string,
+  nodes: FlowChartNode[]
+): Promise<void> {
+  const response = await fetch(`${API_URL}/workspaces/${workspaceId}/nodes`, {
+    method: HTTP_METHOD.PUT,
+    headers: getCommonRequestHeaders(),
+    body: JSON.stringify({ nodes }),
+  });
+
+  if (!response.ok) {
+    const jsonResponse: ApiErrorResponse = await response.json();
+    throw new Error(jsonResponse.message);
   }
 }

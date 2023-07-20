@@ -3,7 +3,7 @@ import { KonvaEventObject } from 'konva/lib/Node';
 import { Stage as StageClass } from 'konva/lib/Stage';
 import { Stage, Layer } from 'react-konva';
 import { Vector2d } from 'konva/lib/types';
-import { useFlowchartStore } from '../stores/flowchart';
+import { useWorkspaceStore } from '../stores/flowchart';
 import {
   AnimationState,
   ConditionalNodeNextNodes,
@@ -79,15 +79,15 @@ export const FlowchartCanvas: React.FC = () => {
   // Previously activated node
   const prevNode = useRef<FlowChartNode>(null);
 
-  const nodes = useFlowchartStore((s) => s.nodes);
-  const animationState = useFlowchartStore((s) => s.animationState);
-  const viewOnlyMode = useFlowchartStore((s) => s.viewOnlyMode);
-  const stopAnimation = useFlowchartStore((s) => s.stopAnimation);
-  const stopAnimationTemporarily = useFlowchartStore(
+  const nodes = useWorkspaceStore((s) => s.nodes);
+  const animationState = useWorkspaceStore((s) => s.animationState);
+  const viewOnlyMode = useWorkspaceStore((s) => s.viewOnlyMode);
+  const stopAnimation = useWorkspaceStore((s) => s.stopAnimation);
+  const stopAnimationTemporarily = useWorkspaceStore(
     (s) => s.stopAnimationTemporarily
   );
-  const startAnimation = useFlowchartStore((s) => s.startAnimation);
-  const nodesDispatch = useFlowchartStore((s) => s.dispatchNodeAction);
+  const startAnimation = useWorkspaceStore((s) => s.startAnimation);
+  const nodesDispatch = useWorkspaceStore((s) => s.dispatchNodeAction);
 
   // MOdal used to add a new node
   const [addNodeModal, setAddNodeModal] = useState<AddNodeModalState>(null);

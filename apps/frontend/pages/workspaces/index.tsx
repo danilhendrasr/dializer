@@ -9,7 +9,7 @@ import { Oval } from 'react-loader-spinner';
 import { useEffect, useState } from 'react';
 import { LocalStorageItems } from '../../common/types';
 import { toast } from 'react-toastify';
-import { WorkspaceService } from '../../services/workspace';
+import * as workspaceClient from '../../services/workspace';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { WorkspaceEntity, WorkspaceVisibility } from '@dializer/types';
 import { formatDistance } from 'date-fns';
@@ -68,22 +68,20 @@ export default function UserDashboard() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['workspaces', userId, queryParamsValue],
     queryFn: async () => {
-      return await WorkspaceService.getInstance().getByUserId(
-        userId,
-        queryParams
-      );
+      return await workspaceClient.getByUserId(userId, queryParams);
     },
     enabled: userId !== undefined,
   });
 
   const createNewWorkspace = async (data: WorkspaceCreationInputs) => {
     try {
-      const { id } = await WorkspaceService.getInstance().create({
+      const { id } = await workspaceClient.create({
         ...data,
         visibility: data.isPrivate
           ? WorkspaceVisibility.PRIVATE
           : WorkspaceVisibility.PUBLIC,
       });
+
       Router.replace(`/workspaces/${id}`);
     } catch (e) {
       const err = e as Error;
@@ -95,7 +93,7 @@ export default function UserDashboard() {
     toast.info('Deleting 1 workspace...', { autoClose: 1000 });
 
     try {
-      await WorkspaceService.getInstance().deleteById(id);
+      await workspaceClient.deleteById(id);
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       toast.dismiss();
       toast.success('1 workspace deleted successfully.');

@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useFlowchartStore } from '../../stores/flowchart';
+import { useWorkspaceStore } from '../../stores/flowchart';
 import { WorkspaceEntity, WorkspaceVisibility } from '@dializer/types';
 import { ControlPanel } from '../../components/control-panel';
 import {
@@ -23,7 +23,7 @@ import { envStore, useEnvStore } from '../../stores/environment';
 import { ExpressionInterpreter } from '@dializer/expression-interpreter';
 import { Oval } from 'react-loader-spinner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { WorkspaceService } from '../../services/workspace';
+import * as workspaceClient from '../../services/workspace';
 import { useForm } from 'react-hook-form';
 import { Variants, motion } from 'framer-motion';
 import NextError from 'next/error';
@@ -141,7 +141,7 @@ export default function Workbench() {
     enabled: router.query['workspace-id'] !== undefined,
     queryKey: ['workspace', router.query['workspace-id']],
     queryFn: async () => {
-      return await WorkspaceService.getInstance().getById(
+      return await workspaceClient.getById(
         router.query['workspace-id'] as string
       );
     },
@@ -156,7 +156,7 @@ export default function Workbench() {
           : WorkspaceVisibility.PUBLIC,
       };
 
-      await WorkspaceService.getInstance().updateMetadata(
+      await workspaceClient.updateMetadata(
         router.query['workspace-id'] as string,
         data
       );
@@ -181,19 +181,22 @@ export default function Workbench() {
   const [deletionModalIsOpen, setDeletionModalIsOpen] = useState(false);
   const [settingsModalIsOpen, setSettingsModalIsOpen] = useState(false);
 
-  const terminalNodesOnly = useFlowchartStore(
+  const terminalNodesOnly = useWorkspaceStore(
     (s) => s.computed.flowchartOnlyHasTerminalNodes
   );
 
   const env = useEnvStore((s) => s.variables);
-  const thereIsUnsavedChanges = useFlowchartStore((s) => s.unsavedChangesExist);
-  const animationState = useFlowchartStore((s) => s.animationState);
-  const viewOnlyMode = useFlowchartStore((s) => s.viewOnlyMode);
-  const startAnimation = useFlowchartStore((s) => s.startAnimation);
-  const stopAnimation = useFlowchartStore((s) => s.stopAnimation);
-  const fetchNodes = useFlowchartStore((s) => s.fetchNodes);
-  const saveNodes = useFlowchartStore((s) => s.saveNodes);
-  const toggleViewOnlyMode = useFlowchartStore((s) => s.toggleViewOnlyMode);
+  const thereIsUnsavedChanges = useWorkspaceStore((s) => s.unsavedChangesExist);
+  const animationState = useWorkspaceStore((s) => s.animationState);
+  const viewOnlyMode = useWorkspaceStore((s) => s.viewOnlyMode);
+  const startAnimation = useWorkspaceStore((s) => s.actions.startAnimation);
+  const stopAnimation = useWorkspaceStore((s) => s.actions.stopAnimation);
+  const setWorkspaceId = useWorkspaceStore((s) => s.actions.setWorkspaceId);
+  const getWorkspaceNodes = useWorkspaceStore((s) => s.actions.getNodes);
+  const saveNodes = useWorkspaceStore((s) => s.actions.saveFlowchart);
+  const toggleViewOnlyMode = useWorkspaceStore(
+    (s) => s.actions.toggleViewOnlyMode
+  );
 
   const deletionModalId = 'deletion-modal';
   const settingsModalId = 'settings-modal';
@@ -201,7 +204,8 @@ export default function Workbench() {
   useEffect(() => {
     if (!router.isReady) return;
     const workspaceId = router.query['workspace-id'] as string;
-    fetchNodes(workspaceId);
+    setWorkspaceId(workspaceId);
+    getWorkspaceNodes();
 
     if (typeof window === 'undefined') return;
     const accessToken = localStorage.getItem(LocalStorageItems.ACCESS_TOKEN);
@@ -243,9 +247,7 @@ export default function Workbench() {
 
     try {
       setDeletionModalIsOpen(false);
-      await WorkspaceService.getInstance().deleteById(
-        router.query['workspace-id'] as string
-      );
+      await workspaceClient.deleteById(router.query['workspace-id'] as string);
 
       toast.error(
         'Workspace successfully deleted, dismiss this alert to redirect to dashboard.'
@@ -485,7 +487,7 @@ export default function Workbench() {
               <DeviceFloppy
                 size={18}
                 cursor="pointer"
-                onClick={() => saveNodes(workspace.id)}
+                onClick={() => saveNodes()}
                 className={
                   thereIsUnsavedChanges
                     ? 'hover:fill-blue-200 hover:scale-110 active:scale-100 transition save-button'

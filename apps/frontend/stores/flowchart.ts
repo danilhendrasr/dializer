@@ -1,40 +1,75 @@
 import { toast } from 'react-toastify';
-import {
-  AnimationState,
-  FlowChartNode,
-  LocalStorageItems,
-  NodeActions,
-} from '../common/types';
+import { AnimationState, FlowChartNode, NodeActions } from '../common/types';
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import { envStore } from './environment';
 import { NodeTypes } from '@dializer/types';
+import * as workspaceClient from '../services/workspace';
 
-type NodesState = {
-  viewOnlyMode: boolean;
-  animationState: AnimationState;
+type WorkspaceStates = {
+  /**
+   * Needs to be set in order to get fetching and saving nodes operations working.
+   */
+  workspaceId: string;
+
+  /**
+   * The nodes of the flowchart.
+   */
   nodes: FlowChartNode[] | null;
+
+  /**
+   * When in view-only mode, flowchart is editable.
+   */
+  viewOnlyMode: boolean;
+
+  /**
+   * The state of the flowchart's animation.
+   */
+  animationState: AnimationState;
+
+  /**
+   * Is there any unsaved changes in the flowchart.
+   */
+  unsavedChangesExist: boolean;
+
+  /**
+   * Computed values need to be put inside an object.
+   * See: https://github.com/pmndrs/zustand/issues/132#issuecomment-1120467721
+   */
   computed: {
+    /**
+     * Check if there are any nodes in the flowchart whose content == undefined.
+     */
     emptyNodeExists: boolean;
+
+    /**
+     * Does the flowchart only has start and end node?
+     */
     flowchartOnlyHasTerminalNodes: boolean;
   };
-  unsavedChangesExist: boolean;
+
+  actions: WorkspaceActions;
+};
+
+type WorkspaceActions = {
+  setWorkspaceId: (workspaceId: string) => void;
   toggleViewOnlyMode: () => void;
   startAnimation: () => void;
   stopAnimation: () => void;
   stopAnimationTemporarily: () => void;
   nullifyNodes: () => void;
   resetNodes: () => void;
-  fetchNodes: (workspaceId: string) => void;
-  saveNodes: (workspaceId: string) => void;
+  getNodes: () => void;
+  saveFlowchart: () => void;
   dispatchNodeAction: (action: NodesReducerAction) => void;
 };
 
-export const useFlowchartStore = create<NodesState>()((set, get) => ({
+export const useWorkspaceStore = create<WorkspaceStates>()((set, get) => ({
+  workspaceId: '',
   viewOnlyMode: true,
-  toggleViewOnlyMode: () => set({ viewOnlyMode: !get().viewOnlyMode }),
   animationState: AnimationState.Stopped,
   nodes: null,
+  unsavedChangesExist: false,
   computed: {
     get emptyNodeExists() {
       if (get().nodes === null) return true;
@@ -52,91 +87,77 @@ export const useFlowchartStore = create<NodesState>()((set, get) => ({
       return nodes.length === 2;
     },
   },
-  unsavedChangesExist: false,
-  startAnimation: () => {
-    if (get().computed.emptyNodeExists) {
-      toast.error("Cannot play flowchart while there's an empty node(s).");
-      return;
-    }
-
-    set({ animationState: AnimationState.Playing });
-  },
-  stopAnimation: () => {
-    set({ animationState: AnimationState.Stopped });
-    envStore.setState({ variables: {} });
-  },
-  stopAnimationTemporarily: () => {
-    set({ animationState: AnimationState.TemporaryStopped });
-  },
-  nullifyNodes: () => set(() => ({ nodes: null })),
-  resetNodes: () => set(() => ({ nodes: [] })),
-  fetchNodes: async (workspaceId) => {
-    const data = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${workspaceId}/nodes`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem(
-            LocalStorageItems.ACCESS_TOKEN
-          )}`,
-        },
-      }
-    );
-
-    const nodes: FlowChartNode[] = await data.json();
-    set({ nodes: nodes });
-  },
-  saveNodes: async (workspaceId) => {
-    const nodes = get().nodes;
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${workspaceId}/nodes`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem(
-            LocalStorageItems.ACCESS_TOKEN
-          )}`,
-        },
-        body: JSON.stringify({ nodes }),
-      }
-    );
-
-    if (res.ok) {
-      toast.success('Flowchart saved!');
-      set({ unsavedChangesExist: false });
-    } else {
-      toast.error('Cannot save workspace, try again later.');
-    }
-  },
-  dispatchNodeAction: (action) => {
-    try {
-      set((state) => ({ nodes: nodesReducer(state.nodes, action) }));
-      const targetNode = get().nodes.find(
-        (node) => node.id === action.targetId
-      );
-
-      // Pause the animation when input node is activated
-      if (
-        action.type === NodeActions.ACTIVATE &&
-        targetNode.type === NodeTypes.INPUT
-      ) {
-        set({ animationState: AnimationState.TemporaryStopped });
+  actions: {
+    setWorkspaceId: (workspaceId) => set({ workspaceId }),
+    toggleViewOnlyMode: () => set({ viewOnlyMode: !get().viewOnlyMode }),
+    startAnimation: () => {
+      if (get().computed.emptyNodeExists) {
+        toast.error("Cannot play flowchart while there's an empty node(s).");
+        return;
       }
 
-      // NodeActions other than active and deactive will always modify the
-      // flowchart's shape
-      if (
-        action.type !== NodeActions.ACTIVATE &&
-        action.type !== NodeActions.DEACTIVATE
-      ) {
-        set({ unsavedChangesExist: true });
+      set({ animationState: AnimationState.Playing });
+    },
+    stopAnimation: () => {
+      set({ animationState: AnimationState.Stopped });
+      envStore.setState({ variables: {} });
+    },
+    stopAnimationTemporarily: () => {
+      set({ animationState: AnimationState.TemporaryStopped });
+    },
+    nullifyNodes: () => set(() => ({ nodes: null })),
+    resetNodes: () => set(() => ({ nodes: [] })),
+    getNodes: async () => {
+      try {
+        const nodes = await workspaceClient.getNodes(get().workspaceId);
+        set({ nodes });
+      } catch (e) {
+        toast.error(
+          'Cannot fetch workspace flowchart, please try again later.'
+        );
       }
-    } catch (e) {
-      const err = e as Error;
-      toast.error(err.message);
-    }
+    },
+    saveFlowchart: async () => {
+      try {
+        await workspaceClient.saveNodes(get().workspaceId, get().nodes);
+        set({ unsavedChangesExist: false });
+        toast.success('Flowchart saved!');
+      } catch (e) {
+        toast.error('Cannot save workspace, please try again later.');
+      }
+    },
+    dispatchNodeAction: (action) => {
+      try {
+        set((state) => ({ nodes: nodesReducer(state.nodes, action) }));
+        const targetNode = get().nodes.find(
+          (node) => node.id === action.targetId
+        );
+
+        // Pause the animation when input node is activated
+        if (
+          action.type === NodeActions.ACTIVATE &&
+          targetNode.type === NodeTypes.INPUT
+        ) {
+          set({ animationState: AnimationState.TemporaryStopped });
+        }
+
+        // NodeActions other than active and deactive will always modify the
+        // flowchart's shape
+        if (
+          action.type !== NodeActions.ACTIVATE &&
+          action.type !== NodeActions.DEACTIVATE
+        ) {
+          set({ unsavedChangesExist: true });
+        }
+      } catch (e) {
+        const err = e as Error;
+        toast.error(err.message);
+      }
+    },
   },
 }));
+
+export const useWorkspaceActions = () => useWorkspaceStore((s) => s.actions);
 
 export type NodesReducerAction = {
   /**
