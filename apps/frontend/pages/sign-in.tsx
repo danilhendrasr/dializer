@@ -7,7 +7,7 @@ import { AuthForm } from '../components/auth-form';
 import { AuthInput } from '../components/auth-input';
 import { AuthTitle } from '../components/auth-title';
 import { AuthSubmitBtn } from '../components/auth-submit';
-import { useAuthorizedProtection } from '../hooks/use-authorized-protection.hook';
+import { useAuthorizedProtection } from '../common/hooks';
 import * as authClient from '../services/auth';
 import { useForm, Controller } from 'react-hook-form';
 import 'react-toastify/dist/ReactToastify.css';

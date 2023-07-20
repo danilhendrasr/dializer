@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useUserId } from '../hooks/use-user-id.hook';
+import { useUserId } from '../common/hooks';
 import { useState } from 'react';
 import { AuthForm } from '../components/auth-form';
 import { AuthInput } from '../components/auth-input';

@@ -7,7 +7,7 @@ import { AuthForm } from '../components/auth-form';
 import { AuthSubmitBtn } from '../components/auth-submit';
 import { toast } from 'react-toastify';
 import { LocalStorageItems } from '../common/types';
-import { useAuthorizedProtection } from '../hooks/use-authorized-protection.hook';
+import { useAuthorizedProtection } from '../common/hooks';
 import * as authClient from '../services/auth';
 import { useForm, Controller } from 'react-hook-form';
 import { motion, Variants } from 'framer-motion';
