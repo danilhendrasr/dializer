@@ -1,62 +1,47 @@
 import { ApiErrorResponse } from '@dializer/types';
-import { ApiService } from './base';
+import { API_URL } from '../common/constants';
 
-export class AuthService extends ApiService {
-  private static instance: AuthService;
+export async function signIn(email: string, password: string): Promise<string> {
+  const response = await fetch(`${API_URL}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      username: email,
+      password,
+    }),
+  });
 
-  static getInstance() {
-    if (this.instance) {
-      return this.instance;
-    }
-
-    this.instance = new AuthService();
-    return this.instance;
+  const jsonResponse = await response.json();
+  if (!response.ok) {
+    throw new Error((jsonResponse as ApiErrorResponse).message);
   }
 
-  // Returns the access token if successful
-  async signIn(email: string, password: string): Promise<string> {
-    const response = await fetch(`${this.apiUrl}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: email,
-        password,
-      }),
-    });
+  return (jsonResponse as { access_token: string }).access_token;
+}
 
-    const jsonResponse = await response.json();
-    if (!response.ok) {
-      throw new Error((jsonResponse as ApiErrorResponse).message);
-    }
+export async function signUp(
+  fullName: string,
+  email: string,
+  password: string
+): Promise<string> {
+  const response = await fetch(`${API_URL}/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      fullName,
+      email,
+      password,
+    }),
+  });
 
-    return (jsonResponse as { access_token: string }).access_token;
+  const jsonResponse = await response.json();
+  if (!response.ok) {
+    throw new Error((jsonResponse as ApiErrorResponse).message);
   }
 
-  // Returns the access token if successful
-  async signUp(
-    fullName: string,
-    email: string,
-    password: string
-  ): Promise<string> {
-    const response = await fetch(`${this.apiUrl}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        fullName,
-        email,
-        password,
-      }),
-    });
-
-    const jsonResponse = await response.json();
-    if (!response.ok) {
-      throw new Error((jsonResponse as ApiErrorResponse).message);
-    }
-
-    return (jsonResponse as { access_token: string }).access_token;
-  }
+  return (jsonResponse as { access_token: string }).access_token;
 }

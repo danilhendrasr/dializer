@@ -8,7 +8,7 @@ import { AuthInput } from '../components/auth-input';
 import { AuthTitle } from '../components/auth-title';
 import { AuthSubmitBtn } from '../components/auth-submit';
 import { useAuthorizedProtection } from '../hooks/use-authorized-protection.hook';
-import { AuthService } from '../services/auth';
+import * as authClient from '../services/auth';
 import { useForm, Controller } from 'react-hook-form';
 import 'react-toastify/dist/ReactToastify.css';
 import { Variants, motion } from 'framer-motion';
@@ -47,7 +47,7 @@ export default function SignInPage() {
 
   const handleSignIn = async (values: SignInInputs) => {
     try {
-      const accessToken = await AuthService.getInstance().signIn(
+      const accessToken = await authClient.signIn(
         values.email,
         values.password
       );

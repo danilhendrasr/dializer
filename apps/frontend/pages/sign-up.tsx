@@ -8,7 +8,7 @@ import { AuthSubmitBtn } from '../components/auth-submit';
 import { toast } from 'react-toastify';
 import { LocalStorageItems } from '../common/types';
 import { useAuthorizedProtection } from '../hooks/use-authorized-protection.hook';
-import { AuthService } from '../services/auth';
+import * as authClient from '../services/auth';
 import { useForm, Controller } from 'react-hook-form';
 import { motion, Variants } from 'framer-motion';
 
@@ -44,12 +44,7 @@ export default function SignUpPage() {
     const { name, email, password } = values;
 
     try {
-      const accessToken = await AuthService.getInstance().signUp(
-        name,
-        email,
-        password
-      );
-
+      const accessToken = await authClient.signUp(name, email, password);
       localStorage.setItem(LocalStorageItems.ACCESS_TOKEN, accessToken);
       Router.replace('/workspaces');
     } catch (error) {
