@@ -82,12 +82,12 @@ export const FlowchartCanvas: React.FC = () => {
   const nodes = useWorkspaceStore((s) => s.nodes);
   const animationState = useWorkspaceStore((s) => s.animationState);
   const viewOnlyMode = useWorkspaceStore((s) => s.viewOnlyMode);
-  const stopAnimation = useWorkspaceStore((s) => s.stopAnimation);
+  const stopAnimation = useWorkspaceStore((s) => s.actions.stopAnimation);
   const stopAnimationTemporarily = useWorkspaceStore(
-    (s) => s.stopAnimationTemporarily
+    (s) => s.actions.stopAnimationTemporarily
   );
-  const startAnimation = useWorkspaceStore((s) => s.startAnimation);
-  const nodesDispatch = useWorkspaceStore((s) => s.dispatchNodeAction);
+  const startAnimation = useWorkspaceStore((s) => s.actions.startAnimation);
+  const nodesDispatch = useWorkspaceStore((s) => s.actions.dispatchNodeAction);
 
   // MOdal used to add a new node
   const [addNodeModal, setAddNodeModal] = useState<AddNodeModalState>(null);
