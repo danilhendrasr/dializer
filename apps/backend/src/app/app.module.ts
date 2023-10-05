@@ -8,9 +8,11 @@ import { getEnvConfig } from '../environments/env-config';
 import { IEnvironment } from '../environments/env.interface';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { LoggerModule } from './modules/logger/logger.module';
 
 @Module({
   imports: [
+    LoggerModule,
     ConfigModule.forRoot({
       load: [getEnvConfig],
       isGlobal: true,
