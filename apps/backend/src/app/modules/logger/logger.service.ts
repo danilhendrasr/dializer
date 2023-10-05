@@ -16,19 +16,19 @@ export class LoggerService implements LoggerServiceInterface {
     });
   }
 
-  debug(message: string, ...optionalParams: any[]) {
-    this.logger.debug(message, optionalParams);
+  debug(message: any, ...optionalParams: any[]) {
+    this.logger.debug(message);
   }
 
-  warn(message: string, ...optionalParams: any[]) {
-    this.logger.warn(message, optionalParams);
+  warn(message: any, ...optionalParams: any[]) {
+    this.logger.warn(message);
   }
 
-  error(message: string, ...optionalParams: any[]) {
-    this.logger.error(message, optionalParams);
+  error(message: any, ...optionalParams: any[]) {
+    this.logger.error(message);
   }
 
-  log(message: string, ...optionalParams: any[]) {
-    this.logger.info(message, optionalParams);
+  log(message: any, ...optionalParams: any[]) {
+    this.logger.info(message);
   }
 }

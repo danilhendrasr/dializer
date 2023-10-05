@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { Env } from './app/types';
 import { LoggerService } from './app/modules/logger/logger.service';
+import { LoggerInterceptor } from './app/shared/interceptors/logger.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -18,6 +19,7 @@ async function bootstrap() {
   app.useLogger(app.get(LoggerService));
   app.setGlobalPrefix(globalPrefix);
   app.enableCors();
+  app.useGlobalInterceptors(new LoggerInterceptor());
   setupSwagger(app);
 
   await app.listen(port);
