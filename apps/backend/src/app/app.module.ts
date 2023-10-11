@@ -4,30 +4,33 @@ import { UsersModule } from './modules/users/users.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 import { NodesModule } from './modules/nodes/nodes.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { getEnvConfig } from '../environments/env-config';
-import { IEnvironment } from '../environments/env.interface';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { LoggerModule } from './modules/logger/logger.module';
+import { validateEnvVariables } from './shared/functions/validations';
+import { EnvSchema } from './shared/types';
 
 @Module({
   imports: [
     LoggerModule,
     ConfigModule.forRoot({
-      load: [getEnvConfig],
+      validate: validateEnvVariables,
       isGlobal: true,
       cache: true,
     }),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
+      useFactory: (configService: ConfigService<EnvSchema>) => {
+        const emailUsername = configService.get('EMAIL_USERNAME');
+        const emailPassword = configService.get('EMAIL_PASSWORD');
+
         return {
           transport: {
             service: 'gmail',
             auth: {
-              user: configService.get('mailer.user'),
-              pass: configService.get('mailer.pass'),
+              user: emailUsername,
+              pass: emailPassword,
             },
           },
         };
@@ -36,20 +39,23 @@ import { LoggerModule } from './modules/logger/logger.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const database: IEnvironment['database'] =
-          configService.get('database');
+      useFactory: (configService: ConfigService<EnvSchema>) => {
+        const env = configService.get('ENV');
 
-        const isProduction: boolean = configService.get('production');
+        const dbHost = configService.get('DB_HOST');
+        const dbPort = configService.get('DB_PORT');
+        const dbUsername = configService.get('DB_USERNAME');
+        const dbPassword = configService.get('DB_PASSWORD');
+        const dbName = configService.get('DB_NAME');
 
         return {
           type: 'postgres',
-          host: database.host,
-          port: database.port,
-          username: database.username,
-          password: database.password,
-          database: database.database,
-          synchronize: !isProduction,
+          host: dbHost,
+          port: dbPort,
+          username: dbUsername,
+          password: dbPassword,
+          database: dbName,
+          synchronize: env !== 'production',
           autoLoadEntities: true,
         };
       },

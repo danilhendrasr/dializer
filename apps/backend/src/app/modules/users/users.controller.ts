@@ -11,8 +11,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiEndpoints } from '../../types';
-import { capitalize } from '../../utils';
+import { ApiEndpoints } from '../../shared/types';
+import { capitalize } from '../../shared/functions/utils';
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';

@@ -31,7 +31,15 @@
 		4200,
 		3333,
 		5432
-	]
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"esbenp.prettier-vscode",
+				"ms-azuretools.vscode-docker"
+			]
+		}
+	}
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "yarn install",
 	// Configure tool-specific properties.

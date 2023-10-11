@@ -42,7 +42,7 @@ export class AuthService {
       });
     }
 
-    delete user.password;
+    user.password = '';
     return user;
   }
 

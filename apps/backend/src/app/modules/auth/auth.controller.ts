@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiEndpoints } from '../../types';
-import { capitalize } from '../../utils';
+import { ApiEndpoints } from '../../shared/types';
+import { capitalize } from '../../shared/functions/utils';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
 import { Request } from 'express';

@@ -14,10 +14,10 @@ import { WorkspaceEntity, WorkspaceVisibility } from '@dializer/types';
 @Entity()
 export class Workspace implements WorkspaceEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  title: string;
+  title!: string;
 
   @Column({ nullable: true })
   description?: string;
@@ -27,17 +27,17 @@ export class Workspace implements WorkspaceEntity {
     enum: WorkspaceVisibility,
     default: WorkspaceVisibility.PRIVATE,
   })
-  visibility: WorkspaceVisibility;
+  visibility!: WorkspaceVisibility;
 
   @ManyToOne(() => User, (user) => user.workspaces)
-  owner: User;
+  owner!: User;
 
   @OneToMany(() => Node, (node) => node.workspace, { cascade: true })
-  nodes: Node[];
+  nodes!: Node[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

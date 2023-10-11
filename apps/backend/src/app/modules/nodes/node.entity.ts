@@ -5,22 +5,22 @@ import { NodeTypes } from '@dializer/types';
 @Entity()
 export class Node {
   @PrimaryColumn({ comment: 'ULID' })
-  id: string;
+  id!: string;
 
   @Column({ enum: NodeTypes, type: 'enum' })
-  type: NodeTypes;
+  type!: NodeTypes;
 
   @Column()
-  x: number;
+  x!: number;
 
   @Column()
-  y: number;
+  y!: number;
 
   @Column()
-  width: number;
+  width!: number;
 
   @Column()
-  height: number;
+  height!: number;
 
   @Column({ nullable: true })
   content?: string;
@@ -43,5 +43,5 @@ export class Node {
     nullable: false,
     onDelete: 'CASCADE',
   })
-  workspace: Workspace[];
+  workspace!: Workspace[];
 }

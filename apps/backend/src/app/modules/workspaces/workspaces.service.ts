@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { EntityNotFoundError, ILike, Repository, TypeORMError } from 'typeorm';
 import { Workspace } from './workspace.entity';
 import { Node } from '../nodes/node.entity';
 import { NodeTypes, WorkspaceVisibility } from '@dializer/types';
@@ -27,7 +27,12 @@ export class WorkspacesService {
   }
 
   async getOne(workspaceId: string) {
-    return await this.workspaceRepo.findOneBy({ id: workspaceId });
+    const result = await this.workspaceRepo.findOneBy({ id: workspaceId });
+    if (result === null) {
+      throw new EntityNotFoundError(Workspace, 'Workspace not found');
+    }
+
+    return result;
   }
 
   async getWorkspaceNodes(workspaceId: string) {
@@ -96,6 +101,10 @@ export class WorkspacesService {
       where: { id: workspaceId },
       relations: { nodes: true },
     });
+
+    if (workspace === null) {
+      throw new EntityNotFoundError(Workspace, 'Workspace not found');
+    }
 
     workspace.nodes = nodes;
 

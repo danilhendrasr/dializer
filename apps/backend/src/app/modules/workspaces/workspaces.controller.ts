@@ -13,8 +13,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { ApiEndpoints } from '../../types';
-import { capitalize } from '../../utils';
+import { ApiEndpoints } from '../../shared/types';
+import { capitalize } from '../../shared/functions/utils';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdateWorkspaceNodesDTO } from './update-nodes.dto';
 import { WorkspacesService } from './workspaces.service';
@@ -33,6 +33,7 @@ export class WorkspacesController {
   async getOne(@Param('id') workspaceId: string, @Req() req: Request) {
     const user = req.user as { id: string; email: string };
     const workspace = await this.workspacesService.getOne(workspaceId);
+
     if (!user && workspace.visibility === WorkspaceVisibility.PRIVATE) {
       throw new NotFoundException('Cannot find this public workspace.');
     }

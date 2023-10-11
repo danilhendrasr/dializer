@@ -13,23 +13,23 @@ import { UserEntity } from '@dializer/types';
 @Entity()
 export class User implements UserEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  fullName: string;
+  fullName!: string;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column()
   @Exclude()
-  password: string;
+  password!: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @OneToMany(() => Workspace, (workspace) => workspace.owner)
   workspaces?: Workspace[];
