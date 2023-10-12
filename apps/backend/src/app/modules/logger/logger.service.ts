@@ -24,6 +24,7 @@ export class LoggerService implements LoggerServiceInterface {
         new LokiTransport({
           host: lokiHost,
           labels: { app: 'dializer' },
+          format: combine(errors({ stack: true }), timestamp(), json()),
           onConnectionError: (e) => console.error(e),
         })
       );
