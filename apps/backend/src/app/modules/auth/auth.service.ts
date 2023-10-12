@@ -23,10 +23,7 @@ export class AuthService {
     @InjectRepository(User) private usersRepository: Repository<User>
   ) {}
 
-  async validateUser(
-    email: string,
-    pass: string
-  ): Promise<Omit<User, 'password'>> {
+  async validateUser(email: string, pass: string): Promise<User> {
     const user = await this.usersService.findOneByEmail(email);
 
     if (!user) {
@@ -77,8 +74,9 @@ export class AuthService {
         access_token: this.jwtService.sign(payload),
       };
     } catch (e) {
-      this.logger.error(e);
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException(
+        'Failed creating user, try again later.'
+      );
     }
   }
 }
