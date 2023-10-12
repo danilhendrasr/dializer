@@ -7,6 +7,7 @@ import { AppModule } from './app/app.module';
 import { EnvSchema } from './app/shared/types';
 import { LoggerService } from './app/modules/logger/logger.service';
 import { LoggerInterceptor } from './app/shared/interceptors/logger.interceptor';
+import { HttpExceptionFilter } from './app/shared/exception-filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -17,10 +18,14 @@ async function bootstrap() {
   const port = configService.get('PORT');
   const globalPrefix = configService.get('API_PREFIX');
 
-  app.useLogger(app.get(LoggerService));
-  app.setGlobalPrefix(globalPrefix);
   app.enableCors();
+  app.setGlobalPrefix(globalPrefix);
+
+  app.useLogger(app.get(LoggerService));
+
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new LoggerInterceptor());
+
   setupSwagger(app);
 
   await app.listen(port);

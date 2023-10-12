@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './modules/users/users.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
@@ -9,6 +9,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { LoggerModule } from './modules/logger/logger.module';
 import { validateEnvVariables } from './shared/functions/validations';
 import { EnvSchema } from './shared/types';
+import { LoggerMiddleware } from './shared/middlewares/logger.middleware';
 
 @Module({
   imports: [
@@ -66,4 +67,8 @@ import { EnvSchema } from './shared/types';
     AuthModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
