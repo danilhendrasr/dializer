@@ -8,7 +8,7 @@ export class LoggerMiddleware implements NestMiddleware {
   private readonly logger = new Logger(LoggerInterceptor.name);
 
   use(req: Request, res: Response, next: NextFunction) {
-    const { method, url } = req;
+    const { method, url, ip } = req;
     const userAgent = req.get('user-agent') || '';
 
     const requestId = uuidv4();
@@ -19,6 +19,7 @@ export class LoggerMiddleware implements NestMiddleware {
     this.logger.log({
       request_id: requestId,
       message: 'incoming request',
+      ip,
       url,
       method,
       user_agent: userAgent,
