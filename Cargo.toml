@@ -1,8 +1,6 @@
-
 [workspace]
-members = [
-	'apps/backend_new',
-]
+members = ['apps/backend_new']
+resolver = "2"
 
 [profile.release]
 lto = true
