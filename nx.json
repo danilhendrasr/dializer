@@ -52,5 +52,6 @@
       }
     }
   },
-  "defaultProject": "frontend"
+  "defaultProject": "frontend",
+  "plugins": ["@monodon/rust"]
 }
