@@ -21,7 +21,8 @@
 		"ghcr.io/devcontainers-contrib/features/typescript:2": {
 			"version": "latest"
 		},
-		"ghcr.io/dhoeric/features/act:1": {}
+		"ghcr.io/dhoeric/features/act:1": {},
+		"ghcr.io/devcontainers/features/rust:1": {}
 	},
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -36,7 +37,8 @@
 		"vscode": {
 			"extensions": [
 				"esbenp.prettier-vscode",
-				"ms-azuretools.vscode-docker"
+				"ms-azuretools.vscode-docker",
+				"rust-lang.rust-analyzer"
 			]
 		}
 	}
