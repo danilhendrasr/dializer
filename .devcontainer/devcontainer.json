@@ -38,7 +38,12 @@
 			"extensions": [
 				"esbenp.prettier-vscode",
 				"ms-azuretools.vscode-docker",
-				"rust-lang.rust-analyzer"
+				"rust-lang.rust-analyzer",
+				"adpyke.vscode-sql-formatter",
+				"vscodevim.vim",
+				"GitHub.copilot",
+				"tamasfe.even-better-toml",
+				"eamodio.gitlens"
 			]
 		}
 	}
