@@ -1,0 +1,55 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM public.workspaces \n        WHERE id = $1 \n        RETURNING id,\n            title,\n            description,\n            visibility as \"visibility: _\",\n            created_at,\n            updated_at,\n            owner_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "visibility: _",
+        "type_info": {
+          "Custom": {
+            "name": "workspace_visibility",
+            "kind": {
+              "Enum": ["private", "public"]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 6,
+        "name": "owner_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid"]
+    },
+    "nullable": [false, false, false, false, false, false, false]
+  },
+  "hash": "45a3a7bf76cba275fade473be997208a2a1a189c751dfeec420ac45b43910097"
+}

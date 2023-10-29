@@ -24,7 +24,7 @@ async fn main() {
         )
         .route(
             "/workspaces/:workspace_id",
-            get(workspaces::get_workspace_by_id),
+            get(workspaces::get_workspace_by_id).delete(workspaces::delete_workspace_by_id),
         )
         .with_state(db_pool);
 
