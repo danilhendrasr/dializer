@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS users(
@@ -42,8 +44,12 @@ CREATE TABLE IF NOT EXISTS nodes(
     content TEXT,
     next_node_id uuid,
     next_node_id_if_false uuid,
+    workspace_id uuid NOT NULL,
     CONSTRAINT fk_next_node_id FOREIGN KEY(next_node_id) REFERENCES nodes(id),
-    CONSTRAINT fk_next_node_id_if_false FOREIGN KEY(next_node_id_if_false) REFERENCES nodes(id)
+    CONSTRAINT fk_next_node_id_if_false FOREIGN KEY(next_node_id_if_false) REFERENCES nodes(id),
+    CONSTRAINT fk_workspace_id FOREIGN KEY(workspace_id) REFERENCES workspaces(id)
 );
 
 COMMENT ON COLUMN nodes.next_node_id_if_false IS 'Only used for branching-type nodes (loop and condition) to point to the next node if the condition is false';
+
+COMMIT;
