@@ -1,10 +1,11 @@
 use std::str::FromStr;
 
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     Json,
 };
-use sqlx::{Pool, Postgres};
+use serde::Deserialize;
+use sqlx::{Pool, Postgres, QueryBuilder};
 use uuid::Uuid;
 
 use crate::types::{AppError, User, Workspace};
@@ -21,28 +22,46 @@ pub async fn get_user_by_id(
     Ok(Json(result))
 }
 
+#[derive(Deserialize)]
+pub struct GetUserWorkspacesQuery {
+    pub search: Option<String>,
+}
+
 pub async fn get_user_workspaces(
     State(db_pool): State<Pool<Postgres>>,
     Path(user_id): Path<String>,
+    Query(query): Query<GetUserWorkspacesQuery>,
 ) -> Result<Json<Vec<Workspace>>, AppError> {
     let uuid = Uuid::from_str(user_id.as_str())?;
     let _ = get_user_by_id(State(db_pool.to_owned()), Path(user_id.to_owned())).await?;
-    let workspaces = sqlx::query_as!(
-        Workspace,
-        r#"SELECT 
+
+    let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
+        "SELECT 
             id,
             title, 
             description, 
-            visibility AS "visibility: _", 
+            visibility, 
             created_at, 
             updated_at, 
             owner_id 
         FROM public.workspaces 
-        WHERE owner_id = $1"#,
-        uuid
-    )
-    .fetch_all(&db_pool)
-    .await?;
+        WHERE owner_id = ",
+    );
+    query_builder.push_bind(uuid);
+
+    if let Some(search) = query.search {
+        let search = format!("%{}%", search);
+        query_builder.push(" AND (title ILIKE ");
+        query_builder.push_bind(search.to_owned());
+        query_builder.push(" OR description ILIKE ");
+        query_builder.push_bind(search.to_owned());
+        query_builder.push(")");
+    }
+
+    let workspaces = query_builder
+        .build_query_as::<Workspace>()
+        .fetch_all(&db_pool)
+        .await?;
 
     Ok(Json(workspaces))
 }

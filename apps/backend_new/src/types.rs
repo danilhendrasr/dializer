@@ -1,6 +1,7 @@
 use axum::{http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
 use sqlx::types::chrono;
+use uuid::Uuid;
 
 pub struct AppError(anyhow::Error);
 
@@ -38,7 +39,7 @@ where
 
 #[derive(Serialize, Deserialize)]
 pub struct User {
-    pub id: String,
+    pub id: Uuid,
     pub full_name: String,
     pub email: String,
     pub password: String,
@@ -56,8 +57,8 @@ pub enum WorkspaceVisibility {
 impl From<String> for WorkspaceVisibility {
     fn from(value: String) -> Self {
         match value.as_str() {
-            "public" => Self::Public,
-            "private" => Self::Private,
+            "Public" => Self::Public,
+            "Private" => Self::Private,
             _ => Self::Private,
         }
     }
@@ -65,11 +66,11 @@ impl From<String> for WorkspaceVisibility {
 
 #[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct Workspace {
-    pub id: String,
+    pub id: Uuid,
     pub title: String,
     pub description: String,
     pub visibility: WorkspaceVisibility,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
-    pub owner_id: String,
+    pub owner_id: Uuid,
 }
