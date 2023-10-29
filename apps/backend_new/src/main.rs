@@ -1,4 +1,7 @@
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use sqlx::postgres::PgPool;
 
 mod healthcheck;
@@ -22,6 +25,7 @@ async fn main() {
             "/users/:user_id/workspaces",
             get(users::get_user_workspaces),
         )
+        .route("/workspaces", post(workspaces::create_workspace))
         .route(
             "/workspaces/:workspace_id",
             get(workspaces::get_workspace_by_id).delete(workspaces::delete_workspace_by_id),
