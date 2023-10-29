@@ -45,3 +45,31 @@ pub struct User {
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, Serialize, Deserialize, sqlx::Type)]
+#[sqlx(type_name = "workspace_visibility", rename_all = "lowercase")]
+pub enum WorkspaceVisibility {
+    Public,
+    Private,
+}
+
+impl From<String> for WorkspaceVisibility {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "public" => Self::Public,
+            "private" => Self::Private,
+            _ => Self::Private,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, sqlx::FromRow)]
+pub struct Workspace {
+    pub id: String,
+    pub title: String,
+    pub description: String,
+    pub visibility: WorkspaceVisibility,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+    pub owner_id: String,
+}

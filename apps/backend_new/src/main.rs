@@ -17,6 +17,10 @@ async fn main() {
         .route("/", get(|| async { "Hello world!" }))
         .route("/health", get(healthcheck::get_health))
         .route("/users/:user_id", get(users::get_user_by_id))
+        .route(
+            "/users/:user_id/workspaces",
+            get(users::get_user_workspaces),
+        )
         .with_state(db_pool);
 
     axum::Server::bind(&"0.0.0.0:3005".parse().unwrap())
