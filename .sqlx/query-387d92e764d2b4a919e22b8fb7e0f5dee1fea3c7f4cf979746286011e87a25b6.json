@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT \n            id,\n            title, \n            description, \n            visibility AS \"visibility: _\", \n            created_at, \n            updated_at, \n            owner_id \n        FROM public.workspaces \n        WHERE owner_id = $1",
+  "query": "SELECT \n            id,\n            title,\n            description,\n            visibility as \"visibility: _\", \n            created_at, \n            updated_at, \n            owner_id \n        FROM public.workspaces \n        WHERE id = $1",
   "describe": {
     "columns": [
       {
@@ -25,7 +25,10 @@
           "Custom": {
             "name": "workspace_visibility",
             "kind": {
-              "Enum": ["private", "public"]
+              "Enum": [
+                "private",
+                "public"
+              ]
             }
           }
         }
@@ -47,9 +50,19 @@
       }
     ],
     "parameters": {
-      "Left": ["Uuid"]
+      "Left": [
+        "Uuid"
+      ]
     },
-    "nullable": [false, false, false, false, false, false, false]
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
   },
-  "hash": "e9eb06e11407b5a2cc655cebe95d4ec4026815cfe75a1fd669a96c31590768a6"
+  "hash": "387d92e764d2b4a919e22b8fb7e0f5dee1fea3c7f4cf979746286011e87a25b6"
 }

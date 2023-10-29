@@ -4,6 +4,7 @@ use sqlx::postgres::PgPool;
 mod healthcheck;
 mod types;
 mod users;
+mod workspaces;
 
 #[tokio::main]
 async fn main() {
@@ -20,6 +21,10 @@ async fn main() {
         .route(
             "/users/:user_id/workspaces",
             get(users::get_user_workspaces),
+        )
+        .route(
+            "/workspaces/:workspace_id",
+            get(workspaces::get_workspace_by_id),
         )
         .with_state(db_pool);
 

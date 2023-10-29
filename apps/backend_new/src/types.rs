@@ -17,11 +17,7 @@ impl IntoResponse for AppError {
         }
 
         if let Some(_) = self.0.downcast_ref::<uuid::Error>() {
-            return (
-                StatusCode::BAD_REQUEST,
-                "invalid parameter, expects uuid, given plain string",
-            )
-                .into_response();
+            return (StatusCode::BAD_REQUEST, "invalid uuid").into_response();
         }
 
         (StatusCode::INTERNAL_SERVER_ERROR, self.0.to_string()).into_response()
