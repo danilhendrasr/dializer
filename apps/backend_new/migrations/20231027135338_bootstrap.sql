@@ -14,7 +14,7 @@ CREATE TYPE workspace_visibility AS ENUM ('private', 'public');
 CREATE TABLE IF NOT EXISTS workspaces(
     id uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     title VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
+    description TEXT,
     visibility workspace_visibility NOT NULL DEFAULT 'private',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS nodes(
     y INT NOT NULL,
     width INT NOT NULL,
     height INT NOT NULL,
-    content TEXT NOT NULL,
-    next_node_id uuid NOT NULL,
-    next_node_id_if_false uuid NOT NULL,
+    content TEXT,
+    next_node_id uuid,
+    next_node_id_if_false uuid,
     CONSTRAINT fk_next_node_id FOREIGN KEY(next_node_id) REFERENCES nodes(id),
     CONSTRAINT fk_next_node_id_if_false FOREIGN KEY(next_node_id_if_false) REFERENCES nodes(id)
 );
