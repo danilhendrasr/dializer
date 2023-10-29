@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT \n            id,\n            title,\n            description,\n            visibility as \"visibility: _\", \n            created_at, \n            updated_at, \n            owner_id \n        FROM public.workspaces \n        WHERE id = $1",
+  "query": "UPDATE public.workspaces \n        SET title = $1, \n            description = $2, \n            visibility = $3, \n            owner_id = $4 \n        WHERE id = $5 \n        RETURNING id,\n            title,\n            description,\n            visibility as \"visibility: _\",\n            created_at,\n            updated_at,\n            owner_id",
   "describe": {
     "columns": [
       {
@@ -47,9 +47,22 @@
       }
     ],
     "parameters": {
-      "Left": ["Uuid"]
+      "Left": [
+        "Varchar",
+        "Text",
+        {
+          "Custom": {
+            "name": "workspace_visibility",
+            "kind": {
+              "Enum": ["private", "public"]
+            }
+          }
+        },
+        "Uuid",
+        "Uuid"
+      ]
     },
     "nullable": [false, false, true, false, false, false, false]
   },
-  "hash": "387d92e764d2b4a919e22b8fb7e0f5dee1fea3c7f4cf979746286011e87a25b6"
+  "hash": "3758cb97ea3b7ab5b10d20d1b688f566d0908ce40a085d798ff9edd4ec088787"
 }

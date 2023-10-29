@@ -32,6 +32,10 @@ async fn main() {
                 .put(workspaces::update_workspace_by_id)
                 .delete(workspaces::delete_workspace_by_id),
         )
+        .route(
+            "/workspaces/:workspace_id/nodes",
+            get(workspaces::get_workspace_nodes),
+        )
         .with_state(db_pool);
 
     axum::Server::bind(&"0.0.0.0:3005".parse().unwrap())

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT \n            id,\n            title,\n            description,\n            visibility as \"visibility: _\", \n            created_at, \n            updated_at, \n            owner_id \n        FROM public.workspaces \n        WHERE id = $1",
+  "query": "INSERT INTO public.workspaces (title, description, visibility, owner_id)\n        VALUES ($1, $2, $3, $4)\n        RETURNING id,\n            title,\n            description,\n            visibility as \"visibility: _\",\n            created_at,\n            updated_at,\n            owner_id",
   "describe": {
     "columns": [
       {
@@ -47,9 +47,21 @@
       }
     ],
     "parameters": {
-      "Left": ["Uuid"]
+      "Left": [
+        "Varchar",
+        "Text",
+        {
+          "Custom": {
+            "name": "workspace_visibility",
+            "kind": {
+              "Enum": ["private", "public"]
+            }
+          }
+        },
+        "Uuid"
+      ]
     },
     "nullable": [false, false, true, false, false, false, false]
   },
-  "hash": "387d92e764d2b4a919e22b8fb7e0f5dee1fea3c7f4cf979746286011e87a25b6"
+  "hash": "5b048dddc98234225f3f5e66aa1699c1965a13051ce81d36c479c03825bdc9a9"
 }

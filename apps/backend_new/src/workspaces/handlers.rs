@@ -8,7 +8,7 @@ use serde::Deserialize;
 use sqlx::{Pool, Postgres};
 use uuid::Uuid;
 
-use crate::types::{AppError, Workspace, WorkspaceVisibility};
+use crate::types::{AppError, Node, Workspace, WorkspaceVisibility};
 
 pub async fn get_workspace_by_id(
     State(db_pool): State<Pool<Postgres>>,
@@ -94,7 +94,7 @@ pub async fn update_workspace_by_id(
     }
 
     if let Some(description) = workspace.description {
-        chosen_workspace.description = description;
+        chosen_workspace.description = Some(description);
     }
 
     if let Some(visibility) = workspace.visibility {
@@ -152,6 +152,37 @@ pub async fn delete_workspace_by_id(
         workspace_uuid,
     )
     .fetch_one(&db_pool)
+    .await?;
+
+    Ok(Json(result))
+}
+
+pub async fn get_workspace_nodes(
+    State(db_pool): State<Pool<Postgres>>,
+    Path(workspace_id): Path<String>,
+) -> Result<Json<Vec<Node>>, AppError> {
+    let workspace_uuid = Uuid::from_str(&workspace_id)?;
+
+    let _ = get_workspace_by_id(State(db_pool.to_owned()), Path(workspace_id)).await?;
+
+    let result = sqlx::query_as!(
+        Node,
+        r#"SELECT 
+            id,
+            type as "type: _",
+            x,
+            y,
+            width,
+            height,
+            content,
+            next_node_id,
+            next_node_id_if_false,
+            workspace_id
+        FROM public.nodes 
+        WHERE workspace_id = $1"#,
+        workspace_uuid,
+    )
+    .fetch_all(&db_pool)
     .await?;
 
     Ok(Json(result))

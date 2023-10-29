@@ -43,7 +43,7 @@ pub struct User {
     pub updated_at: chrono::NaiveDateTime,
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Serialize, Deserialize, sqlx::Type)]
+#[derive(Serialize, Deserialize, sqlx::Type)]
 #[sqlx(type_name = "workspace_visibility", rename_all = "lowercase")]
 pub enum WorkspaceVisibility {
     Public,
@@ -64,9 +64,50 @@ impl From<String> for WorkspaceVisibility {
 pub struct Workspace {
     pub id: Uuid,
     pub title: String,
-    pub description: String,
+    pub description: Option<String>,
     pub visibility: WorkspaceVisibility,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
     pub owner_id: Uuid,
+}
+
+#[derive(Serialize, Deserialize, sqlx::Type)]
+#[sqlx(type_name = "node_type", rename_all = "lowercase")]
+pub enum NodeType {
+    Start,
+    End,
+    Process,
+    Input,
+    Output,
+    Loop,
+    Condition,
+}
+
+impl From<String> for NodeType {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "start" => Self::Start,
+            "end" => Self::End,
+            "process" => Self::Process,
+            "input" => Self::Input,
+            "output" => Self::Output,
+            "loop" => Self::Loop,
+            "condition" => Self::Condition,
+            _ => panic!("Invalid node type"),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Node {
+    pub id: Uuid,
+    pub r#type: NodeType,
+    pub x: i32,
+    pub y: i32,
+    pub width: i32,
+    pub height: i32,
+    pub content: Option<String>,
+    pub next_node_id: Option<Uuid>,
+    pub next_node_id_if_false: Option<Uuid>,
+    pub workspace_id: Uuid,
 }
