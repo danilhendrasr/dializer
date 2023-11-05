@@ -111,3 +111,14 @@ pub struct Node {
     pub next_node_id_if_false: Option<Uuid>,
     pub workspace_id: Uuid,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct AuthResponse {
+    pub access_token: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct JwtClaims {
+    pub sub: String,
+    pub exp: usize,
+}

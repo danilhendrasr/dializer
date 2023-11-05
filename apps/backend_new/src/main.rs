@@ -4,6 +4,7 @@ use axum::{
 };
 use sqlx::postgres::PgPool;
 
+mod auth;
 mod healthcheck;
 mod types;
 mod users;
@@ -36,6 +37,7 @@ async fn main() {
             "/workspaces/:workspace_id/nodes",
             get(workspaces::get_workspace_nodes),
         )
+        .route("/auth/register", post(auth::register))
         .with_state(db_pool);
 
     axum::Server::bind(&"0.0.0.0:3005".parse().unwrap())
