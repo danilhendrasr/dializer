@@ -8,16 +8,23 @@ use serde::Deserialize;
 use sqlx::{Pool, Postgres, QueryBuilder};
 use uuid::Uuid;
 
-use crate::types::{AppError, User, Workspace};
+use crate::types::{AppError, UserResponse, Workspace};
 
 pub async fn get_user_by_id(
     State(db_pool): State<Pool<Postgres>>,
     Path(user_id): Path<String>,
-) -> Result<Json<User>, AppError> {
+) -> Result<Json<UserResponse>, AppError> {
     let uuid = Uuid::from_str(user_id.as_str())?;
-    let result = sqlx::query_as!(User, r#"SELECT * FROM public.users WHERE id = $1"#, uuid)
-        .fetch_one(&db_pool)
-        .await?;
+    let result = sqlx::query_as!(
+        UserResponse,
+        r#"SELECT 
+                id, full_name, email
+            FROM public.users 
+            WHERE id = $1"#,
+        uuid
+    )
+    .fetch_one(&db_pool)
+    .await?;
 
     Ok(Json(result))
 }

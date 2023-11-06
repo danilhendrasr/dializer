@@ -43,6 +43,14 @@ pub struct User {
     pub updated_at: chrono::NaiveDateTime,
 }
 
+/// User struct without password, created_at, and updated_at, primarily used to type responses.
+#[derive(Serialize, Deserialize)]
+pub struct UserResponse {
+    pub id: Uuid,
+    pub full_name: String,
+    pub email: String,
+}
+
 #[derive(Serialize, Deserialize, sqlx::Type)]
 #[sqlx(type_name = "workspace_visibility", rename_all = "lowercase")]
 pub enum WorkspaceVisibility {
