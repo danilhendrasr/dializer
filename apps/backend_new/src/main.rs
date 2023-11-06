@@ -37,6 +37,7 @@ async fn main() {
             "/workspaces/:workspace_id/nodes",
             get(workspaces::get_workspace_nodes),
         )
+        .route("/auth/login", post(auth::login))
         .route("/auth/register", post(auth::register))
         .with_state(db_pool);
 

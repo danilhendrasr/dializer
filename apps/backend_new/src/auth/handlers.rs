@@ -9,6 +9,8 @@ use sqlx::{Pool, Postgres};
 
 use crate::types::{AppError, AuthResponse, JwtClaims, User};
 
+const JWT_SECRET: &'static str = "secret";
+
 #[derive(Deserialize)]
 pub struct LoginPayload {
     pub email: String,
@@ -18,8 +20,32 @@ pub struct LoginPayload {
 pub async fn login(
     State(db_pool): State<Pool<Postgres>>,
     Json(payload): Json<LoginPayload>,
-) -> Result<String, AppError> {
-    Ok("login".to_string())
+) -> Result<Json<AuthResponse>, AppError> {
+    let argon2 = Argon2::default();
+    let user = sqlx::query_as!(
+        User,
+        r#"SELECT * FROM public.users WHERE email = $1"#,
+        payload.email
+    )
+    .fetch_one(&db_pool)
+    .await?;
+
+    let password_hash = PasswordHash::new(&user.password)?;
+    argon2.verify_password(payload.password.as_bytes(), &password_hash)?;
+
+    let jwt_token = encode(
+        &Header::default(),
+        &JwtClaims {
+            sub: user.email,
+            exp: 10000,
+        },
+        // TODO: use env variable
+        &EncodingKey::from_secret(JWT_SECRET.as_bytes()),
+    )?;
+
+    Ok(Json(AuthResponse {
+        access_token: jwt_token,
+    }))
 }
 
 #[derive(Deserialize)]
@@ -62,7 +88,7 @@ pub async fn register(
             exp: 10000,
         },
         // TODO: use env variable
-        &EncodingKey::from_secret("secret".as_ref()),
+        &EncodingKey::from_secret(JWT_SECRET.as_bytes()),
     )?;
 
     Ok(Json(AuthResponse {
