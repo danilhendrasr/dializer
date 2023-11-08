@@ -42,6 +42,10 @@ async fn main() {
         )
         .route(
             "/workspaces/:workspace_id/nodes",
+            patch(workspaces::update_workspace_nodes),
+        )
+        .route(
+            "/workspaces/:workspace_id/nodes",
             get(workspaces::get_workspace_nodes),
         )
         .route("/auth/login", post(auth::login))

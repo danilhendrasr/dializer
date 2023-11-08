@@ -89,7 +89,7 @@ pub struct Workspace {
     pub owner_id: Uuid,
 }
 
-#[derive(Serialize, Deserialize, sqlx::Type)]
+#[derive(Serialize, Clone, Copy, Deserialize, sqlx::Type)]
 #[sqlx(type_name = "node_type", rename_all = "lowercase")]
 pub enum NodeType {
     Start,

@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO public.nodes (\n            id,\n            type, \n            x, \n            y, \n            width, \n            height, \n            content, \n            next_node_id, \n            next_node_id_if_false, \n            workspace_id\n        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        {
+          "Custom": {
+            "name": "node_type",
+            "kind": {
+              "Enum": [
+                "start",
+                "end",
+                "input",
+                "output",
+                "process",
+                "loop",
+                "condition"
+              ]
+            }
+          }
+        },
+        "Int4",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "eb6501a698ea4daa25eb1f2ac9b44f111f3b84f1a4f4bbca158a74c24b907c99"
+}
