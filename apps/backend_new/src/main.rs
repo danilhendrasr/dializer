@@ -21,7 +21,10 @@ async fn main() {
     let app = Router::new()
         .route("/", get(|| async { "Hello world!" }))
         .route("/health", get(healthcheck::get_health))
-        .route("/users/:user_id", get(users::get_user_by_id))
+        .route(
+            "/users/:user_id",
+            get(users::get_user_by_id).put(users::update_user),
+        )
         .route(
             "/users/:user_id/workspaces",
             get(users::get_user_workspaces),
