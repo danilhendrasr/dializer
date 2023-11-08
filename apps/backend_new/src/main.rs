@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post},
+    routing::{get, patch, post},
     Router,
 };
 use sqlx::postgres::PgPool;
@@ -24,6 +24,10 @@ async fn main() {
         .route(
             "/users/:user_id",
             get(users::get_user_by_id).put(users::update_user),
+        )
+        .route(
+            "/users/:user_id/password",
+            patch(users::update_user_password),
         )
         .route(
             "/users/:user_id/workspaces",

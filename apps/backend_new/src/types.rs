@@ -1,3 +1,4 @@
+use argon2::password_hash;
 use axum::{http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
 use sqlx::types::chrono;
@@ -18,6 +19,15 @@ impl IntoResponse for AppError {
 
         if let Some(_) = self.0.downcast_ref::<uuid::Error>() {
             return (StatusCode::BAD_REQUEST, "invalid uuid").into_response();
+        }
+
+        if let Some(err) = self.0.downcast_ref::<password_hash::Error>() {
+            match err {
+                password_hash::Error::Password => {
+                    return (StatusCode::UNAUTHORIZED, "wrong password").into_response()
+                }
+                _ => {}
+            }
         }
 
         (StatusCode::INTERNAL_SERVER_ERROR, self.0.to_string()).into_response()

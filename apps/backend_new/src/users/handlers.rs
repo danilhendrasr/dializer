@@ -1,5 +1,9 @@
 use std::str::FromStr;
 
+use argon2::{
+    password_hash::{rand_core::OsRng, SaltString},
+    Argon2, PasswordHash, PasswordHasher, PasswordVerifier,
+};
 use axum::{
     extract::{Path, Query, State},
     Json,
@@ -113,4 +117,45 @@ pub async fn get_user_workspaces(
         .await?;
 
     Ok(Json(workspaces))
+}
+
+#[derive(Deserialize)]
+pub struct UpdateUserPasswordPayload {
+    pub old_password: String,
+    pub new_password: String,
+}
+
+pub async fn update_user_password(
+    State(db_pool): State<Pool<Postgres>>,
+    Path(user_id): Path<Uuid>,
+    Json(payload): Json<UpdateUserPasswordPayload>,
+) -> Result<(), AppError> {
+    let mut trx = db_pool.clone().begin().await?;
+
+    let argon2 = Argon2::default();
+    let user = sqlx::query_as!(User, r#"SELECT * FROM public.users WHERE id = $1"#, user_id)
+        .fetch_one(&mut *trx)
+        .await?;
+
+    let password_hash = PasswordHash::new(&user.password)?;
+    argon2.verify_password(payload.old_password.as_bytes(), &password_hash)?;
+
+    let salt = SaltString::generate(&mut OsRng);
+    let password_hash = argon2
+        .hash_password(payload.new_password.as_bytes(), &salt)?
+        .to_string();
+
+    sqlx::query!(
+        r#"UPDATE public.users 
+            SET password = $1
+            WHERE id = $2"#,
+        password_hash,
+        user_id
+    )
+    .execute(&mut *trx)
+    .await?;
+
+    trx.commit().await?;
+
+    Ok(())
 }

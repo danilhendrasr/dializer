@@ -25,7 +25,10 @@
           "Custom": {
             "name": "workspace_visibility",
             "kind": {
-              "Enum": ["private", "public"]
+              "Enum": [
+                "private",
+                "public"
+              ]
             }
           }
         }
@@ -54,7 +57,10 @@
           "Custom": {
             "name": "workspace_visibility",
             "kind": {
-              "Enum": ["private", "public"]
+              "Enum": [
+                "private",
+                "public"
+              ]
             }
           }
         },
@@ -62,7 +68,15 @@
         "Uuid"
       ]
     },
-    "nullable": [false, false, true, false, false, false, false]
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
   },
   "hash": "3758cb97ea3b7ab5b10d20d1b688f566d0908ce40a085d798ff9edd4ec088787"
 }
