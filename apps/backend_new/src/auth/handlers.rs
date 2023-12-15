@@ -9,7 +9,7 @@ use sqlx::{Pool, Postgres};
 
 use crate::types::{AppError, AuthResponse, JwtClaims, User};
 
-const JWT_SECRET: &'static str = "secret";
+const JWT_SECRET: &str = "secret";
 
 #[derive(Deserialize)]
 pub struct LoginPayload {

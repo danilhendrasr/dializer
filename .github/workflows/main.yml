@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Node.js v18
+      - name: Set up Node.js v20
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Node.js v18
+      - name: Set up Node.js v20
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
